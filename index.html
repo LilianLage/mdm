@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDM – Cronograma 2026–2027</title>
+<style>
+:root{
+  --v1:#006B3F;--v2:#00D38D;--v3:#82EA5B;
+  --la:#FF8B22;--la2:#FFB719;
+  --warn:#BF360C;--med:#7B5E00;--ok:#006B3F;
+  --bim-c:#793F98;--orc-c:#FF8B22;--comp-c:#AC41D8;
+  --bg:#EEF3EE;--card:#fff;--bdr:#C8DAC8;--tx:#1A2A1A;--tx2:#3A5A3A;
+  --fn:Arial,sans-serif;
+  --row-h:20px; /* altura de cada sub-linha de área */
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:13px}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.3}
+.wrap{width:min(1500px,100%);margin:8px auto;display:flex;flex-direction:column;gap:0}
+
+/* ══ HEADER ══ */
+header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-radius:6px 6px 0 0}
+.h1{font-size:15px;font-weight:700;color:#fff;flex:1}
+.h-sub{font-size:10px;color:#A8D5C5}
+.logo{font-size:18px;font-weight:900;color:#fff;letter-spacing:-1px;white-space:nowrap;flex-shrink:0}
+.logo b{color:var(--la)}
+.metas-pill{background:rgba(0,0,0,.22);border-radius:4px;padding:5px 10px;font-size:9.5px;color:#cee;flex-shrink:0;max-width:260px;line-height:1.5}
+.metas-pill b{color:#fff;display:block;margin-bottom:2px}
+
+/* ══ RESUMO EXECUTIVO — faixa compacta ══ */
+.exec{
+  background:#F0F7F0;border:1px solid var(--bdr);border-top:none;
+  display:flex;
+  align-items:stretch;
+  overflow:hidden;
+}
+/* KPI block empilhado verticalmente */
+.kpi-block{
+  display:flex;
+  flex-direction:column;
+  border-right:1px solid var(--bdr);
+  flex-shrink:0;
+}
+/* Seção colapsável horizontalmente */
+.exec-sec{
+  border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:min-width .25s, max-width .25s;
+  min-width:160px;flex:1;
+}
+.exec-sec.collapsed{min-width:28px;max-width:28px;flex:0 0 28px}
+.exec-sec-hdr{
+  display:flex;align-items:center;gap:4px;
+  padding:4px 8px;cursor:pointer;
+  border-bottom:1px solid var(--bdr);
+  background:rgba(0,107,63,.04);
+  flex-shrink:0;
+  user-select:none;
+}
+.exec-sec-hdr:hover{background:rgba(0,107,63,.09)}
+.exec-sec-hdr h3{font-size:9px;font-weight:700;color:var(--v1);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;flex:1}
+.exec-sec-arrow{font-size:9px;color:var(--v1);flex-shrink:0;transition:transform .2s}
+.exec-sec.collapsed .exec-sec-arrow{transform:rotate(-90deg)}
+.exec-sec-body{padding:4px 8px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;overflow-x:hidden;flex:1}
+.exec-sec.collapsed .exec-sec-body{display:none}
+.exec-sec.collapsed .exec-sec-hdr h3{
+  writing-mode:vertical-rl;text-orientation:mixed;
+  transform:rotate(180deg);
+  font-size:8px;overflow:visible;
+}
+
+/* KPI */
+.kpi-block{display:flex;gap:0;border-right:1px solid var(--bdr)}
+.kpi-item{padding:8px 14px;display:flex;flex-direction:column;justify-content:center;gap:2px;border-right:1px solid var(--bdr);min-width:120px}
+.kpi-item:last-child{border-right:none}
+.kpi-label{font-size:8.5px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.kpi-val{font-size:24px;font-weight:700;color:var(--v1);line-height:1}
+.kpi-sub{font-size:8px;color:#888}
+.kpi-bar{height:4px;background:#dde8dd;border-radius:2px;margin-top:4px;overflow:hidden}
+.kpi-fill{height:100%;border-radius:2px;transition:width .5s,background .5s;cursor:help}
+.kpi-fill.k2{background:var(--v1)}
+
+/* auto-sec — substituído por exec-sec */
+.d-item{display:flex;align-items:flex-start;gap:5px;font-size:9px;padding:3px 5px;border-radius:3px;line-height:1.4}
+.d-item.alto{background:#FFF0EE;border-left:3px solid var(--warn)}
+.d-item.med {background:#FEFBEE;border-left:3px solid var(--med)}
+.d-item.ok  {background:#EEFAF2;border-left:3px solid var(--ok)}
+.d-ic{font-size:10px;flex-shrink:0}
+.r-item{display:flex;align-items:center;gap:5px;font-size:9px;padding:3px 5px;border-radius:3px;background:#fff;border:1px solid #eee}
+.rbg{padding:1px 6px;border-radius:8px;font-size:8px;font-weight:700;color:#fff;white-space:nowrap}
+.rbg.alto{background:var(--warn)}.rbg.med{background:var(--med)}.rbg.ok{background:var(--ok)}
+
+/* Plano + Notas juntos */
+.pa-ta-legacy{display:none}
+
+.p-item{display:flex;align-items:center;gap:4px;font-size:9px;padding:2px 4px;border-radius:3px;background:#fff;border:1px solid #eee;cursor:pointer}
+.p-item:hover{background:#F0FAF4}
+.p-chk{width:13px;height:13px;border-radius:2px;border:1.5px solid var(--v1);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.p-chk.done{background:var(--v1);color:#fff;font-size:9px}
+.p-txt{flex:1;line-height:1.3}.p-txt.done{text-decoration:line-through;color:#aaa}
+.p-area{font-size:7.5px;padding:1px 5px;border-radius:8px;color:#fff;white-space:nowrap;flex-shrink:0}
+.p-del{border:none;background:none;color:#ccc;font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0}
+.p-del:hover{color:var(--warn)}
+.ta-item{display:flex;align-items:flex-start;gap:5px;font-size:9px;padding:4px 6px;border-radius:3px;background:#fff;border:1px solid #eee;line-height:1.45;cursor:pointer}
+.ta-item:hover{background:#F5FAF7}
+.ta-item.dest{background:#FFFBEE;border-color:#FFB719}
+.ta-txt{flex:1;color:var(--tx)}
+.ta-txt.dest{font-weight:700;color:#7B5E00}
+.ta-del{border:none;background:none;color:#ccc;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1}
+.ta-del:hover{color:var(--warn)}
+.ta-star{border:none;background:none;font-size:11px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;color:#ccc}
+.ta-star.on{color:#FFB719}
+
+/* Toggle visibilidade seções */
+.exec-ctrl{background:rgba(0,107,63,.07);border-bottom:1px solid var(--bdr);padding:4px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ec-label{font-size:9px;font-weight:700;color:var(--tx2);margin-right:4px}
+.tog{padding:3px 9px;border-radius:3px;border:1px solid var(--bdr);background:#fff;font-size:9px;font-weight:600;color:var(--tx2);cursor:pointer;transition:.1s}
+.tog.on{background:var(--v1);color:#fff;border-color:var(--v1)}
+.btn-add-p{font-size:9px;padding:2px 7px;background:#E8F5EE;color:var(--v1);border:1px dashed var(--v2);border-radius:3px;cursor:pointer;white-space:nowrap}
+
+
+/* ══ CHARTS PAINEL ══ */
+.charts-wrap{
+  background:#F0F7F0;
+  display:grid;grid-template-columns:3fr 2fr;gap:0;
+}
+.chart-panel{padding:12px 16px;border-right:1px solid var(--bdr)}
+.chart-panel:last-child{border-right:none}
+.chart-panel h3{font-size:10px;font-weight:700;color:var(--v1);text-transform:uppercase;
+  letter-spacing:.4px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.chart-panel h3 span{font-size:9px;color:#888;font-weight:400;text-transform:none}
+.chart-panel canvas{display:block;width:100%!important}
+/* Heatmap melhorado */
+.hm-wrap{overflow-x:auto}
+.hm-grid{display:grid;grid-template-columns:90px repeat(8,1fr);gap:3px;min-width:500px}
+.hm-hdr{background:var(--v1);color:#fff;font-weight:700;padding:5px 4px;
+  text-align:center;border-radius:3px;font-size:9px}
+.hm-lbl{background:var(--v1);color:#A8D5C5;font-weight:700;padding:5px 8px;
+  border-radius:3px;display:flex;align-items:center;font-size:9px}
+.hm-cell{border-radius:3px;padding:6px 2px;text-align:center;font-size:9px;
+  font-weight:700;cursor:default;transition:filter .15s;line-height:1}
+.hm-cell:hover{filter:brightness(1.12);transform:scale(1.05)}
+.hm-sep{grid-column:1/-1;height:2px;background:var(--bdr);margin:2px 0}
+
+/* ══ GANTT TOOLBAR ══ */
+.toolbar{background:#E8F0E8;border:1px solid var(--bdr);border-top:none;padding:5px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tl-label{font-size:9.5px;font-weight:700;color:var(--tx2)}
+.tl-select{border:1px solid var(--bdr);border-radius:3px;padding:3px 6px;font-size:9.5px;font-family:var(--fn);background:#fff;color:var(--tx);outline:none;min-width:80px}
+.tl-select:focus{border-color:var(--v1)}
+.tl-input{border:1px solid var(--bdr);border-radius:3px;padding:3px 6px;font-size:9.5px;font-family:var(--fn);background:#fff;color:var(--tx);outline:none;width:110px}
+.tl-btn{padding:3px 9px;border-radius:3px;border:none;background:var(--v1);color:#fff;font-size:9.5px;font-weight:700;cursor:pointer}
+.tl-btn:hover{background:#005030}
+.tl-btn.sec{background:#fff;color:var(--v1);border:1px solid var(--v1)}
+.tl-cnt{font-size:9px;color:var(--tx2);margin-left:4px}
+
+/* Legenda */
+.legend{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-left:auto}
+.lg{display:flex;align-items:center;gap:3px;font-size:9px;color:var(--tx2)}
+.lg-sq{width:12px;height:8px;border-radius:2px;flex-shrink:0}
+.lg-sq.plan{opacity:.22;border:1px dashed #999}
+
+/* ══ GANTT ══ */
+.gantt-wrap{background:#fff;border:1px solid var(--bdr);border-top:none;border-radius:0 0 6px 6px;overflow-x:auto;overflow-y:visible;box-shadow:0 3px 12px rgba(0,107,63,.08)}
+
+/* Cabeçalho tempo */
+.g-head{display:flex;position:sticky;top:0;z-index:30;background:var(--v1)}
+.lbl-col{width:230px;min-width:230px;flex-shrink:0;padding:3px 8px;display:flex;align-items:flex-end;border-right:2px solid rgba(255,255,255,.15)}
+.lbl-col span{font-size:9px;font-weight:700;color:#A8D5C5;letter-spacing:.3px}
+.t-cols{flex:1;display:flex;flex-direction:column;min-width:1100px}
+.m-row{display:flex}
+.m-cell{flex:1;text-align:center;padding:2px 0;font-size:9px;font-weight:700;color:#fff;border-right:1px solid rgba(255,255,255,.1)}
+.w-row{display:flex;background:#F5FAF5;border-bottom:1px solid var(--bdr)}
+.w-cell{flex:1;text-align:center;padding:1px 0;font-size:8px;color:#aaa;border-right:1px solid #eee}
+
+/* Cabeçalho fase — clicável para colapsar */
+.fase-hdr{
+  display:flex;align-items:stretch;
+  background:linear-gradient(90deg,var(--v1) 0%,#115530 100%);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  cursor:pointer;user-select:none;
+}
+.fase-hdr:hover{filter:brightness(1.06)}
+.fase-lbl{
+  width:230px;min-width:230px;
+  padding:5px 8px;display:flex;align-items:center;gap:6px;
+  border-right:2px solid rgba(255,255,255,.15);flex-shrink:0;
+}
+.fase-arrow{font-size:9px;color:#A8D5C5;transition:transform .2s;flex-shrink:0}
+.fase-arrow.collapsed{transform:rotate(-90deg)}
+.fase-info{display:flex;flex-direction:column;gap:1px;flex:1}
+.fase-nome{font-size:11px;font-weight:700;color:#fff}
+.fase-meta{font-size:8.5px;color:#A8D5C5}
+/* progress pill no header da fase */
+.fase-prog{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;font-size:9px;color:#A8D5C5;
+}
+.fase-prog-bar{width:80px;height:5px;background:rgba(255,255,255,.2);border-radius:3px;overflow:hidden;flex-shrink:0}
+.fase-prog-fill{height:100%;background:var(--la);border-radius:3px}
+.fase-prog-txt{white-space:nowrap;font-weight:700;color:#fff;font-size:10px}
+.fase-grid{flex:1;position:relative;min-width:1100px;display:flex;align-items:center}
+.fase-today{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,100,100,.6);pointer-events:none}
+
+/* Linha de grupo */
+.g-group{border-bottom:2px solid #d0e8d0}
+.g-group.collapsed .g-rows{display:none}
+.g-row{display:flex;border-bottom:1px solid #eef4ee}
+.g-row:hover .g-lbl,.g-row:hover .g-sub{background:rgba(0,107,63,.04)!important}
+
+/* Label do grupo (esquerda) */
+.g-lbl{
+  width:230px;min-width:230px;flex-shrink:0;
+  border-right:1px solid #eee;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:3px 6px 3px 14px;
+}
+.g-lbl-top{display:flex;align-items:center;gap:4px}
+.g-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.g-nome{font-size:10px;font-weight:600;color:var(--tx);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.g-stats{font-size:8px;color:#888;padding-left:11px}
+.g-stats b{color:var(--v1)}
+/* Sub-rótulo de área (dentro do grupo) */
+.g-area-lbl{
+  width:230px;min-width:230px;flex-shrink:0;
+  border-right:1px solid #eee;
+  padding:0 6px 0 26px;
+  display:flex;align-items:center;
+  font-size:9px;font-weight:700;
+}
+
+/* Sub-linhas área */
+.g-subs{flex:1;display:flex;flex-direction:column;min-width:1100px}
+.g-sub{
+  position:relative;
+  height:var(--row-h);
+  border-bottom:1px solid rgba(0,107,63,.06);
+  display:flex;align-items:center;
+}
+.g-sub:last-child{border-bottom:none}
+.g-sub:nth-child(odd){background:rgba(0,107,63,.02)}
+.today-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(191,54,12,.9);z-index:10;pointer-events:none}
+.need-line{position:absolute;top:0;bottom:0;width:2px;background:rgba(255,139,34,.75);z-index:9;pointer-events:none;border-left:2px dashed rgba(255,139,34,.75)}
+.today-lbl{position:absolute;top:0;left:3px;font-size:7.5px;font-weight:700;color:var(--warn);white-space:nowrap;background:rgba(255,255,255,.88);padding:0 2px;border-radius:2px;line-height:14px}
+
+/* Barra Gantt */
+.g-bar{
+  position:absolute;top:2px;bottom:2px;
+  border-radius:3px;
+  display:flex;align-items:center;padding:0 5px;
+  font-size:9px;font-weight:700;color:rgba(255,255,255,.95);
+  white-space:nowrap;overflow:hidden;cursor:pointer;
+  transition:filter .12s,top .1s,bottom .1s;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);
+}
+/* CP visual removido — cálculos mantidos */
+.g-bar:hover{top:0;bottom:0;filter:brightness(1.1);z-index:5}
+.g-bar.done{opacity:1}
+.g-bar.wip{opacity:.84}
+.g-bar.plan{opacity:.22;box-shadow:none}
+
+/* Tooltip */
+.tt{position:fixed;background:rgba(0,35,18,.96);color:#fff;font-size:11px;padding:10px 13px;border-radius:7px;pointer-events:none;display:none;z-index:99999;max-width:320px;line-height:1.7;box-shadow:0 6px 24px rgba(0,0,0,.4)}
+.tt h4{font-size:12px;font-weight:700;color:#A8D5C5;margin-bottom:4px}
+.tt-seq{display:flex;gap:3px;margin:4px 0}
+.tt-chip{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;opacity:.3}
+.tt-chip.on{opacity:1}
+.tt hr{border:none;border-top:1px solid rgba(255,255,255,.12);margin:5px 0}
+
+/* ══ PAINEL EDIÇÃO ══ */
+.edit-panel{background:#fff;border:2px solid var(--v2);border-radius:8px;margin:8px auto;width:min(1500px,100%);padding:14px 18px;box-shadow:0 4px 16px rgba(0,107,63,.12);display:none}
+.ep-h{font-size:13px;font-weight:700;color:var(--v1);margin-bottom:10px}
+.ep-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ep-card{border:1px solid var(--bdr);border-radius:5px;padding:10px;background:#FAFCFA}
+.ep-card h3{font-size:11px;font-weight:700;color:var(--v1);margin-bottom:6px}
+.ep-lbl{font-size:9px;color:var(--tx2);display:block;margin-bottom:2px;margin-top:5px;font-weight:600}
+.ep-inp{width:100%;border:1px solid var(--bdr);border-radius:3px;padding:4px 7px;font-size:10px;font-family:var(--fn);color:var(--tx);outline:none;background:#fff}
+.ep-inp:focus{border-color:var(--v1)}
+.ep-tabs{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:8px}
+.ep-tab{padding:3px 10px;border-radius:3px;border:1px solid var(--bdr);font-size:10px;cursor:pointer;background:#fff;color:var(--tx2);font-weight:600;transition:.1s}
+.ep-tab.on{background:var(--v1);color:#fff;border-color:var(--v1)}
+.ep-hint{font-size:9px;color:#888;margin:2px 0 6px}
+.ep-row{display:grid;grid-template-columns:72px 1fr 1fr 88px;gap:4px;align-items:center;margin-bottom:3px}
+.ep-row label{font-size:8.5px;font-weight:700}
+.ep-row input,.ep-row select{border:1px solid var(--bdr);border-radius:3px;padding:2px 4px;font-size:9px;width:100%}
+.btn-row{display:flex;gap:8px;margin-top:10px}
+.btn{padding:6px 16px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;border:none}
+.btn.p{background:var(--v1);color:#fff}.btn.p:hover{background:#005030}
+.btn.s{background:#eee;color:#444}.btn.s:hover{background:#ddd}
+
+/* Fixo */
+.fab{position:fixed;bottom:16px;right:16px;z-index:1000;background:var(--v1);color:#fff;border:none;border-radius:50px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(0,107,63,.35)}
+.fab:hover{background:#005030}
+
+footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:3px;font-size:9px;color:rgba(255,255,255,.55);border-radius:0 0 6px 6px}
+/* Menu exportar */
+.exp-btn{
+  background:rgba(255,255,255,.12);border:none;color:#fff;
+  font-size:18px;font-weight:700;cursor:pointer;border-radius:4px;
+  padding:4px 10px;line-height:1;flex-shrink:0;position:relative;
+  transition:background .15s;
+}
+.exp-btn:hover{background:rgba(255,255,255,.22)}
+.exp-menu{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;
+  background:#fff;border:1px solid var(--bdr);border-radius:6px;
+  box-shadow:0 6px 20px rgba(0,0,0,.18);min-width:160px;z-index:9999;
+  overflow:hidden;
+}
+.exp-btn.open .exp-menu{display:block}
+.exp-item{
+  display:flex;align-items:center;gap:8px;padding:9px 14px;
+  font-size:11px;font-weight:600;color:var(--tx);cursor:pointer;
+  border:none;background:none;width:100%;text-align:left;
+  transition:background .12s;
+}
+.exp-item:hover{background:#F0F7F0;color:var(--v1)}
+.exp-item span{font-size:14px}
+</style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB7URLeOjy1ofQx6TxYp4XbYhbxAxOOwdE",
+    authDomain: "dados-mestres.firebaseapp.com",
+    projectId: "dados-mestres",
+    storageBucket: "dados-mestres.firebasestorage.app",
+    messagingSenderId: "739025205181",
+    appId: "1:739025205181:web:79e344d6e203daa57604d4"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+  const REF = doc(db, "mdm", "dashboard");
+
+  // Expor funções globalmente para o dashboard usar
+  window.fbSalvar = async function() {
+    try {
+      await setDoc(REF, {
+        grupos:    JSON.stringify(window.GRUPOS),
+        plano:     JSON.stringify(window.PLANO),
+        takeaways: JSON.stringify(window.TAKEAWAYS),
+        cfg:       JSON.stringify({kpi2: window.CFG.kpi2}),
+        ts:        new Date().toISOString()
+      });
+      window.mostrarSyncStatus("✅ Dados salvos e sincronizados", "#006B3F");
+    } catch(e) {
+      window.mostrarSyncStatus("⚠️ Erro ao salvar: " + e.message, "#BF360C");
+      console.error("Firebase save error:", e);
+    }
+  };
+
+  window.fbCarregar = async function() {
+    try {
+      const snap = await getDoc(REF);
+      if (!snap.exists()) return false;
+      const d = snap.data();
+      if (d.grupos)    { const v=JSON.parse(d.grupos);    if(Array.isArray(v)&&v.length) { window.GRUPOS.splice(0,window.GRUPOS.length,...v); } }
+      if (d.plano)     { const v=JSON.parse(d.plano);     if(Array.isArray(v)) { window.PLANO.splice(0,window.PLANO.length,...v); } }
+      if (d.takeaways) { const v=JSON.parse(d.takeaways); if(Array.isArray(v)) { window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...v); } }
+      if (d.cfg)       { const v=JSON.parse(d.cfg); if(v.kpi2!==undefined) window.CFG.kpi2=v.kpi2; }
+      window.mostrarSyncStatus("🔄 Dados carregados", "#006B3F");
+      return true;
+    } catch(e) {
+      console.warn("Firebase load error:", e.message);
+      window.mostrarSyncStatus("⚠️ Usando dados locais", "#888");
+      return false;
+    }
+  };
+
+  // Carregar dados assim que o Firebase estiver pronto
+  window.fbPronto = true;
+  if(window._fbOnPronto) window._fbOnPronto();
+</script>
+</head>
+<body>
+
+<div class="edit-panel" id="ep">
+  <div class="ep-h">✏️ Painel de Edição</div>
+  <div class="ep-grid">
+    <div class="ep-card">
+      <h3>Configurações Gerais</h3>
+      <label class="ep-lbl">% Meta 2 — Utilizados em Orçamentos (realizado)</label><input class="ep-inp" type="number" id="e-k2" min="0" max="120">
+      <label class="ep-lbl">Data de Hoje (AAAA-MM-DD)</label><input class="ep-inp" type="date" id="e-hoje">
+      <label class="ep-lbl">Data do rodapé</label><input class="ep-inp" type="text" id="e-rod">
+    </div>
+    <div class="ep-card" style="grid-column:1/-1">
+      <h3>Grupos por Fase — datas, status e %</h3>
+      <p class="ep-hint">Selecione a fase. Edite: % de conclusão geral, peso na meta, e para cada área: início, fim e status (done/wip/plan).</p>
+      <div class="ep-tabs" id="ep-tabs"></div>
+      <div id="ep-fase"></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn p" onclick="aplicar()">✅ Aplicar</button>
+    <button class="btn s" onclick="toggleEdit()">✖ Fechar</button>
+  </div>
+</div>
+
+<div class="wrap">
+<header>
+  <div style="flex:1">
+    <div class="h1">MDM – SQUAD DE CONTRATOS E DADOS MESTRES</div>
+    <div class="h-sub">CRONOGRAMA DE IMPLANTAÇÃO — GRUPOS DE MATERIAIS POR ÁREA · 2026–2027</div>
+  </div>
+  <div class="logo">MRV<b>&</b>CO</div>
+  <div id="hoje-badge" style="
+    background:rgba(255,255,255,.12);border-radius:4px;
+    padding:4px 10px;font-size:10px;color:#fff;
+    white-space:nowrap;flex-shrink:0;
+    display:flex;flex-direction:column;align-items:center;gap:1px;
+  ">
+    <span style="font-size:8px;color:#A8D5C5;font-weight:700;letter-spacing:.5px">ATUALIZADO EM</span>
+    <span id="hoje-txt" style="font-weight:700;font-size:12px"></span>
+  </div>
+  <div class="metas-pill">
+    <b>METAS 2026</b>
+    • Meta 1: 90% dos itens MDM aptos até 12/2026<br>
+    • Meta 2: 25% utilizados em orçamentos até 12/2026
+  </div>
+  <!-- Botão exportar -->
+  <div class="exp-btn" id="exp-btn" onclick="togExpMenu(event)">⋯
+    <div class="exp-menu" id="exp-menu">
+      <button class="exp-item" onclick="exportarPDF()"><span>📄</span> Exportar PDF</button>
+      <button class="exp-item" onclick="exportarCSV()"><span>📊</span> Exportar CSV</button>
+      <button class="exp-item" onclick="exportarJSON()"><span>📦</span> Exportar JSON</button>
+    </div>
+  </div>
+</header>
+
+<!-- RESUMO EXECUTIVO -->
+<div class="exec" id="exec">
+
+  <!-- KPIs fixos — nunca colapsam -->
+  <div class="kpi-block">
+    <div class="kpi-item">
+      <div class="kpi-label">Meta 1 — Aptos p/ Operação</div>
+      <div class="kpi-val" id="k1-v">—</div>
+      <div class="kpi-sub">Realizado · Meta: 90% até dez/26</div>
+      <div class="kpi-bar"><div class="kpi-fill" id="k1-b"></div></div>
+    </div>
+    <div class="kpi-item">
+      <div class="kpi-label">Meta 2 — Utilizados em Orçamentos</div>
+      <div class="kpi-val" id="k2-v">—</div>
+      <div class="kpi-sub">Realizado · Meta: 25% até dez/26</div>
+      <div class="kpi-bar"><div class="kpi-fill k2" id="k2-b"></div></div>
+    </div>
+  </div>
+
+  <!-- Divergências colapsável -->
+  <div class="exec-sec" id="sec-div">
+    <div class="exec-sec-hdr" onclick="togExecSec('div')">
+      <h3>⚠️ Divergências</h3>
+      <span class="exec-sec-arrow" id="arr-div">▲</span>
+    </div>
+    <div class="exec-sec-body" id="div-list"></div>
+  </div>
+
+  <!-- Riscos colapsável -->
+  <div class="exec-sec" id="sec-risk">
+    <div class="exec-sec-hdr" onclick="togExecSec('risk')">
+      <h3>🔴 Riscos</h3>
+      <span class="exec-sec-arrow" id="arr-risk">▲</span>
+    </div>
+    <div class="exec-sec-body" id="risk-list"></div>
+  </div>
+
+  <!-- Plano de Ação colapsável -->
+  <div class="exec-sec" id="sec-plano">
+    <div class="exec-sec-hdr" onclick="togExecSec('plano')">
+      <h3>✅ Plano de Ação</h3>
+      <span class="exec-sec-arrow" id="arr-plano">▲</span>
+    </div>
+    <div class="exec-sec-body">
+      <button class="btn-add-p" onclick="addAcao();event.stopPropagation()">+ Adicionar</button>
+      <div id="plano-list" style="display:flex;flex-direction:column;gap:3px;margin-top:2px"></div>
+    </div>
+  </div>
+
+  <!-- Notas colapsável -->
+  <div class="exec-sec" id="sec-ta">
+    <div class="exec-sec-hdr" onclick="togExecSec('ta')">
+      <h3>📝 Notas</h3>
+      <span class="exec-sec-arrow" id="arr-ta">▲</span>
+    </div>
+    <div class="exec-sec-body">
+      <button class="btn-add-p" onclick="addTA();event.stopPropagation()">+ Adicionar</button>
+      <div id="ta-list" style="display:flex;flex-direction:column;gap:3px;margin-top:2px"></div>
+    </div>
+  </div>
+
+</div><!-- /exec -->
+
+<!-- VISUAIS: Burndown + Heatmap + Velocidade — colapsável -->
+<div style="border:1px solid var(--bdr);border-top:none;background:#F0F7F0">
+  <div style="display:flex;align-items:center;padding:5px 12px;cursor:pointer;background:rgba(0,107,63,.06);border-bottom:1px solid var(--bdr)"
+       onclick="togVisuais()" id="visuais-hdr" style="user-select:none">
+    <span style="font-size:9.5px;font-weight:700;color:var(--v1);flex:1">📊 Análises Visuais — Burndown · Heatmap · Velocidade</span>
+    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▲</span>
+  </div>
+  <div id="visuais-body">
+    <!-- Linha 1: Burndown + Heatmap lado a lado -->
+    <div class="charts-wrap" id="charts-wrap">
+      <div class="chart-panel">
+        <h3>📉 Burndown — Meta 1 <span>pp acumulados × tempo · planejado vs realizado</span></h3>
+        <canvas id="burndown-canvas" height="130"></canvas>
+      </div>
+      <div class="chart-panel">
+        <h3>🟥 Heatmap — Fase × Área <span>% conclusão médio</span></h3>
+        <div class="hm-wrap"><div id="heatmap-grid" class="hm-grid"></div></div>
+      </div>
+    </div>
+    <!-- Linha 2: 4 cards velocidade em largura TOTAL (burndown + heatmap) -->
+    <div style="padding:8px 14px 10px;border-top:1px solid var(--bdr);background:#F0F7F0">
+      <div style="font-size:10px;font-weight:700;color:var(--v1);text-transform:uppercase;letter-spacing:.4px;margin-bottom:7px">
+        ⚡ Velocidade necessária <span style="font-weight:400;text-transform:none;color:#888;font-size:9px">grupos pendentes e ritmo por área</span>
+      </div>
+      <div id="velocidade-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- GANTT TOOLBAR -->
+<div class="toolbar">
+  <span class="tl-label">Fase:</span>
+  <select class="tl-select" id="f-fase" multiple size="1" style="min-height:26px" onchange="renderGantt()">
+    <option value="">Todas</option>
+    <option>Fase 1</option><option>Fase 2</option><option>Fase 3</option>
+    <option>Fase 4</option><option>Fase 5</option><option>Fase 6</option>
+    <option>Fase 7</option><option>Fase 8</option>
+  </select>
+  <span class="tl-label">Status:</span>
+  <select class="tl-select" id="f-st" multiple size="1" style="min-height:26px" onchange="renderGantt()">
+    <option value="">Todos</option>
+    <option value="done">✅ Concluído</option>
+    <option value="wip">⏳ Em andamento</option>
+    <option value="plan">⚪ Previsto</option>
+  </select>
+  <span class="tl-label">Buscar:</span>
+  <input class="tl-input" type="text" id="f-busca" placeholder="ex: Argamassa" oninput="renderGantt()">
+  <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
+  <span class="tl-cnt" id="f-cnt"></span>
+  <div style="display:flex;gap:4px;margin-right:4px">
+    <button class="tl-btn sec" id="tog-allf" onclick="toggleTodasFases()">⊟ Recolher todas</button>
+  </div>
+  <div class="legend">
+    <div class="lg"><div class="lg-sq" style="background:#006B3F"></div>MDM</div>
+    <div class="lg"><div class="lg-sq" style="background:#793F98"></div>BIM</div>
+    <div class="lg"><div class="lg-sq" style="background:#FF8B22"></div>Orçamento</div>
+    <div class="lg"><div class="lg-sq" style="background:#AC41D8"></div>Compilador</div>
+    <div class="lg"><div class="lg-sq" style="background:#555"></div>Concluído</div>
+    <div class="lg"><div class="lg-sq plan" style="background:#888"></div>Previsto</div>
+    <div class="lg"><div style="width:2px;height:11px;background:rgba(191,54,12,.9);border-radius:1px"></div>Hoje</div>
+    <div class="lg"><div style="width:0;height:11px;border-left:2px dashed #FF8B22"></div>Projeção: quando atinge 90%</div>
+
+  </div>
+</div>
+
+<div class="gantt-wrap">
+  <div id="gantt"></div>
+</div>
+
+<footer>
+  <span>🔄 Revisão executiva: semanal</span>
+  <span>Fonte: Plano MDM V9 (04/05/2026) · % Meta: V3</span>
+  <span id="rod"></span>
+</footer>
+</div><!-- /wrap -->
+
+<div class="tt" id="tt"></div>
+<button class="fab" onclick="toggleEdit()">✏️ Editar dados</button>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIGURAÇÃO
+// ══════════════════════════════════════════════════
+// Hoje sempre vem do sistema — nunca fixo
+const _HOJE = new Date();
+const _HOJE_STR = _HOJE.toISOString().slice(0,10);
+const _HOJE_BR  = _HOJE.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"numeric"});
+let CFG={kpi2:5,hoje:_HOJE_STR,rod:_HOJE_BR};
+
+let TAKEAWAYS=[
+  {txt:"Webformat – Plataforma de Cadastro de Materiais: 1.145 usuários solicitantes ativos em 05/26 · 660 usuários inativados (57,6%) · 485 permanecem ativos (42,4%)", dest:true},
+  {txt:"48 orçamentos desde nov./26 possuem código agrupador (58% dos orçamentos do período)", dest:true},
+  {txt:"Em razão dos atrasos na Fase 1 do MDM, o time de BIM acumulou mais grupos pendentes do que o previsto — impacto direto na capacidade de entrega das próximas fases.", dest:false},
+];
+
+let PLANO=[
+  {txt:"Grupos de trabalho de cada área em colaboração com TI para identificar oportunidades de IA no trabalho operacional", area:"", done:false},
+  {txt:"Acelerar MDM em Tintas/Texturas-4 e Drenagem-3 — BIM aguardando",area:"MDM",done:false},
+  {txt:"Alinhar com BIM conclusão de Concreto-14 (Orç 63%)",area:"BIM",done:false},
+  {txt:"Iniciar planejamento Fase 2 com MDM — janela abre 12/06",area:"MDM",done:false},
+];
+
+const COR_A={MDM:"#006B3F",BIM:"#1565C0",ORC:"#BF360C",COMP:"#6A1B9A",PMO:"#555"};
+
+// ── DADOS ──────────────────────────────────────────
+let GRUPOS=[
+  // FASE 1
+  {fase:"Fase 1",nome:"Acab. Elétrico-2",   pct:37, pctMeta:0.8389,  MDM:{ini:"2026-04-08",fim:"2026-05-20",iniLB:"2026-04-08",fimLB:"2026-05-20",pct:89, st:"wip"}, ORC:{ini:"2026-05-21",fim:"2026-05-27",iniLB:"2026-05-21",fimLB:"2026-05-27",pct:38, st:"wip"}, BIM:{ini:"2026-05-21",fim:"2026-05-29",iniLB:"2026-05-21",fimLB:"2026-05-29",pct:0,  st:"plan"},COMP:{ini:"2026-05-25",fim:"2026-06-02",iniLB:"2026-05-25",fimLB:"2026-06-02",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Argamassa-2",         pct:100,pctMeta:0.1074,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:100,st:"done"},ORC:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},COMP:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Fios/Cabos-1",        pct:21, pctMeta:1.4541, MDM:{ini:"2026-04-08",fim:"2026-05-29",iniLB:"2026-04-08",fimLB:"2026-05-29",pct:44, st:"wip"}, ORC:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},BIM:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},COMP:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Metais Sanit.-1",     pct:100,pctMeta:1.3858,  MDM:{ini:"2026-04-08",fim:"2026-05-13",iniLB:"2026-04-08",fimLB:"2026-05-13",pct:100,st:"done"},ORC:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"},BIM:{ini:"2026-05-13",fim:"2026-05-13",iniLB:"2026-05-13",fimLB:"2026-05-13",pct:100,st:"done"},COMP:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Tintas/Texturas-4",   pct:90, pctMeta:0.6774,  MDM:{ini:"2026-04-08",fim:"2026-05-18",iniLB:"2026-04-08",fimLB:"2026-05-18",pct:100,st:"done"},ORC:{ini:"2026-04-16",fim:"2026-05-27",iniLB:"2026-04-16",fimLB:"2026-05-27",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-12",iniLB:"2026-05-19",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-05-19",fim:"2026-06-15",iniLB:"2026-05-19",fimLB:"2026-06-15",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Concreto-14",          pct:77, pctMeta:5.0336,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:90, st:"wip"}, ORC:{ini:"2026-04-15",fim:"2026-07-02",iniLB:"2026-04-15",fimLB:"2026-07-02",pct:63, st:"wip"}, BIM:{ini:"2026-04-24",fim:"2026-05-15",iniLB:"2026-04-24",fimLB:"2026-05-15",pct:100,st:"done"},COMP:{ini:"2026-04-15",fim:"2026-06-09",iniLB:"2026-04-15",fimLB:"2026-06-09",pct:60, st:"wip"}},
+  {fase:"Fase 1",nome:"Argamassa-3",          pct:100,pctMeta:0.4954,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:100,st:"done"},ORC:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},BIM:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},COMP:{ini:"2026-06-09",fim:"2026-06-09",iniLB:"2026-06-09",fimLB:"2026-06-09",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Drenagem-3",           pct:65, pctMeta:0.9011,  MDM:{ini:"2026-04-01",fim:"2026-05-29",iniLB:"2026-04-01",fimLB:"2026-05-29",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-08",iniLB:"2026-05-18",fimLB:"2026-06-08",pct:100,st:"done"},BIM:{ini:"2026-05-18",fim:"2026-06-19",iniLB:"2026-05-18",fimLB:"2026-06-19",pct:36, st:"wip"}, COMP:{ini:"2026-05-26",fim:"2026-06-15",iniLB:"2026-05-26",fimLB:"2026-06-15",pct:3,  st:"wip"}},
+  {fase:"Fase 1",nome:"Tintas/Texturas-5",   pct:95, pctMeta:0.6774,  MDM:{ini:"2026-04-01",fim:"2026-05-29",iniLB:"2026-04-01",fimLB:"2026-05-29",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-03",iniLB:"2026-05-18",fimLB:"2026-06-03",pct:100,st:"done"},BIM:{ini:"2026-06-01",fim:"2026-06-12",iniLB:"2026-06-01",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-06-01",fim:"2026-06-15",iniLB:"2026-06-01",fimLB:"2026-06-15",pct:0,  st:"plan"}},
+  // FASE 2
+  {fase:"Fase 2",nome:"Tintas/Texturas", pct:10,pctMeta:0.6774, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Pedras",          pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Aço",             pct:10,pctMeta:2.8026, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},BIM:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-15",iniLB:"2026-07-09",fimLB:"2026-07-15",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Ardósia (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-20",iniLB:"2026-07-09",fimLB:"2026-07-20",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-23",iniLB:"2026-06-22",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-23",iniLB:"2026-07-09",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Esquadrias",      pct:10,pctMeta:17.7107,MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-16",iniLB:"2026-07-09",fimLB:"2026-07-16",pct:0,st:"plan"},BIM:{ini:"2026-07-24",fim:"2026-09-03",iniLB:"2026-07-24",fimLB:"2026-09-03",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Gas",             pct:10,pctMeta:0.3107, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-24",iniLB:"2026-06-22",fimLB:"2026-06-24",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-29",iniLB:"2026-06-22",fimLB:"2026-06-29",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Granito (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-04",fim:"2026-09-21",iniLB:"2026-09-04",fimLB:"2026-09-21",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Piso Laminado",  pct:10,pctMeta:0.2796, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-22",fim:"2026-09-24",iniLB:"2026-09-22",fimLB:"2026-09-24",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Tubos PEX",      pct:10,pctMeta:1.3361, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-30",fim:"2026-07-07",iniLB:"2026-06-30",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-06-29",fim:"2026-07-03",iniLB:"2026-06-29",fimLB:"2026-07-03",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Outros Acabamentos",    pct:10,pctMeta:0.3405, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  // FASE 3
+  {fase:"Fase 3",nome:"Acabamento Hidro",pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},BIM:{ini:"2026-07-01",fim:"2026-07-07",iniLB:"2026-07-01",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-07-08",fim:"2026-07-14",iniLB:"2026-07-08",fimLB:"2026-07-14",pct:0,st:"plan"}},
+  {fase:"Fase 3",nome:"Hidrosan.",       pct:0,pctMeta:2.8648,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-21",iniLB:"2026-07-01",fimLB:"2026-07-21",pct:0,st:"plan"},BIM:{ini:"2026-07-08",fim:"2026-07-31",iniLB:"2026-07-08",fimLB:"2026-07-31",pct:0,st:"plan"},COMP:{ini:"2026-08-03",fim:"2026-08-04",iniLB:"2026-08-03",fimLB:"2026-08-04",pct:0,st:"plan"}},
+  {fase:"Fase 3",nome:"Tubos PVC",       pct:0,pctMeta:4.263,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-22",fim:"2026-08-04",iniLB:"2026-07-22",fimLB:"2026-08-04",pct:0,st:"plan"},BIM:{ini:"2026-08-03",fim:"2026-08-21",iniLB:"2026-08-03",fimLB:"2026-08-21",pct:0,st:"plan"},COMP:{ini:"2026-08-24",fim:"2026-08-25",iniLB:"2026-08-24",fimLB:"2026-08-25",pct:0,st:"plan"}},
+  // FASE 4
+  {fase:"Fase 4",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-24",fim:"2026-07-29",iniLB:"2026-07-24",fimLB:"2026-07-29",pct:0,st:"plan"},BIM:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},COMP:{ini:"2026-08-06",fim:"2026-08-12",iniLB:"2026-08-06",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Drywall",        pct:0,pctMeta:0.6774,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-07",iniLB:"2026-07-30",fimLB:"2026-08-07",pct:0,st:"plan"},BIM:{ini:"2026-09-30",fim:"2026-10-06",iniLB:"2026-09-30",fimLB:"2026-10-06",pct:0,st:"plan"},COMP:{ini:"2026-10-07",fim:"2026-10-07",iniLB:"2026-10-07",fimLB:"2026-10-07",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Incêndio",       pct:0,pctMeta:0.7209,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-05",fim:"2026-08-11",iniLB:"2026-08-05",fimLB:"2026-08-11",pct:0,st:"plan"},BIM:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Louças Sanit.",  pct:0,pctMeta:0.3915,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},BIM:{ini:"2026-10-07",fim:"2026-10-13",iniLB:"2026-10-07",fimLB:"2026-10-13",pct:0,st:"plan"},COMP:{ini:"2026-10-14",fim:"2026-10-14",iniLB:"2026-10-14",fimLB:"2026-10-14",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Mecânica",       pct:0,pctMeta:0.3045,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},BIM:{ini:"2026-08-11",fim:"2026-08-11",iniLB:"2026-08-11",fimLB:"2026-08-11",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"PEAD",           pct:0,pctMeta:0.9881,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-12",fim:"2026-08-25",iniLB:"2026-08-12",fimLB:"2026-08-25",pct:0,st:"plan"},BIM:{ini:"2026-10-14",fim:"2026-10-20",iniLB:"2026-10-14",fimLB:"2026-10-20",pct:0,st:"plan"},COMP:{ini:"2026-10-21",fim:"2026-10-21",iniLB:"2026-10-21",fimLB:"2026-10-21",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Peças Concreto", pct:0,pctMeta:2.0569,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-26",fim:"2026-09-01",iniLB:"2026-08-26",fimLB:"2026-09-01",pct:0,st:"plan"},BIM:{ini:"2026-10-21",fim:"2026-10-27",iniLB:"2026-10-21",fimLB:"2026-10-27",pct:0,st:"plan"},COMP:{ini:"2026-10-28",fim:"2026-10-28",iniLB:"2026-10-28",fimLB:"2026-10-28",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Perfil Aço",     pct:0,pctMeta:0.1616,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-11",fim:"2026-08-13",iniLB:"2026-08-11",fimLB:"2026-08-13",pct:0,st:"plan"},BIM:{ini:"2026-10-28",fim:"2026-11-04",iniLB:"2026-10-28",fimLB:"2026-11-04",pct:0,st:"plan"},COMP:{ini:"2026-11-05",fim:"2026-11-05",iniLB:"2026-11-05",fimLB:"2026-11-05",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Portas",         pct:0,pctMeta:1.6965,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-14",fim:"2026-08-27",iniLB:"2026-08-14",fimLB:"2026-08-27",pct:0,st:"plan"},BIM:{ini:"2026-11-05",fim:"2026-11-11",iniLB:"2026-11-05",fimLB:"2026-11-11",pct:0,st:"plan"},COMP:{ini:"2026-11-12",fim:"2026-11-12",iniLB:"2026-11-12",fimLB:"2026-11-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Rev. Cerâmico",  pct:0,pctMeta:0.2505,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-09-04",iniLB:"2026-08-28",fimLB:"2026-09-04",pct:0,st:"plan"},BIM:{ini:"2026-11-12",fim:"2026-11-23",iniLB:"2026-11-12",fimLB:"2026-11-23",pct:0,st:"plan"},COMP:{ini:"2026-11-24",fim:"2026-11-24",iniLB:"2026-11-24",fimLB:"2026-11-24",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Telhas Fibroc",  pct:0,pctMeta:0.1554,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-08-28",iniLB:"2026-08-28",fimLB:"2026-08-28",pct:0,st:"plan"},BIM:{ini:"2026-11-24",fim:"2026-11-25",iniLB:"2026-11-24",fimLB:"2026-11-25",pct:0,st:"plan"},COMP:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"}},
+  // FASE 5
+  {fase:"Fase 5",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-02",fim:"2026-09-09",iniLB:"2026-09-02",fimLB:"2026-09-09",pct:0,st:"plan"},BIM:{ini:"2026-08-12",fim:"2026-08-18",iniLB:"2026-08-12",fimLB:"2026-08-18",pct:0,st:"plan"},COMP:{ini:"2026-09-10",fim:"2026-09-16",iniLB:"2026-09-10",fimLB:"2026-09-16",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Bombas",        pct:0,pctMeta:1.2926,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-10",fim:"2026-09-23",iniLB:"2026-09-10",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2026-08-19",fim:"2026-08-19",iniLB:"2026-08-19",fimLB:"2026-08-19",pct:0,st:"plan"},COMP:{ini:"2026-09-24",fim:"2026-09-30",iniLB:"2026-09-24",fimLB:"2026-09-30",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Estrutura",     pct:0,pctMeta:0.0746,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-08-31",iniLB:"2026-08-31",fimLB:"2026-08-31",pct:0,st:"plan"},BIM:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"},COMP:{ini:"2026-11-27",fim:"2026-11-27",iniLB:"2026-11-27",fimLB:"2026-11-27",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Ferrosos",      pct:0,pctMeta:2.9953,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-10-07",iniLB:"2026-09-24",fimLB:"2026-10-07",pct:0,st:"plan"},BIM:{ini:"2026-11-27",fim:"2026-12-17",iniLB:"2026-11-27",fimLB:"2026-12-17",pct:0,st:"plan"},COMP:{ini:"2026-12-18",fim:"2026-12-21",iniLB:"2026-12-18",fimLB:"2026-12-21",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Forma",         pct:0,pctMeta:3.4241,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-09-03",iniLB:"2026-08-31",fimLB:"2026-09-03",pct:0,st:"plan"},BIM:{ini:"2026-12-18",fim:"2027-01-11",iniLB:"2026-12-18",fimLB:"2027-01-11",pct:0,st:"plan"},COMP:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Fundação",      pct:0,pctMeta:0.5531,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-04",fim:"2026-09-14",iniLB:"2026-09-04",fimLB:"2026-09-14",pct:0,st:"plan"},BIM:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"},COMP:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Piscina",       pct:0,pctMeta:0.1802,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-17",iniLB:"2026-09-15",fimLB:"2026-09-17",pct:0,st:"plan"},BIM:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"},COMP:{ini:"2027-01-14",fim:"2027-01-14",iniLB:"2027-01-14",fimLB:"2027-01-14",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Rev. Cerâmico", pct:0,pctMeta:0.5263,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-23",iniLB:"2026-09-15",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2027-01-14",fim:"2027-01-22",iniLB:"2027-01-14",fimLB:"2027-01-22",pct:0,st:"plan"},COMP:{ini:"2027-01-25",fim:"2027-01-25",iniLB:"2027-01-25",fimLB:"2027-01-25",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Segurança",     pct:0,pctMeta:0.1989,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-09-28",iniLB:"2026-09-24",fimLB:"2026-09-28",pct:0,st:"plan"},BIM:{ini:"2027-01-25",fim:"2027-01-26",iniLB:"2027-01-25",fimLB:"2027-01-26",pct:0,st:"plan"},COMP:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"}},
+  // FASE 6
+  {fase:"Fase 6",nome:"Elétrica",          pct:0,pctMeta:6.5996,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-10-08",fim:"2026-10-29",iniLB:"2026-10-08",fimLB:"2026-10-29",pct:0,st:"plan"},BIM:{ini:"2026-08-26",fim:"2026-11-09",iniLB:"2026-08-26",fimLB:"2026-11-09",pct:0,st:"plan"},COMP:{ini:"2026-11-10",fim:"2026-11-12",iniLB:"2026-11-10",fimLB:"2026-11-12",pct:0,st:"plan"}},
+  {fase:"Fase 6",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-06",iniLB:"2026-09-29",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"},COMP:{ini:"2027-01-28",fim:"2027-01-28",iniLB:"2027-01-28",fimLB:"2027-01-28",pct:0,st:"plan"}},
+  {fase:"Fase 6",nome:"Pisos",             pct:0,pctMeta:0.3387,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-01",iniLB:"2026-09-29",fimLB:"2026-10-01",pct:0,st:"plan"},BIM:{ini:"2027-01-28",fim:"2027-02-02",iniLB:"2027-01-28",fimLB:"2027-02-02",pct:0,st:"plan"},COMP:{ini:"2027-02-03",fim:"2027-02-03",iniLB:"2027-02-03",fimLB:"2027-02-03",pct:0,st:"plan"}},
+  // FASE 7
+  {fase:"Fase 7",nome:"Coletores Lixo",    pct:0,pctMeta:0.7022,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-06",iniLB:"2026-10-02",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-02-03",fim:"2027-02-05",iniLB:"2027-02-03",fimLB:"2027-02-05",pct:0,st:"plan"},COMP:{ini:"2027-02-10",fim:"2027-02-10",iniLB:"2027-02-10",fimLB:"2027-02-10",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Mobiliários",       pct:0,pctMeta:4.7726,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-13",iniLB:"2026-10-02",fimLB:"2026-10-13",pct:0,st:"plan"},BIM:{ini:"2027-02-10",fim:"2027-03-22",iniLB:"2027-02-10",fimLB:"2027-03-22",pct:0,st:"plan"},COMP:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Outros",            pct:0,pctMeta:5.6363,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-11-04",iniLB:"2026-10-14",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"},COMP:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-10-15",iniLB:"2026-10-14",fimLB:"2026-10-15",pct:0,st:"plan"},BIM:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"},COMP:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"SPDA",              pct:0,pctMeta:0.3169,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-10-30",iniLB:"2026-10-30",fimLB:"2026-10-30",pct:0,st:"plan"},BIM:{ini:"2026-09-28",fim:"2026-09-30",iniLB:"2026-09-28",fimLB:"2026-09-30",pct:0,st:"plan"},COMP:{ini:"2026-11-03",fim:"2026-11-03",iniLB:"2026-11-03",fimLB:"2026-11-03",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Visual",            pct:0,pctMeta:1.9948,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-16",fim:"2026-10-20",iniLB:"2026-10-16",fimLB:"2026-10-20",pct:0,st:"plan"},BIM:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"},COMP:{ini:"2027-03-29",fim:"2027-03-29",iniLB:"2027-03-29",fimLB:"2027-03-29",pct:0,st:"plan"}},
+  // FASE 8
+  {fase:"Fase 8",nome:"Bloco Cerâmico",pct:0,pctMeta:0.3405,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-11-04",iniLB:"2026-10-30",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-29",fim:"2027-04-06",iniLB:"2027-03-29",fimLB:"2027-04-06",pct:0,st:"plan"},COMP:{ini:"2027-04-07",fim:"2027-04-07",iniLB:"2027-04-07",fimLB:"2027-04-07",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Elevador",      pct:0,pctMeta:7.2583,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-05",fim:"2026-11-13",iniLB:"2026-11-05",fimLB:"2026-11-13",pct:0,st:"plan"},BIM:{ini:"2027-04-07",fim:"2027-04-09",iniLB:"2027-04-07",fimLB:"2027-04-09",pct:0,st:"plan"},COMP:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Luminárias",    pct:0,pctMeta:1.7089,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-03",fim:"2026-11-09",iniLB:"2026-11-03",fimLB:"2026-11-09",pct:0,st:"plan"},BIM:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"},COMP:{ini:"2027-04-13",fim:"2027-04-13",iniLB:"2027-04-13",fimLB:"2027-04-13",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Mármore",       pct:0,pctMeta:0.3405,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-16",fim:"2026-11-23",iniLB:"2026-11-16",fimLB:"2026-11-23",pct:0,st:"plan"},BIM:{ini:"2027-04-13",fim:"2027-04-19",iniLB:"2027-04-13",fimLB:"2027-04-19",pct:0,st:"plan"},COMP:{ini:"2027-04-20",fim:"2027-04-27",iniLB:"2027-04-20",fimLB:"2027-04-27",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Paisagismo",    pct:0,pctMeta:4.2692,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-24",fim:"2026-12-02",iniLB:"2026-11-24",fimLB:"2026-12-02",pct:0,st:"plan"},BIM:{ini:"2027-04-20",fim:"2027-06-04",iniLB:"2027-04-20",fimLB:"2027-06-04",pct:0,st:"plan"},COMP:{ini:"2027-06-07",fim:"2027-06-07",iniLB:"2027-06-07",fimLB:"2027-06-07",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Pisos",         pct:0,pctMeta:0.3387,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-12-03",fim:"2026-12-11",iniLB:"2026-12-03",fimLB:"2026-12-11",pct:0,st:"plan"},BIM:{ini:"2027-06-07",fim:"2027-06-10",iniLB:"2027-06-07",fimLB:"2027-06-10",pct:0,st:"plan"},COMP:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Vidros",        pct:0,pctMeta:0.5841,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-12-14",fim:"2026-12-16",iniLB:"2026-12-14",fimLB:"2026-12-16",pct:0,st:"plan"},BIM:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"},COMP:{ini:"2027-06-30",fim:"2027-06-30",iniLB:"2027-06-30",fimLB:"2027-06-30",pct:0,st:"plan"}},
+];
+
+// ══════════════════════════════════════════════════
+const AREAS=["MDM","ORC","BIM","COMP"];
+const ACFG={MDM:{label:"MDM",cor:"#006B3F"},BIM:{label:"BIM",cor:"#793F98"},ORC:{label:"Orçamento",cor:"#FF8B22"},COMP:{label:"Compilador",cor:"#AC41D8"}};
+const MESES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+const pd=s=>new Date(s+"T00:00:00");
+const fmtBR=d=>d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
+const MIN_D=pd("2026-02-01"),MAX_D=pd("2027-07-15");
+const TOTAL=(MAX_D-MIN_D)/86400000;
+const bPos=(d0,d1)=>{
+  const l=Math.max(0,(pd(d0)-MIN_D)/86400000/TOTAL*100);
+  const w=Math.max(0.2,(pd(d1)-pd(d0))/86400000/TOTAL*100+.05);
+  return{l:l.toFixed(3),w:Math.min(w,100-l).toFixed(3)};
+};
+
+// Estado colapso de fases
+const COLLAPSED={};
+let _allCollapsed=false;
+function toggleTodasFases(){
+  _allCollapsed=!_allCollapsed;
+  ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"]
+    .forEach(f=>{ COLLAPSED[f]=_allCollapsed; });
+  document.getElementById("tog-allf").textContent=_allCollapsed?"⊞ Expandir todas":"⊟ Recolher todas";
+  renderGantt();
+}
+
+// ══ VISIBILIDADE SEÇÕES ══
+// Seções exec colapsáveis horizontalmente
+function togExecSec(id){
+  const sec=document.getElementById("sec-"+id);
+  const arr=document.getElementById("arr-"+id);
+  const collapsed=sec.classList.toggle("collapsed");
+  if(arr) arr.textContent=collapsed?"▶":"▲";
+}
+
+// ══ CÁLCULOS AUTOMÁTICOS ══
+function calcMeta1(){ return GRUPOS.reduce((s,g)=>s+g.pctMeta*g.pct/100,0); }
+
+// Ritmo necessário: precisa de 90% até 31/12/26
+// Dias restantes para o fim do ano
+function calcRitmo(){
+  const hoje=pd(CFG.hoje);
+  const fimAno=pd("2026-12-31");
+  const inicio=pd("2026-02-01"); // início do projeto
+  const totalDiasProjeto=(fimAno-inicio)/86400000;
+  const diasPassados=(hoje-inicio)/86400000;
+  const diasRestantes=(fimAno-hoje)/86400000;
+  const meta1Atual=calcMeta1();
+  // pp por dia realizados
+  const ritmoAtual=diasPassados>0?meta1Atual/diasPassados:0;
+  // pp necessários ainda
+  const falta=90-meta1Atual;
+  // ritmo necessário
+  const ritmoNec=diasRestantes>0?falta/diasRestantes:Infinity;
+  return{ritmoAtual,ritmoNec,meta1Atual,diasRestantes:Math.round(diasRestantes),falta};
+}
+
+function calcDivs(){
+  const hoje=pd(CFG.hoje);
+  const out=[];
+  GRUPOS.forEach(g=>{
+    const mdmLiberado  = g.MDM.st==="done";
+    const bimLiberado  = g.BIM.st==="done";
+    const orcLiberado  = g.ORC.st==="done";
+    AREAS.forEach(a=>{
+      // MDM não liberado → não apontar nenhuma outra área
+      if(a!=="MDM" && !mdmLiberado) return;
+      // COMPILADOR só é apontado se MDM + BIM + ORC já entregaram
+      if(a==="COMP" && (!bimLiberado || !orcLiberado)) return;
+      const b=g[a];
+      const fim=pd(b.fim);
+      const ini=pd(b.ini);
+      // Não iniciou mas data de início passou
+      if(b.st==="plan" && ini<hoje){
+        const d=Math.round((hoje-ini)/86400000);
+        out.push({cls:"alto",ic:"🔴",txt:`${g.nome} [${ACFG[a].label}]: não iniciado — devia ter começado há ${d}d`});
+      }
+      // WIP mas data de fim passou
+      if(b.st==="wip" && fim<hoje){
+        const d=Math.round((hoje-fim)/86400000);
+        const prog=b.pct>0?` — progresso atual: ${b.pct}%`:"";
+        out.push({cls:"med",ic:"🟡",txt:`${g.nome} [${ACFG[a].label}]: em andamento com prazo vencido há ${d}d${prog}`});
+      }
+      // WIP ainda no prazo — mostrar progresso se existir
+      if(b.st==="wip" && fim>=hoje && b.pct>0){
+        // calcular progresso esperado pelo plano
+        const dur=Math.max(1,(fim-ini)/86400000);
+        const dec=Math.max(0,(hoje-ini)/86400000);
+        const espPct=Math.round(Math.min(100,dec/dur*100));
+        if(b.pct < espPct-20){ // atrasado em relação ao plano interno
+          const gap=espPct-b.pct;
+          out.push({cls:"med",ic:"🟡",txt:`${g.nome} [${ACFG[a].label}]: em andamento — ${b.pct}% concluído, esperado ~${espPct}% (${gap}pp abaixo do plano)`});
+        }
+      }
+      // Não iniciado (plan) e fim já passou — mais crítico
+      if(b.st==="plan" && fim<hoje){
+        const d=Math.round((hoje-fim)/86400000);
+        out.push({cls:"alto",ic:"🔴",txt:`${g.nome} [${ACFG[a].label}]: não concluído — prazo venceu há ${d}d`});
+      }
+    });
+  });
+  const ok=GRUPOS.filter(g=>g.pct===100).length;
+  if(ok>0) out.push({cls:"ok",ic:"✅",txt:`${ok} de ${GRUPOS.length} grupos 100% concluídos`});
+  return out.slice(0,12);
+}
+
+function calcRiscos(){
+  const r=calcRitmo();
+  const hoje=pd(CFG.hoje);
+  const out=[];
+  // Risco de ritmo
+  if(r.diasRestantes>0){
+    const ratio=r.ritmoNec/Math.max(r.ritmoAtual,0.001);
+    if(ratio>2) out.push({niv:"alto",
+      txt:`Ritmo atual: ${r.ritmoAtual.toFixed(2)}pp/dia`,
+      sit:`Necessário ${r.ritmoNec.toFixed(2)}pp/dia para atingir 90% — faltam ${r.falta.toFixed(1)}pp em ${r.diasRestantes}d`,
+      pp:r.falta.toFixed(1)});
+    else if(ratio>1.3) out.push({niv:"med",
+      txt:`Ritmo atual (${r.ritmoAtual.toFixed(2)}pp/dia) pode não ser suficiente`,
+      sit:`Necessário ${r.ritmoNec.toFixed(2)}pp/dia — monitorar aceleração`,
+      pp:r.falta.toFixed(1)});
+  }
+  // Grupos de alto peso não iniciados
+  GRUPOS.filter(g=>g.pctMeta>5&&g.pct===0)
+    .sort((a,b)=>b.pctMeta-a.pctMeta)
+    .forEach(g=>{
+      const iniPrev=fmtBR(pd(g.MDM.ini));
+      const fimPrev=fmtBR(pd(g.MDM.fim));
+      out.push({niv:"alto",
+        txt:`${g.nome}: ${g.pctMeta.toFixed(2)}% da meta — não iniciado`,
+        sit:`MDM previsto: ${iniPrev} → ${fimPrev} · Situação atual: 0% concluído`,
+        pp:g.pctMeta.toFixed(2)});
+    });
+  // Grupos alto peso em andamento lento
+  GRUPOS.filter(g=>g.pctMeta>3&&g.pct>0&&g.pct<50)
+    .forEach(g=>{
+      const fimPrev=fmtBR(pd(g.MDM.fim));
+      out.push({niv:"med",
+        txt:`${g.nome}: ${g.pctMeta.toFixed(2)}% da meta — apenas ${g.pct}% concluído`,
+        sit:`MDM previa conclusão em ${fimPrev} · Em andamento: ${g.pct}% de progresso`,
+        pp:g.pctMeta.toFixed(2)});
+    });
+  // Fases não iniciadas — só sinalizar se a data de início do MDM já passou
+  ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"].forEach(f=>{
+    const gs=GRUPOS.filter(g=>g.fase===f);
+    if(!gs.length) return;
+    if(!gs.every(g=>g.pct===0)) return; // pelo menos um iniciado → ok
+    // pegar a data de início mais cedo do MDM nessa fase
+    const iniMaisCedo=gs.reduce((min,g)=>pd(g.MDM.ini)<pd(min)?g.MDM.ini:min, gs[0].MDM.ini);
+    if(pd(iniMaisCedo)>hoje) return; // data futura → sem risco ainda
+    const m=gs.reduce((s,g)=>s+g.pctMeta,0);
+    const iniF=fmtBR(pd(iniMaisCedo));
+    const diasAtraso=Math.round((hoje-pd(iniMaisCedo))/86400000);
+    out.push({niv:"alto",
+      txt:`${f} (${m.toFixed(1)}% da meta) não iniciada`,
+      sit:`MDM deveria ter iniciado em ${iniF} — há ${diasAtraso}d sem início · ${gs.length} grupos aguardando`,
+      pp:m.toFixed(1)});
+  });
+  return out.slice(0,8);
+}
+
+// ══ RENDER EXEC ══
+function renderExec(){
+  const k1=calcMeta1();
+  const k2=CFG.kpi2;
+  const k1El = document.getElementById("k1-v");
+  k1El.textContent=k1.toFixed(1)+"%";
+  // Tooltip customizado: listar grupos 100% concluídos
+  const _aptos = GRUPOS.filter(g=>g.pct===100);
+  k1El.style.cursor = "help";
+  k1El.style.textDecoration = "underline dotted";
+  k1El.style.textDecorationColor = "rgba(0,107,63,.4)";
+  k1El.onmouseenter = (e) => {
+    const tt = document.getElementById("tt");
+    const linhas = _aptos.length
+      ? _aptos.map(g=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${g.fase} · ${g.nome}</span><span style="color:#A8D5C5;white-space:nowrap">${g.pctMeta.toFixed(2)}%</span></div>`).join("")
+      : `<div style="color:#aaa">Nenhum grupo 100% concluído ainda</div>`;
+    const _contrib = GRUPOS.filter(g=>g.pct>0&&g.pct<100);
+    const _ppParcial = _contrib.reduce((s,g)=>s+g.pctMeta*g.pct/100,0);
+    const _ppConcl  = _aptos.reduce((s,g)=>s+g.pctMeta,0);
+    tt.innerHTML = `<h4>📊 Meta 1 — ${k1.toFixed(1)}pp acumulados</h4>
+      <div style="font-size:9.5px;color:#aaa;margin-bottom:6px">
+        O valor da meta combina dois componentes:<br>
+        <b style="color:#A8D5C5">✅ ${_ppConcl.toFixed(1)}pp</b> de grupos 100% concluídos<br>
+        <b style="color:#FFB719">⏳ ${_ppParcial.toFixed(1)}pp</b> de evolução parcial em andamento (${_contrib.length} grupos)
+      </div>
+      ${_aptos.length ? `<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin-bottom:3px">Grupos concluídos (${_aptos.length}):</div>
+      <div style="font-size:9.5px;max-height:160px;overflow-y:auto;line-height:1.8">${linhas}</div>` : ""}
+      <hr><div style="font-size:8.5px;color:#aaa">Meta: 90pp até dez/26 · Faltam ${(90-k1).toFixed(1)}pp</div>`;
+    tt.style.display = "block";
+    const spaceRight = window.innerWidth - (e.clientX+14);
+    tt.style.left = (spaceRight>340 ? e.clientX+14 : e.clientX-344) + "px";
+    tt.style.top  = (e.clientY-10) + "px";
+  };
+  k1El.onmouseleave = () => { document.getElementById("tt").style.display="none"; };
+  const k1b=document.getElementById("k1-b");
+  const ritmo=calcRitmo();
+  const ratio=ritmo.ritmoNec/Math.max(ritmo.ritmoAtual,0.0001);
+  const k1OkRitmo=ratio<=1.3;
+  k1b.style.width=Math.min(100,k1/90*100)+"%";
+  k1b.style.background=k1OkRitmo?"var(--v1)":"var(--la)";
+  k1b.title=k1OkRitmo
+    ?`✅ Ritmo adequado — ${ritmo.ritmoAtual.toFixed(2)}pp/dia realizado vs ${ritmo.ritmoNec.toFixed(2)}pp/dia necessário. Meta 1 no caminho certo.`
+    :`⚠️ Ritmo insuficiente — realizando ${ritmo.ritmoAtual.toFixed(2)}pp/dia, mas precisaria de ${ritmo.ritmoNec.toFixed(2)}pp/dia para atingir 90% até dez/26. Faltam ${ritmo.falta.toFixed(1)}pp em ${ritmo.diasRestantes} dias.`;
+  document.getElementById("k2-v").textContent=k2+"%";
+  document.getElementById("k2-b").style.width=Math.min(100,k2/25*100)+"%";
+  document.getElementById("rod").textContent="Data: "+CFG.rod;
+
+  const divs=calcDivs();
+  document.getElementById("div-list").innerHTML=divs.length===0
+    ?`<div class="d-item ok"><span>✅</span>Sem divergências detectadas</div>`
+    :divs.map(d=>`<div class="d-item ${d.cls}"><span class="d-ic">${d.ic}</span><span>${d.txt}</span></div>`).join("");
+
+  const risks=calcRiscos();
+  document.getElementById("risk-list").innerHTML=risks.length===0
+    ?`<div class="r-item"><span class="rbg ok">OK</span><span>Nenhum risco</span></div>`
+    :risks.map(r=>`<div class="r-item" style="flex-direction:column;align-items:flex-start;gap:2px;padding:4px 6px">
+        <div style="display:flex;align-items:center;gap:5px;width:100%">
+          <span class="rbg ${r.niv}">${r.niv==="alto"?"Alto":"Médio"}</span>
+          <span style="flex:1;font-weight:600">${r.txt}</span>
+          ${r.pp?`<span style="font-size:8px;color:var(--warn);font-weight:700;white-space:nowrap">${r.pp}%</span>`:""}
+        </div>
+        ${r.sit?`<div style="font-size:8.5px;color:#666;padding-left:2px">↳ ${r.sit}</div>`:""}
+      </div>`).join("");
+
+  renderPlano();
+}
+
+function renderPlano(){
+  document.getElementById("plano-list").innerHTML=PLANO.length===0
+    ?`<span style="font-size:9px;color:#aaa">Nenhuma ação.</span>`
+    :PLANO.map((p,i)=>`
+      <div class="p-item">
+        <div class="p-chk ${p.done?"done":""}" onclick="togAcao(${i})">${p.done?"✓":""}</div>
+        <span class="p-txt ${p.done?"done":""}" onclick="editAcao(${i})">${p.txt}</span>
+        <span class="p-area" style="background:${COR_A[p.area]||"#555"}">${p.area}</span>
+        <button class="p-del" onclick="delAcao(${i})">✕</button>
+      </div>`).join("");
+}
+// ── Notas ──
+function renderTA(){
+  document.getElementById("ta-list").innerHTML=TAKEAWAYS.length===0
+    ?`<span style="font-size:9px;color:#aaa">Nenhum take away. Clique em + Adicionar.</span>`
+    :TAKEAWAYS.map((t,i)=>`
+      <div class="ta-item ${t.dest?"dest":""}">
+        <button class="ta-star ${t.dest?"on":""}" onclick="togTADest(${i})" title="Destacar">★</button>
+        <span class="ta-txt ${t.dest?"dest":""}" onclick="editTA(${i})" title="Clique para editar">${t.txt}</span>
+        <button class="ta-del" onclick="delTA(${i})" title="Remover">✕</button>
+      </div>`).join("");
+}
+function togTADest(i){TAKEAWAYS[i].dest=!TAKEAWAYS[i].dest;renderTA();if(window.fbSalvar)window.fbSalvar();}
+function editTA(i){const n=prompt("Editar take away:",TAKEAWAYS[i].txt);if(n===null)return;if(!n.trim()){delTA(i);return;}TAKEAWAYS[i].txt=n.trim();renderTA();}
+function delTA(i){if(!confirm(`Remover?
+"${TAKEAWAYS[i].txt.slice(0,60)}..."`))return;TAKEAWAYS.splice(i,1);renderTA();}
+function addTA(){const t=prompt("Novo take away:");if(!t||!t.trim())return;TAKEAWAYS.push({txt:t.trim(),dest:false});renderTA();if(window.fbSalvar)window.fbSalvar();}
+
+function togAcao(i){PLANO[i].done=!PLANO[i].done;renderPlano();if(window.fbSalvar)window.fbSalvar();}
+function editAcao(i){const n=prompt("Editar:",PLANO[i].txt);if(n===null)return;if(!n.trim()){delAcao(i);return;}PLANO[i].txt=n.trim();renderPlano();}
+function delAcao(i){if(!confirm(`Remover?\n"${PLANO[i].txt}"`))return;PLANO.splice(i,1);renderPlano();}
+function addAcao(){const t=prompt("Descrição:");if(!t||!t.trim())return;const a=(prompt("Área (MDM/BIM/ORC/COMP/PMO):")||"MDM").toUpperCase().trim();PLANO.push({txt:t.trim(),area:a,done:false});renderPlano();}
+
+// ══ GANTT ══
+function getSelValues(id){
+  const el=document.getElementById(id);
+  return Array.from(el.selectedOptions).map(o=>o.value).filter(v=>v!=="");
+}
+
+function renderGantt(){
+  const fFases = getSelValues("f-fase");
+  const fSts   = getSelValues("f-st");
+  const fBusca = document.getElementById("f-busca").value.toLowerCase().trim();
+  const hoje   = pd(CFG.hoje);
+  const hojeL  = Math.max(0,Math.min(100,(hoje-MIN_D)/86400000/TOTAL*100));
+
+  // ── Linha PLANEJADA (roxa tracejada) ──────────────────────────────
+  // "Onde o plano dizia que deveríamos estar hoje"
+  // Calculamos quanto progresso o plano previa até hoje (soma ponderada pelo tempo decorrido de cada grupo MDM)
+  // e encontramos a data equivalente na escala X do gantt = sempre "hoje" por definição conceitual.
+  // Então mostramos a linha de QUANTO o plano dizia que teríamos — como label numérico no tooltip.
+  const _ritmo=calcRitmo(); window._ritmoAtual=_ritmo;
+  let _ppPlanejadoHoje=0;
+  GRUPOS.forEach(g=>{
+    const ini=pd(g.MDM.ini), fim=pd(g.MDM.fim);
+    if(fim<=hoje) _ppPlanejadoHoje+=g.pctMeta;           // deveria estar 100%
+    else if(ini<=hoje){
+      const dur=Math.max(1,(fim-ini)/86400000);
+      const dec=(hoje-ini)/86400000;
+      _ppPlanejadoHoje+=g.pctMeta*(dec/dur);              // proporção decorrida
+    }
+  });
+  // A linha planejada fica em "hoje" no eixo X, mas com label diferente da linha vermelha.
+  // Ela representa o nível esperado — colocamos ela DESLOCADA para a posição
+  // onde o plano linear diria que estaríamos, dentro do período fev→dez/26:
+  // Posição X proporcional a (_ppPlanejadoHoje / 90) dentro do período total do projeto
+  const _inicioProj=pd("2026-02-01");
+  const _fimMeta=pd("2026-12-31");
+  const _duracaoTotal=(_fimMeta-_inicioProj)/86400000;
+  // Data equivalente: quando o plano linear atingiria _ppPlanejadoHoje
+  // Plano linear: pp_alvo(t) = 90 * (t - inicio) / duracao
+  // Inversão: t = inicio + (ppHoje/90) * duracao
+  const _dtPlanEquiv=new Date(_inicioProj.getTime() + (_ppPlanejadoHoje/90)*_duracaoTotal*86400000);
+  const _planL=Math.max(0,Math.min(100,(_dtPlanEquiv-MIN_D)/86400000/TOTAL*100));
+
+  // ── Linha PROJEÇÃO 90% (laranja tracejada) ─────────────────────────
+  // Estratégia: ordenar grupos por data de fim prevista do COMP (última área).
+  // Acumular pctMeta × (pct/100) progressivamente.
+  // A linha cai na data do grupo onde o acumulado cruza 90%.
+  // Para grupos já concluídos: contribuição real. Para pendentes: contribuição esperada (pctMeta completo).
+  let _proj90L=null;
+  let _proj90Date=null;
+  window._proj90Date=null;
+  (() => {
+    // Construir lista de grupos com data de conclusão prevista (fim do COMP se plan/wip, real se done)
+    const lista = GRUPOS.map(g=>{
+      // Data de conclusão = fim da última área a entregar
+      const fimComp = pd(g.COMP.fim);
+      const fimBIM  = pd(g.BIM.fim);
+      const fimORC  = pd(g.ORC.fim);
+      const fimMDM  = pd(g.MDM.fim);
+      const fimPrev = new Date(Math.max(fimComp,fimBIM,fimORC,fimMDM));
+      // Contribuição: se done usa pct real, se não usa 100% (esperado quando concluir)
+      const contrib = g.pct===100 ? g.pctMeta : (g.pct>0 ? g.pctMeta*(g.pct/100) : g.pctMeta);
+      return {g, fimPrev, contrib, done:g.pct===100};
+    }).sort((a,b)=>a.fimPrev-b.fimPrev);
+
+    // Acumular do mais cedo para o mais tarde
+    let acum=0;
+    for(const item of lista){
+      acum += item.contrib;
+      if(acum>=90){
+        _proj90Date = item.fimPrev;
+        window._proj90Date = item.fimPrev;
+        _proj90L = Math.max(0,Math.min(99.5,(_proj90Date-MIN_D)/86400000/TOTAL*100));
+        break;
+      }
+    }
+    // Se não atingiu 90% mesmo com todos: linha no final
+    if(_proj90L===null) _proj90L=99.5;
+  })();
+
+  // ── Cabeçalho de tempo ──
+  let mH="",wH="";
+  let cur=new Date(MIN_D);
+  while(cur<=MAX_D){
+    const m=cur.getMonth(),y=cur.getFullYear();
+    const mFim=new Date(Math.min(new Date(y,m+1,0),MAX_D));
+    const dias=(mFim-cur)/86400000+1;
+    const bg=m%2===0?"#006B3F":"#115530";
+    mH+=`<div class="m-cell" style="flex:${dias} 0 0%;background:${bg}">${MESES[m]}${y>2026?" '27":""}</div>`;
+    cur=new Date(y,m+1,1);
+  }
+  let wc=new Date(MIN_D);
+  while(wc<=MAX_D){
+    const wf=new Date(Math.min(wc.getTime()+6*86400000,MAX_D.getTime()));
+    const d=(wf-wc)/86400000+1;
+    wH+=`<div class="w-cell" style="flex:${d} 0 0%">${wc.getDate()}</div>`;
+    wc=new Date(wc.getTime()+7*86400000);
+  }
+
+  let html=`<div class="g-head">
+    <div class="lbl-col"><span>GRUPO · % conclusão | % meta</span></div>
+    <div class="t-cols"><div class="m-row">${mH}</div><div class="w-row">${wH}</div></div>
+  </div>`;
+
+  const faseMap={};
+  GRUPOS.forEach(g=>{if(!faseMap[g.fase])faseMap[g.fase]=[];faseMap[g.fase].push(g);});
+
+  let tot=0,vis=0;
+
+  Object.keys(faseMap).forEach(fk=>{
+    const itens=faseMap[fk].filter(g=>{
+      if(fFases.length && !fFases.includes(g.fase)) return false;
+      if(fBusca && !g.nome.toLowerCase().includes(fBusca)) return false;
+      if(fSts.length){
+        // grupo passa se qualquer área tem o status selecionado
+        const match=fSts.some(s=>AREAS.some(a=>g[a].st===s));
+        if(!match) return false;
+      }
+      return true;
+    });
+    tot+=faseMap[fk].length;
+    if(!itens.length) return;
+    vis+=itens.length;
+
+    // Cabeçalho da fase — com contador e barra de progresso
+    const all=faseMap[fk];
+    const nConc=all.filter(g=>g.pct===100).length;
+    const pctF=Math.round(all.reduce((s,g)=>s+g.pct,0)/all.length);
+    const metaF=all.reduce((s,g)=>s+g.pctMeta,0).toFixed(1);
+    const isCollapsed=!!COLLAPSED[fk];
+
+    html+=`<div class="fase-hdr" onclick="toggleFase('${fk}')" id="hdr-${fk.replace(" ","")}">
+      <div class="fase-lbl">
+        <span class="fase-arrow ${isCollapsed?"collapsed":""}">▼</span>
+        <div class="fase-info">
+          <span class="fase-nome">${fk}</span>
+          <span class="fase-meta">${all.length} grupos · peso: ${metaF}%</span>
+        </div>
+      </div>
+      <div class="fase-prog">
+        <div class="fase-prog-bar"><div class="fase-prog-fill" style="width:${pctF}%"></div></div>
+        <span class="fase-prog-txt">${nConc}/${all.length} concluídos · ${pctF}%</span>
+      </div>
+    <div class="fase-grid"></div>
+    </div>`;
+
+    if(!isCollapsed){
+      itens.forEach((g,gi)=>{
+        const dot=g.pct===100?"#006B3F":g.pct>0?"#FF8B22":"#ccc";
+        // Sub-linhas por área
+        let subs="";
+        AREAS.forEach((a,ai)=>{
+          const b=g[a];
+          const {l,w}=bPos(b.ini,b.fim);
+          const cor=ACFG[a].cor;
+          const bid=`B${fk.replace(" ","")}_${gi}_${a}`;
+          const bgSub=ai%2===0?"":"rgba(0,107,63,.03)";
+          subs+=`<div class="g-sub" style="background:${bgSub}">
+            <div class="today-line" style="left:${hojeL}%"></div>
+            ${_proj90L!==null?`<div class="need-line" style="left:${Math.min(99.5,_proj90L).toFixed(2)}%"></div>`:''}
+            <div id="${bid}" class="g-bar ${b.st}"
+              style="left:${l}%;width:${w}%;background:${cor}"
+              data-fk="${fk}" data-gi="${gi}" data-a="${a}"
+            >${parseFloat(w)>2?ACFG[a].label:''}</div>
+          </div>`;
+        });
+
+        html+=`<div class="g-row">
+          <div class="g-lbl">
+            <div class="g-lbl-top">
+              <div class="g-dot" style="background:${dot}"></div>
+              <span class="g-nome" title="${g.nome}">${g.nome}</span>
+            </div>
+            <div class="g-stats">conclusão <b>${g.pct}%</b> &nbsp;|&nbsp; meta <b style="color:var(--v1)">${g.pctMeta.toFixed(2)}%</b></div>
+            <div style="padding-left:0;margin-top:1px">
+              ${AREAS.map(a=>`<div style="height:20px;display:flex;align-items:center;padding-left:2px;font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}</div>`).join("")}
+            </div>
+          </div>
+          <div class="g-subs">${subs}</div>
+        </div>`;
+      });
+    }
+  });
+
+  document.getElementById("gantt").innerHTML=html;
+  document.getElementById("f-cnt").textContent=`${vis} de ${tot} grupos`;
+
+  // Tooltips
+  const tt=document.getElementById("tt");
+  GRUPOS.forEach((g,gi)=>{
+    const fk=g.fase;
+    const idx=faseMap[fk]?faseMap[fk].indexOf(g):-1;
+    AREAS.forEach(a=>{
+      const el=document.getElementById(`B${fk.replace(" ","")}_${idx}_${a}`);
+      if(!el) return;
+      el.addEventListener("mousemove",e=>{
+        const b=g[a];
+        const chips=AREAS.map(ar=>{
+          const s=g[ar].st,ic=s==="done"?"✅":s==="wip"?"⏳":"⚪";
+          return `<div class="tt-chip ${s!=="plan"?"on":""}" style="background:${ACFG[ar].cor}">${ACFG[ar].label} ${ic}</div>`;
+        }).join("");
+        tt.style.display="block";
+        // Posicionar tooltip evitando corte nas bordas
+        const ttW=320, ttH=160;
+        const spaceRight=window.innerWidth-(e.clientX+14);
+        const spaceBottom=window.innerHeight-(e.clientY-10);
+        tt.style.left=(spaceRight>ttW ? e.clientX+14 : e.clientX-ttW-4)+"px";
+        tt.style.top=(spaceBottom>ttH ? e.clientY-10 : e.clientY-ttH-10)+"px";
+        tt.innerHTML=`<h4>${g.nome} · ${fk}</h4>
+          <div class="tt-seq">${chips}</div>
+          <div style="font-size:10px;color:#ddd"><b style="color:${ACFG[a].cor}">${ACFG[a].label}</b>: ${fmtBR(pd(b.ini))} → ${fmtBR(pd(b.fim))} · ${b.st==="done"?"✅ Concluído":b.st==="wip"?"⏳ Em andamento":"⚪ Previsto"}</div>
+          <hr>
+          <div style="font-size:10px">
+            Conclusão do grupo: <b style="color:#A8D5C5;font-size:13px">${g.pct}%</b><br>
+            Peso na Meta 1: <b style="color:#FF8B22">${g.pctMeta.toFixed(2)}%</b><br>
+            Contribuição: <b style="color:#aaa">${(g.pctMeta*g.pct/100).toFixed(2)}pp</b>
+
+          </div>`;
+      });
+      el.addEventListener("mouseleave",()=>tt.style.display="none");
+    });
+  });
+}
+
+function toggleFase(fk){
+  COLLAPSED[fk]=!COLLAPSED[fk];
+  renderGantt();
+}
+
+function limpar(){
+  // Limpar seleções múltiplas
+  ["f-fase","f-st"].forEach(id=>{
+    const el=document.getElementById(id);
+    Array.from(el.options).forEach(o=>o.selected=false);
+  });
+  document.getElementById("f-busca").value="";
+  renderGantt();
+}
+
+// ══ PAINEL EDIÇÃO ══
+let epFase=0;
+const FASES=["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"];
+const stOpt=v=>["done","wip","plan"].map(s=>`<option value="${s}" ${v===s?"selected":""}>${s==="done"?"✅ done":s==="wip"?"⏳ wip":"⚪ plan"}</option>`).join("");
+
+function toggleEdit(){
+  const ep=document.getElementById("ep");
+  const vis=ep.style.display!=="none";
+  ep.style.display=vis?"none":"block";
+  if(!vis){loadEp();ep.scrollIntoView({behavior:"smooth"});}
+}
+
+function loadEp(){
+  document.getElementById("e-k2").value=CFG.kpi2;
+  document.getElementById("e-hoje").value=CFG.hoje;
+  document.getElementById("e-rod").value=CFG.rod;
+  document.getElementById("ep-tabs").innerHTML=FASES.map((f,i)=>
+    `<button class="ep-tab ${i===epFase?"on":""}" onclick="setEpFase(${i})">${f}</button>`).join("");
+  renderEpFase();
+}
+
+function setEpFase(i){epFase=i;document.querySelectorAll(".ep-tab").forEach((t,ti)=>t.classList.toggle("on",ti===i));renderEpFase();}
+
+function renderEpFase(){
+  const fk=FASES[epFase];
+  const its=GRUPOS.filter(g=>g.fase===fk);
+  document.getElementById("ep-fase").innerHTML=its.map((g,gi)=>`
+    <div style="margin-bottom:10px;padding:8px;background:#F5FAF5;border-radius:4px;border-left:3px solid var(--v1)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
+        <b style="font-size:11px;color:var(--v1);flex:1">${g.nome}</b>
+        <label class="ep-lbl" style="margin:0">% conclusão:</label>
+        <input type="number" id="g-pct-${gi}" value="${g.pct}" min="0" max="100" style="width:52px;border:1px solid var(--bdr);border-radius:3px;padding:3px 5px;font-size:10px">
+        <label class="ep-lbl" style="margin:0;color:var(--v1)">% meta:</label>
+        <input type="number" id="g-meta-${gi}" value="${g.pctMeta}" min="0" max="100" step="0.01" style="width:62px;border:1px solid var(--bdr);border-radius:3px;padding:3px 5px;font-size:10px">
+      </div>
+      <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 88px;gap:3px;margin-bottom:3px">
+        <span></span>
+        <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center;background:#eee;padding:2px;border-radius:2px">Início LB 🔒</span>
+        <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center;background:#eee;padding:2px;border-radius:2px">Fim LB 🔒</span>
+        <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Início Prev.</span>
+        <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Fim Prev.</span>
+        <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center">Status</span>
+      </div>
+      ${AREAS.map(a=>`
+        <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 88px;gap:3px;align-items:center;margin-bottom:3px">
+          <label style="font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}</label>
+          <input type="date" value="${g[a].iniLB||g[a].ini}" disabled
+            style="border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;background:#f0f0f0;color:#aaa;cursor:not-allowed;width:100%">
+          <input type="date" value="${g[a].fimLB||g[a].fim}" disabled
+            style="border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;background:#f0f0f0;color:#aaa;cursor:not-allowed;width:100%">
+          <input type="date" id="g-${a}-i-${gi}" value="${g[a].ini}"
+            style="border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%">
+          <input type="date" id="g-${a}-f-${gi}" value="${g[a].fim}"
+            style="border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%">
+          <select id="g-${a}-s-${gi}" class="ep-inp" style="font-size:8.5px">${stOpt(g[a].st)}</select>
+        </div>`).join("")}
+    </div>`).join("");
+}
+
+function saveEpFase(){
+  const fk=FASES[epFase];
+  GRUPOS.filter(g=>g.fase===fk).forEach((g,gi)=>{
+    g.pct=parseFloat(document.getElementById(`g-pct-${gi}`).value)||0;
+    g.pctMeta=parseFloat(document.getElementById(`g-meta-${gi}`).value)||0;
+    AREAS.forEach(a=>{
+      // Preservar linha de base (iniLB/fimLB) — nunca sobrescrever
+      // Só atualizar ini/fim (previsto/realizado)
+      g[a].ini=document.getElementById(`g-${a}-i-${gi}`).value;
+      g[a].fim=document.getElementById(`g-${a}-f-${gi}`).value;
+      g[a].st=document.getElementById(`g-${a}-s-${gi}`).value;
+      // iniLB e fimLB permanecem intocados
+    });
+  });
+}
+
+function aplicar(){
+  CFG.kpi2=parseFloat(document.getElementById("e-k2").value)||0;
+  CFG.hoje=document.getElementById("e-hoje").value;
+  CFG.rod=document.getElementById("e-rod").value;
+  saveEpFase();
+  calcCPM();
+  renderExec();renderGantt();renderBurndown();renderHeatmap();renderVelocidade();toggleEdit();
+  if(window.fbSalvar) window.fbSalvar();
+}
+
+
+// ══════════════════════════════════════════════════════════════
+// BURNDOWN — versão melhorada
+// ══════════════════════════════════════════════════════════════
+function renderBurndown(){
+  const canvas = document.getElementById("burndown-canvas");
+  if(!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.offsetWidth || 600;
+  const H = 140;
+  canvas.width = W * (window.devicePixelRatio||1);
+  canvas.height = H * (window.devicePixelRatio||1);
+  canvas.style.width = W+"px";
+  canvas.style.height = H+"px";
+  ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
+
+  const PAD = {t:20, r:16, b:32, l:42};
+  const CW = W - PAD.l - PAD.r;
+  const CH = H - PAD.t - PAD.b;
+
+  const inicio = pd("2026-02-01");
+  const fimMeta = pd("2026-12-31");
+  const totalDias = (fimMeta - inicio) / 86400000;
+  const hoje = pd(CFG.hoje);
+
+  ctx.clearRect(0,0,W,H);
+
+  // Fundo
+  ctx.fillStyle = "#F8FAF8";
+  ctx.fillRect(PAD.l, PAD.t, CW, CH);
+
+  // Grade horizontal
+  const gridVals = [0,25,50,75,90,100];
+  gridVals.forEach(v => {
+    const y = PAD.t + CH - (v/100)*CH;
+    ctx.strokeStyle = v===90 ? "rgba(0,107,63,.3)" : "rgba(0,107,63,.08)";
+    ctx.lineWidth = v===90 ? 1.5 : 1;
+    ctx.setLineDash(v===90 ? [5,3] : []);
+    ctx.beginPath(); ctx.moveTo(PAD.l,y); ctx.lineTo(PAD.l+CW,y); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = v===90 ? "#006B3F" : "#aaa";
+    ctx.font = `${v===90?"bold ":""}9px Arial`;
+    ctx.textAlign = "right";
+    ctx.fillText(v+"%", PAD.l-4, y+3);
+    if(v===90){
+      ctx.fillStyle = "#006B3F";
+      ctx.font = "bold 8px Arial";
+      ctx.textAlign = "left";
+      ctx.fillText("Meta", PAD.l+3, y-3);
+    }
+  });
+
+  // Grade vertical — meses
+  const MESES_PT = ["Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  MESES_PT.forEach((m,i) => {
+    const t = (i*30.5) / totalDias;
+    if(t > 1) return;
+    const x = PAD.l + t*CW;
+    ctx.strokeStyle = "rgba(0,107,63,.08)";
+    ctx.lineWidth = 1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t+CH); ctx.stroke();
+    ctx.fillStyle = "#888"; ctx.font = "8px Arial"; ctx.textAlign = "center";
+    ctx.fillText(m, x, PAD.t+CH+11);
+  });
+
+  // Linha META planejada (crescimento linear 0→90)
+  ctx.strokeStyle = "rgba(0,107,63,.25)";
+  ctx.lineWidth = 1.5; ctx.setLineDash([6,3]);
+  ctx.beginPath();
+  ctx.moveTo(PAD.l, PAD.t+CH);
+  ctx.lineTo(PAD.l+CW, PAD.t+CH - 0.9*CH);
+  ctx.stroke(); ctx.setLineDash([]);
+
+  // Linha REALIZADO — acumular pctMeta*pct/100 por data de conclusão
+  const eventos = [];
+  GRUPOS.forEach(g => {
+    if(g.pct > 0){
+      // data de conclusão = fim da área mais avançada concluída
+      let fimReal = null;
+      ["COMP","BIM","ORC","MDM"].forEach(a => {
+        if(g[a].st==="done" && (!fimReal || pd(g[a].fim) > fimReal))
+          fimReal = pd(g[a].fim);
+      });
+      if(!fimReal) fimReal = pd(g.MDM.fim);
+      if(fimReal >= inicio && fimReal <= fimMeta)
+        eventos.push({ data: fimReal, pp: g.pctMeta * g.pct / 100 });
+    }
+  });
+  eventos.sort((a,b) => a.data - b.data);
+
+  let acum = 0;
+  const realPts = [{x: PAD.l, y: PAD.t+CH}];
+  eventos.forEach(e => {
+    acum += e.pp;
+    const t = (e.data - inicio) / 86400000 / totalDias;
+    realPts.push({ x: PAD.l + t*CW, y: PAD.t + CH - Math.min(acum/100, 1)*CH });
+  });
+
+  // Ponto hoje
+  const hojeT = Math.min(1,(hoje-inicio)/86400000/totalDias);
+  const hojeX = PAD.l + hojeT*CW;
+  const hojeY = PAD.t + CH - Math.min(acum/100,1)*CH;
+  realPts.push({x:hojeX, y:hojeY});
+
+  // Desenhar linha realizada
+  ctx.strokeStyle = "#006B3F"; ctx.lineWidth = 2.5; ctx.setLineDash([]);
+  ctx.beginPath();
+  realPts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
+  ctx.stroke();
+
+  // Área sob a linha realizada
+  ctx.fillStyle = "rgba(0,107,63,.07)";
+  ctx.beginPath();
+  ctx.moveTo(PAD.l, PAD.t+CH);
+  realPts.forEach(p => ctx.lineTo(p.x,p.y));
+  ctx.lineTo(hojeX, PAD.t+CH);
+  ctx.closePath(); ctx.fill();
+
+  // Linha HOJE
+  ctx.strokeStyle = "rgba(191,54,12,.8)"; ctx.lineWidth = 1.5; ctx.setLineDash([3,2]);
+  ctx.beginPath(); ctx.moveTo(hojeX,PAD.t); ctx.lineTo(hojeX,PAD.t+CH); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "rgba(191,54,12,.9)";
+  ctx.font = "bold 8px Arial"; ctx.textAlign = "center";
+  ctx.fillText("Hoje", hojeX, PAD.t-4);
+
+  // Calcular ponto dez/26 ANTES de desenhar projeção
+  const fimDez = pd("2026-12-31");
+  const fimDezT = Math.min(1,(fimDez-inicio)/86400000/totalDias);
+  const fimDezX = PAD.l + fimDezT*CW;
+  const _rt = window._ritmoAtual || {ritmoAtual:0};
+  let ppDez = acum;
+  if(_rt.ritmoAtual > 0){
+    const diasAteDez = (fimDez-hoje)/86400000;
+    ppDez = Math.min(100, acum + _rt.ritmoAtual*diasAteDez);
+  }
+  const fimDezY = PAD.t + CH - Math.min(ppDez/100,1)*CH;
+
+  // Projeção: linha laranja do ponto hoje até dez/26 no ritmo atual
+  ctx.strokeStyle = "#FF8B22"; ctx.lineWidth = 1.5; ctx.setLineDash([5,3]);
+  ctx.beginPath(); ctx.moveTo(hojeX, hojeY); ctx.lineTo(fimDezX, fimDezY); ctx.stroke();
+  ctx.setLineDash([]);
+  // Seta no fim da projeção indicando gap
+  const gapPp = (90 - ppDez);
+  if(gapPp > 0){
+    // Linha vertical do gap: de ppDez até 90pp em dez/26
+    ctx.strokeStyle = "rgba(191,54,12,.4)"; ctx.lineWidth = 1; ctx.setLineDash([2,2]);
+    const y90 = PAD.t + CH - 0.9*CH;
+    ctx.beginPath(); ctx.moveTo(fimDezX, fimDezY); ctx.lineTo(fimDezX, y90); ctx.stroke();
+    ctx.setLineDash([]);
+    // Label do gap
+    ctx.fillStyle = "#BF360C";
+    ctx.font = "bold 8px Arial"; ctx.textAlign = "left";
+    ctx.fillText(`Gap: ${gapPp.toFixed(1)}pp`, fimDezX+4, (fimDezY+y90)/2+3);
+  }
+
+  // Ponto atual destacado
+  ctx.fillStyle = "#006B3F";
+  ctx.beginPath(); ctx.arc(hojeX, hojeY, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.beginPath(); ctx.arc(hojeX, hojeY, 2, 0, Math.PI*2); ctx.fill();
+
+  // Legenda
+  const legs = [
+    {cor:"rgba(0,107,63,.25)",dash:true,  lbl:"Planejado linear"},
+    {cor:"#006B3F",           dash:false, lbl:`Realizado (${acum.toFixed(1)}pp)`},
+    {cor:"#FF8B22",           dash:true,  lbl:`Projeção ritmo atual (→${ppDez.toFixed(1)}pp em dez/26)`},
+  ];
+  let lx = PAD.l;
+  const ly = PAD.t + CH + 24;
+  legs.forEach(lg => {
+    ctx.strokeStyle=lg.cor; ctx.lineWidth=lg.dash?1.5:2.5;
+    ctx.setLineDash(lg.dash?[5,3]:[]);
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+20,ly); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#555"; ctx.font="8.5px Arial"; ctx.textAlign="left";
+    ctx.fillText(lg.lbl, lx+24, ly+3);
+    lx += ctx.measureText(lg.lbl).width + 48;
+  });
+
+  // ── Marcos interativos — guardar dados para tooltip ──
+  // Rótulo no fim do realizado (ponto hoje)
+  ctx.fillStyle="#006B3F";
+  ctx.font="bold 9px Arial"; ctx.textAlign="left";
+  ctx.fillText(`${acum.toFixed(1)}pp`, hojeX+6, hojeY-4);
+
+  // fimDez, fimDezX, fimDezY, ppDez já calculados antes da projeção
+  ctx.fillStyle="rgba(255,139,34,.9)";
+  ctx.beginPath(); ctx.arc(fimDezX, fimDezY, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle="#FF8B22";
+  ctx.font="bold 9px Arial"; ctx.textAlign="right";
+  ctx.fillText(`${ppDez.toFixed(1)}pp`, fimDezX-6, fimDezY-5);
+  // Label "dez/26"
+  ctx.fillStyle="#888"; ctx.font="8px Arial"; ctx.textAlign="center";
+  ctx.fillText("dez/26", fimDezX, PAD.t+CH+11);
+  // Linha vertical tracejada em dez/26
+  ctx.strokeStyle="rgba(255,139,34,.3)"; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(fimDezX,PAD.t); ctx.lineTo(fimDezX,PAD.t+CH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // ── Guardar pontos para hover ──
+  canvas._bdData = {
+    PAD, CW, CH, inicio, totalDias, acum, ppDez,
+    hojeX, hojeY, fimDezX, fimDezY,
+    proj90X: window._proj90Date ? PAD.l+Math.min(1.1,(window._proj90Date-inicio)/86400000/totalDias)*CW : null,
+  };
+
+  // ── Adicionar listener de mousemove para tooltip ──
+  canvas._bdTooltip = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (canvas.width/rect.width);
+    const my = (e.clientY - rect.top)  * (canvas.height/rect.height);
+    const {PAD,CW,CH,inicio,totalDias,acum,ppDez,hojeX,hojeY,fimDezX,fimDezY,proj90X} = canvas._bdData;
+    const DPR = window.devicePixelRatio||1;
+
+    // Verificar proximidade dos marcos (em pixels canvas)
+    const near = (px,py,r=20*DPR) => Math.hypot(mx-px*DPR,my-py*DPR)<r;
+    const tt = document.getElementById("tt");
+
+    if(near(hojeX,hojeY)){
+      tt.style.display="block";
+      tt.style.left=(e.clientX+12)+"px";
+      tt.style.top=(e.clientY-60)+"px";
+      tt.innerHTML=`<h4>📍 Hoje — ${fmtBR(pd(CFG.hoje))}</h4>
+        <div style="font-size:11px">Meta 1 realizada: <b style="color:#A8D5C5;font-size:14px">${acum.toFixed(1)}pp</b> de 90pp<br>
+        <span style="color:#aaa;font-size:9px">${(acum/90*100).toFixed(0)}% do caminho até a meta</span></div>`;
+    } else if(near(fimDezX,fimDezY)){
+      tt.style.display="block";
+      tt.style.left=(e.clientX+12)+"px";
+      tt.style.top=(e.clientY-60)+"px";
+      tt.innerHTML=`<h4>🎯 Dez/26 — se continuar no ritmo atual</h4>
+        <div style="font-size:11px">
+          Chegará em: <b style="color:#FF8B22;font-size:14px">${ppDez.toFixed(1)}pp</b> de 90pp necessários<br>
+          <span style="color:#FF5252;font-size:10px;font-weight:700">Gap: ${(90-ppDez).toFixed(1)}pp abaixo da meta</span><br>
+          <span style="color:#aaa;font-size:9px">Para atingir 90pp seria necessário acelerar ${((90-ppDez)/Math.max(1,(pd("2026-12-31")-pd(CFG.hoje))/86400000)*7).toFixed(1)}pp/sem adicionais</span>
+        </div>`;
+    } else if(proj90X && near(proj90X, PAD.t+CH-0.9*CH)){
+      tt.style.display="block";
+      tt.style.left=(e.clientX+12)+"px";
+      tt.style.top=(e.clientY-60)+"px";
+      tt.innerHTML=`<h4>🏁 90% atingido</h4>
+        <div style="font-size:11px">Data projetada: <b style="color:#FF8B22">${window._proj90Date?fmtBR(window._proj90Date):"—"}</b></div>`;
+    } else {
+      tt.style.display="none";
+    }
+  };
+  canvas.removeEventListener("mousemove", canvas._bdTooltip);
+  canvas.addEventListener("mousemove", canvas._bdTooltip);
+  canvas.addEventListener("mouseleave", ()=>document.getElementById("tt").style.display="none");
+}
+
+// ══════════════════════════════════════════════════════════════
+// HEATMAP — versão melhorada
+// ══════════════════════════════════════════════════════════════
+function renderHeatmap(){
+  const el = document.getElementById("heatmap-grid");
+  if(!el) return;
+  const fases = ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"];
+
+  function hmCor(pct){
+    if(pct===100) return {bg:"#006B3F",fg:"#fff"};
+    if(pct>=70)   return {bg:"#52B788",fg:"#fff"};
+    if(pct>=40)   return {bg:"#FFB719",fg:"#1A2A1A"};
+    if(pct>0)     return {bg:"#FF8B22",fg:"#fff"};
+    return          {bg:"#BF360C",fg:"#fff"};
+  }
+
+  const areaLabels = {MDM:"MDM",ORC:"Orçamento",BIM:"BIM",COMP:"Compilador"};
+  const areaCors   = {MDM:"#006B3F",ORC:"#FF8B22",BIM:"#793F98",COMP:"#AC41D8"};
+
+  let html = "";
+  // Cabeçalho
+  html += `<div class="hm-lbl" style="background:transparent"></div>`;
+  fases.forEach(f => html += `<div class="hm-hdr">${f.replace("Fase ","F")}</div>`);
+
+  // Linhas por área
+  AREAS.forEach(a => {
+    html += `<div class="hm-lbl" style="background:transparent;color:${areaCors[a]};border-left:3px solid ${areaCors[a]};padding-left:5px">${areaLabels[a]}</div>`;
+    fases.forEach(f => {
+      const gs = GRUPOS.filter(g=>g.fase===f);
+      if(!gs.length){ html+=`<div class="hm-cell" style="background:#eee"></div>`; return; }
+      const med = Math.round(gs.reduce((s,g)=>s+g[a].pct,0)/gs.length);
+      const {bg,fg} = hmCor(med);
+      html += `<div class="hm-cell" style="background:${bg};color:${fg}" title="${f}·${areaLabels[a]}: ${med}%">${med}%</div>`;
+    });
+  });
+
+  // Separador
+  html += `<div class="hm-sep"></div>`;
+
+  // Linha de conclusão geral por fase
+  html += `<div class="hm-lbl" style="background:transparent;color:var(--tx2);font-size:8px">Grupo %</div>`;
+  fases.forEach(f => {
+    const gs = GRUPOS.filter(g=>g.fase===f);
+    if(!gs.length){ html+=`<div class="hm-cell"></div>`; return; }
+    const med = Math.round(gs.reduce((s,g)=>s+g.pct,0)/gs.length);
+    const {bg,fg} = hmCor(med);
+    html += `<div class="hm-cell" style="background:${bg};color:${fg};font-size:10px" title="Fase ${f}: ${med}% concluído">${med}%</div>`;
+  });
+
+  el.style.gridTemplateColumns = `90px repeat(${fases.length},1fr)`;
+  el.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════════
+// VELOCIDADE — grupos/semana necessários por área
+// ══════════════════════════════════════════════════════════════
+function renderVelocidade(){
+  const el = document.getElementById("velocidade-cards");
+  if(!el) return;
+
+  const hoje = pd(CFG.hoje);
+  const areaLabels = {MDM:"MDM",ORC:"Orçamento",BIM:"BIM",COMP:"Compilador"};
+  const areaCors   = {MDM:"#006B3F",ORC:"#FF8B22",BIM:"#793F98",COMP:"#AC41D8"};
+
+  let html = "";
+
+  AREAS.forEach(a => {
+    const cor = areaCors[a];
+    const label = areaLabels[a];
+
+    // Regra de predecessoras:
+    // ORC e BIM só são cobrados se MDM já liberou (done)
+    // COMP só é cobrado se MDM + ORC + BIM já liberaram
+    // "Pendente real" = pendente E predecessor já liberou
+    // "Aguardando" = pendente mas predecessor ainda não liberou
+
+    const todosPendentes = GRUPOS.filter(g => g[a].st !== "done");
+
+    // Separar: pendentes reais (predecessor liberado) vs aguardando predecessor
+    const pendentes = todosPendentes.filter(g => {
+      if(a === "MDM")  return true;                                         // MDM não tem predecessor
+      if(a === "ORC")  return g.MDM.st === "done";                         // ORC aguarda MDM
+      if(a === "BIM")  return g.MDM.st === "done";                         // BIM aguarda MDM
+      if(a === "COMP") return g.MDM.st === "done" && g.ORC.st === "done" && g.BIM.st === "done";
+      return true;
+    });
+    const aguardando = todosPendentes.filter(g => !pendentes.includes(g));
+
+    if(!todosPendentes.length){
+      html += `<div style="border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;background:#EEF8F2;border-left:4px solid ${cor}">
+        <div style="font-size:10px;font-weight:700;color:${cor};margin-bottom:4px">${label}</div>
+        <div style="font-size:11px;color:#006B3F;font-weight:700">✅ Todos concluídos</div>
+      </div>`;
+      return;
+    }
+
+    // Próxima entrega: apenas dos pendentes reais (predecessor já liberou)
+    const proximoGrupo = pendentes.length > 0
+      ? pendentes.reduce((min,g) => pd(g[a].fim) < pd(min[a].fim) ? g : min)
+      : null;
+    const proximaData = proximoGrupo ? pd(proximoGrupo[a].fim) : null;
+    const diasProx = proximaData ? Math.round((proximaData - hoje)/86400000) : null;
+
+    // Prazo mais tardio dos pendentes reais
+    const ultimoGrupo = pendentes.length > 0
+      ? pendentes.reduce((max,g) => pd(g[a].fim) > pd(max[a].fim) ? g : max)
+      : null;
+    const ultimaData = ultimoGrupo ? pd(ultimoGrupo[a].fim) : hoje;
+    const diasTotal = Math.max(1,(ultimaData - hoje)/86400000);
+    const semanasTotal = diasTotal/7;
+
+    // Ritmo necessário = pendentes reais / semanas até último prazo real
+    const ritmo = pendentes.length > 0 ? pendentes.length / semanasTotal : 0;
+
+    // Status: só considera "atrasado" se o predecessor liberou E o prazo venceu
+    let statusCor = "#006B3F", statusBg = "#EEF8F2", statusTxt = "No prazo";
+    if(pendentes.length === 0 && aguardando.length > 0){
+      statusCor="#888"; statusBg="#F5F5F5"; statusTxt="Aguardando";
+    } else if(diasProx !== null && diasProx < 0){
+      statusCor="#BF360C"; statusBg="#FFEEEE"; statusTxt="Atrasado";
+    } else if(ritmo > 3){
+      statusCor="#7B5E00"; statusBg="#FFF8EE"; statusTxt="Atenção";
+    }
+
+    // Próximos 3 grupos pendentes reais
+    const proximos = [...pendentes]
+      .sort((a2,b2)=>pd(a2[a].fim)-pd(b2[a].fim))
+      .slice(0,3);
+
+    html += `<div style="border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;background:#fff;border-left:4px solid ${cor}">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:700;color:${cor};flex:1">${label}</span>
+        <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:${statusBg};color:${statusCor}">${statusTxt}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px">
+        <div style="background:#F5FAF5;border-radius:3px;padding:4px 6px">
+          <div style="font-size:7.5px;color:#888">Acionáveis agora</div>
+          <div style="font-size:14px;font-weight:700;color:${cor}">${pendentes.length}<span style="font-size:9px;color:#aaa"> / ${todosPendentes.length} pend.</span></div>
+          ${aguardando.length>0?`<div style="font-size:7.5px;color:#aaa">${aguardando.length} aguard. predecessor</div>`:""}
+        </div>
+        <div style="background:#F5FAF5;border-radius:3px;padding:4px 6px">
+          <div style="font-size:7.5px;color:#888">Ritmo necessário</div>
+          <div style="font-size:14px;font-weight:700;color:${statusCor}">${pendentes.length>0?ritmo.toFixed(1)+"<span style='font-size:9px;color:#aaa'> /sem</span>":"—"}</div>
+        </div>
+      </div>
+      <div style="font-size:8px;color:#555;margin-bottom:4px">
+        ${proximoGrupo
+          ? `<b>Próxima entrega:</b> ${proximoGrupo.nome} · ${fmtBR(proximaData)}
+             ${diasProx<0?`<span style="color:#BF360C">(${Math.abs(diasProx)}d atrasado)</span>`:`<span style="color:#888">(em ${diasProx}d)</span>`}`
+          : `<span style="color:#888">Aguardando predecessores liberarem</span>`}
+      </div>
+      <div style="font-size:8px;color:#888;border-top:1px solid #eee;padding-top:4px">
+        ${proximos.map(g=>`<div style="display:flex;justify-content:space-between"><span>${g.fase} · ${g.nome}</span><span style="color:#aaa">${fmtBR(pd(g[a].fim))}</span></div>`).join("")}
+        ${pendentes.length>3?`<div style="color:#aaa">+${pendentes.length-3} outros</div>`:""}
+        ${aguardando.length>0 && pendentes.length===0?`<div style="color:#aaa;font-style:italic">${aguardando.length} grupos aguardam liberação do predecessor</div>`:""}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+
+// ══════════════════════════════════════════════════════════════════
+// CPM — Critical Path Method
+// Roda uma vez no init e sempre que dados mudam (via aplicar())
+// Predecessoras por material:
+//   ORC  ← MDM
+//   BIM  ← MDM
+//   COMP ← MDM + ORC + BIM
+// Marco final: maior EF(COMP) de todo o projeto
+// ══════════════════════════════════════════════════════════════════
+function calcCPM(){
+  const MS  = s => new Date(s+"T00:00:00").getTime();
+  const D86 = 86400000;
+
+  // 1. Montar rede de atividades
+  const ATIV = {};
+  GRUPOS.forEach(g => {
+    const mk  = a => g.fase+"||"+g.nome+"||"+a;
+    const dur = a => Math.max(0, MS(g[a].fim) - MS(g[a].ini));
+    const iMDM=mk("MDM"), iORC=mk("ORC"), iBIM=mk("BIM"), iCOMP=mk("COMP");
+    ATIV[iMDM]  = {id:iMDM,  dur:dur("MDM"),  pred:[],                  suc:[], g, a:"MDM"  };
+    ATIV[iORC]  = {id:iORC,  dur:dur("ORC"),  pred:[iMDM],              suc:[], g, a:"ORC"  };
+    ATIV[iBIM]  = {id:iBIM,  dur:dur("BIM"),  pred:[iMDM],              suc:[], g, a:"BIM"  };
+    ATIV[iCOMP] = {id:iCOMP, dur:dur("COMP"), pred:[iMDM,iORC,iBIM],   suc:[], g, a:"COMP" };
+  });
+
+  // 2. Sucessores
+  Object.values(ATIV).forEach(at =>
+    at.pred.forEach(pid => { if(ATIV[pid]) ATIV[pid].suc.push(at.id); })
+  );
+
+  // 3. Ordem topológica (Kahn)
+  const grau = {};
+  Object.keys(ATIV).forEach(id => grau[id] = ATIV[id].pred.length);
+  const fila = Object.keys(ATIV).filter(id => grau[id]===0);
+  const ordem = [];
+  while(fila.length){
+    const id = fila.shift();
+    ordem.push(id);
+    ATIV[id].suc.forEach(s => { if(--grau[s]===0) fila.push(s); });
+  }
+
+  // 4. Forward pass — ES = max(EF predecessoras, data planejada)
+  ordem.forEach(id => {
+    const at = ATIV[id];
+    const iniPlan = MS(at.g[at.a].ini);
+    at.ES = at.pred.length===0 ? iniPlan : Math.max(iniPlan, ...at.pred.map(p=>ATIV[p].EF));
+    at.EF = at.ES + at.dur;
+  });
+
+  // 5. Marco final = maior EF de todos os COMPs
+  const marco = Math.max(...Object.values(ATIV).filter(at=>at.a==="COMP").map(at=>at.EF));
+
+  // 6. Backward pass — LF = marco se sem sucessores, senão min(LS sucessores)
+  [...ordem].reverse().forEach(id => {
+    const at = ATIV[id];
+    at.LF = at.suc.length===0 ? marco : Math.min(...at.suc.map(s=>ATIV[s].LS));
+    at.LS = at.LF - at.dur;
+    at.folga   = Math.round((at.LS - at.ES) / D86);
+    at.critico = at.folga === 0;
+  });
+
+  // 7. Salvar resultado
+  window._cpResult = {};
+  Object.values(ATIV).forEach(at => {
+    window._cpResult[at.id] = {folga:at.folga, critico:at.critico};
+  });
+  window._cpMarco = marco;
+}
+
+// Helpers usados pelo renderer — consultam window._cpResult
+function _cpKey(g,a){ return g.fase+"||"+g.nome+"||"+a; }
+function _isCriticoArea(g,a){ return !!(window._cpResult && window._cpResult[_cpKey(g,a)] && window._cpResult[_cpKey(g,a)].critico); }
+function _folgaArea(g,a){ return window._cpResult && window._cpResult[_cpKey(g,a)] ? window._cpResult[_cpKey(g,a)].folga : 999; }
+function _isCriticoGrupo(g){ return AREAS.some(a=>_isCriticoArea(g,a)); }
+
+
+// ══ VISUAIS TOGGLE ══
+let _visuaisAberto = true;
+function togVisuais(){
+  _visuaisAberto = !_visuaisAberto;
+  document.getElementById("visuais-body").style.display = _visuaisAberto ? "" : "none";
+  document.getElementById("visuais-arrow").textContent = _visuaisAberto ? "▲" : "▶";
+}
+
+
+// ══ EXPORTAÇÃO ══
+function togExpMenu(e){
+  e.stopPropagation();
+  const btn = document.getElementById("exp-btn");
+  btn.classList.toggle("open");
+}
+document.addEventListener("click", () => {
+  document.getElementById("exp-btn")?.classList.remove("open");
+});
+
+function exportarPDF(){
+  document.getElementById("exp-btn").classList.remove("open");
+  window.print();
+}
+
+function exportarCSV(){
+  document.getElementById("exp-btn").classList.remove("open");
+  const linhas = [
+    ["Fase","Grupo","% Conclusão","% Meta","MDM Status","MDM Início","MDM Fim",
+     "ORC Status","ORC Início","ORC Fim","BIM Status","BIM Início","BIM Fim",
+     "COMP Status","COMP Início","COMP Fim"]
+  ];
+  GRUPOS.forEach(g => {
+    linhas.push([
+      g.fase, g.nome, g.pct, g.pctMeta.toFixed(4),
+      g.MDM.st,  g.MDM.ini,  g.MDM.fim,
+      g.ORC.st,  g.ORC.ini,  g.ORC.fim,
+      g.BIM.st,  g.BIM.ini,  g.BIM.fim,
+      g.COMP.st, g.COMP.ini, g.COMP.fim,
+    ]);
+  });
+  const csv = linhas.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "MDM_Gantt_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click(); URL.revokeObjectURL(url);
+}
+
+function exportarJSON(){
+  document.getElementById("exp-btn").classList.remove("open");
+  const payload = {
+    exportadoEm: new Date().toISOString(),
+    cfg: CFG,
+    grupos: GRUPOS,
+    plano: PLANO,
+    takeaways: TAKEAWAYS,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "MDM_Dados_"+new Date().toISOString().slice(0,10)+".json";
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ══ SYNC STATUS ══
+window.mostrarSyncStatus = function(msg, cor) {
+  let el = document.getElementById("sync-status");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "sync-status";
+    el.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);" +
+      "background:#1A2A1A;color:#fff;padding:7px 18px;border-radius:20px;font-size:11px;" +
+      "font-weight:600;z-index:99999;pointer-events:none;transition:opacity .5s;white-space:nowrap";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = cor || "#fff";
+  el.style.opacity = "1";
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.style.opacity = "0"; }, 3000);
+};
+
+// Expor dados globalmente para o Firebase acessar
+window.GRUPOS = GRUPOS;
+window.PLANO  = PLANO;
+window.TAKEAWAYS = TAKEAWAYS;
+window.CFG    = CFG;
+
+function renderTudo(){
+  CFG.hoje = _HOJE_STR;
+  CFG.rod  = "Atualizado em " + _HOJE_BR;
+  document.getElementById("hoje-txt").textContent = _HOJE_BR;
+  document.getElementById("rod").textContent = CFG.rod;
+  calcCPM();
+  renderExec();
+  renderGantt();
+  renderTA();
+  renderBurndown();
+  renderHeatmap();
+  renderVelocidade();
+}
+
+// Botão salvar fixo
+(function(){
+  const btn = document.createElement("button");
+  btn.className = "fab";
+  btn.style.cssText = "right:180px;background:#004d2e;font-size:12px;padding:10px 16px;width:auto";
+  btn.innerHTML = "💾 Salvar";
+  btn.onclick = () => { if(window.fbSalvar) window.fbSalvar(); };
+  document.body.appendChild(btn);
+})();
+
+// ══ INIT ══
+// Aguardar Firebase carregar dados antes de renderizar
+function _iniciar(){
+  if(window.fbCarregar){
+    window.fbCarregar().then(() => renderTudo());
+  } else {
+    renderTudo();
+  }
+}
+
+if(window.fbPronto){
+  _iniciar();
+} else {
+  window._fbOnPronto = _iniciar;
+  // Fallback: se Firebase demorar mais de 3s, renderiza com dados locais
+  setTimeout(() => { if(!window.fbPronto) renderTudo(); }, 3000);
+}
+</script>
+</body>
+</html>

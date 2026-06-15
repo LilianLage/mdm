@@ -263,6 +263,19 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 /* Tooltip */
 .tt{position:fixed;background:rgba(0,35,18,.96);color:#fff;font-size:11px;padding:10px 13px;border-radius:7px;pointer-events:none;display:none;z-index:99999;max-width:320px;line-height:1.7;box-shadow:0 6px 24px rgba(0,0,0,.4)}
 .tt h4{font-size:12px;font-weight:700;color:#A8D5C5;margin-bottom:4px}
+/* Tooltip de GMs por grupo (fixo, rolável) */
+#gmtt{pointer-events:auto;max-width:360px;max-height:74vh;overflow-y:auto;line-height:1.4}
+#gmtt.c2{max-width:560px}
+#gmtt::-webkit-scrollbar{width:7px}
+#gmtt::-webkit-scrollbar-thumb{background:rgba(168,213,197,.45);border-radius:4px}
+.gmtt-badge{display:inline-block;background:#FF8B22;color:#fff;font-size:10px;font-weight:700;padding:1px 8px;border-radius:10px;margin-left:6px}
+.gmtt-sub{font-size:9px;color:#9fc7b3;margin:2px 0 6px}
+.gmtt-list{display:grid;grid-template-columns:1fr;gap:3px 16px}
+#gmtt.c2 .gmtt-list{grid-template-columns:1fr 1fr}
+.gmtt-it{font-size:10px;line-height:1.35;color:#eaf6ef;display:flex;gap:5px;align-items:baseline}
+.gmtt-it b{color:#FFB719;font-weight:700;flex-shrink:0;min-width:30px;text-align:right;font-variant-numeric:tabular-nums}
+.g-lbl{cursor:default}
+.g-lbl:hover .g-nome{color:var(--v1)}
 .tt-seq{display:flex;gap:3px;margin:4px 0}
 .tt-chip{padding:2px 7px;border-radius:10px;font-size:9px;font-weight:700;opacity:.3}
 .tt-chip.on{opacity:1}
@@ -532,6 +545,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 </div><!-- /wrap -->
 
 <div class="tt" id="tt"></div>
+<div class="tt" id="gmtt"></div>
 <button class="fab" onclick="toggleEdit()">✏️ Editar dados</button>
 
 <script>
@@ -632,6 +646,19 @@ let GRUPOS=[
 // ══════════════════════════════════════════════════
 const AREAS=["MDM","ORC","BIM","COMP"];
 const ACFG={MDM:{label:"MDM",cor:"#006B3F"},BIM:{label:"BIM",cor:"#793F98"},ORC:{label:"Orçamento",cor:"#FF8B22"},COMP:{label:"Compilador",cor:"#AC41D8"}};
+// ══════════════════════════════════════════════════
+// GMs por GRUPO (origem: PROJETO_MDM.xlsx · MOD-REPORT)
+// Chave = nome do grupo normalizado. Cada grupo lista seus GMs (Nº + nome) e o total.
+const GM_BY_GRUPO = {"acabeletrico":{"label":"Acab. Elétrico","gms":[{"n":453,"nome":"Instalação Elétrica - Quadros Elétricos"},{"n":465,"nome":"Instalação Elétrica - Acabamento Elétrico"}],"total":2},"argamassa":{"label":"Argamassa","gms":[{"n":115,"nome":"Argamassa"},{"n":472,"nome":"Argamassa de Regularização"},{"n":535,"nome":"Aditivo para Argamassa"},{"n":536,"nome":"Argamassa Polimérica"},{"n":942,"nome":"Argamassa Usinada"}],"total":5},"concreto":{"label":"Concreto","gms":[{"n":101,"nome":"Cimento"},{"n":103,"nome":"Bloco de Concreto"},{"n":116,"nome":"Areia"},{"n":117,"nome":"Pedra Britada"},{"n":127,"nome":"Laje Pré-Fabricada"},{"n":140,"nome":"Premoldado de Concreto"},{"n":143,"nome":"Cal"},{"n":148,"nome":"Aglutinante"},{"n":156,"nome":"Impermeabilizante"},{"n":231,"nome":"Estrutura Pré-Moldado de Concreto"},{"n":233,"nome":"Guia Pré-Moldado de Concreto"},{"n":322,"nome":"Solvente"},{"n":494,"nome":"Aditivo para Usina de Concreto"},{"n":495,"nome":"Fibra de Vidro - Parede"},{"n":523,"nome":"Muro Pré-Moldado de Concreto"},{"n":943,"nome":"Concreto Usinado"}],"total":16},"drenagem":{"label":"Drenagem","gms":[{"n":246,"nome":"Drenagem"},{"n":469,"nome":"Infra ETE/ETA/EBE/EEE"},{"n":554,"nome":"Tubo PEAD Corrugado - Drenagem"}],"total":3},"fioscabos":{"label":"Fios/Cabos","gms":[{"n":451,"nome":"Instalação Elétrica - Cabos Elétricos de Cobre"}],"total":1},"metaissanit":{"label":"Metais Sanit.","gms":[{"n":430,"nome":"Instalação Hidrosanitária - Metais"}],"total":1},"tintastexturas":{"label":"Tintas/Texturas","gms":[{"n":118,"nome":"Tinta Látex"},{"n":119,"nome":"Tinta Acrílica"},{"n":121,"nome":"Textura"},{"n":122,"nome":"Grafiato"},{"n":171,"nome":"Material para Pintura"},{"n":173,"nome":"Tinta Esmalte/Tinta a Óleo"},{"n":178,"nome":"Verniz/Resina"},{"n":184,"nome":"Massa Corrida"},{"n":271,"nome":"Ecogranito"},{"n":476,"nome":"Pigmento Corante"}],"total":10},"aco":{"label":"Aço","gms":[{"n":104,"nome":"Vergalhão"},{"n":163,"nome":"Serralheria Aço Carbono"},{"n":188,"nome":"Perfil e Chapas de Aço Carbono"},{"n":220,"nome":"Ferragem"},{"n":243,"nome":"Perfil de Alumínio"},{"n":481,"nome":"Vergalhão Cortado e Dobrado"},{"n":505,"nome":"Guarda-Corpo"},{"n":510,"nome":"Tela de Aço"}],"total":8},"ardosiapedras":{"label":"Ardósia (Pedras)","gms":[{"n":144,"nome":"Ardósia"}],"total":1},"esquadrias":{"label":"Esquadrias","gms":[{"n":105,"nome":"Esquadrias de Alumínio"},{"n":106,"nome":"Acessórios para Esquadrias de Alumínio"},{"n":480,"nome":"PU para Esquadrias"},{"n":491,"nome":"Esquadrias Padrão"}],"total":4},"gas":{"label":"Gas","gms":[{"n":420,"nome":"Instalação Gás"},{"n":552,"nome":"Tubo PEAD Eletrofusão - Gás"}],"total":2},"granitopedras":{"label":"Granito (Pedras)","gms":[{"n":131,"nome":"Granitos"}],"total":1},"outrosacabamentos":{"label":"Outros Acabamentos","gms":[{"n":555,"nome":"Suporte Mão Francesa"},{"n":155,"nome":"Graxa/Lubrificante"},{"n":244,"nome":"Forros e Acessórios PVC"},{"n":527,"nome":"Placa de Lã Rocha"},{"n":542,"nome":"Espaçadores Plásticos"},{"n":543,"nome":"Espaçadores Cerâmicos"},{"n":147,"nome":"Adesivo/Vedante/Cola"}],"total":7},"pedras":{"label":"Pedras","gms":[{"n":112,"nome":"Piso Granito"},{"n":145,"nome":"Acabamento de Granito"},{"n":166,"nome":"Pedra Decorativa"}],"total":3},"pisolaminado":{"label":"Piso Laminado","gms":[{"n":113,"nome":"Piso Laminado"},{"n":513,"nome":"Piso Vinilico"}],"total":2},"tubospex":{"label":"Tubos PEX","gms":[{"n":192,"nome":"Tubo/Conexão Multicamada Compressão"},{"n":435,"nome":"INATIVO - MATERIAL: Instalação Hidrosanitária - PEX"},{"n":483,"nome":"Instalação Hidrosanitária-Dist Predial Água Fria"}],"total":3},"acabhidro":{"label":"Acab. Hidro","gms":[{"n":478,"nome":"Instalação Hidrosanitária – Barra de Apoio"},{"n":176,"nome":"Cuba/Tanque Inox"},{"n":429,"nome":"Instalação Hidrosanitária - Acessórios Banheiros"},{"n":438,"nome":"Instalação Hidrosanitária - Kit Hidraulico"},{"n":549,"nome":"Grelha e Porta Grelha de Inox"}],"total":5},"hidro":{"label":"Hidro","gms":[{"n":150,"nome":"Calha/Rufo"},{"n":206,"nome":"INATIVO-MATERIAL: Tubo/Conexão PVC Roscável"},{"n":240,"nome":"INATIVO-MATERIAL: Acessórios Aquecedor"},{"n":251,"nome":"Shaft EPS"},{"n":253,"nome":"INATIVO - MATERIAL: Acessórios Hidráulicos"},{"n":255,"nome":"INATIVO - MMATERIAL: Tubo/Conexão CPVC"},{"n":419,"nome":"Instalação Hidrosanitária"},{"n":424,"nome":"Instalação Hidrosanitária - Caixas d'aguas"},{"n":426,"nome":"Instalação Hidrosanitária - Outros Acessórios"},{"n":427,"nome":"Instalação Hidrosanitária - Acessórios Hidráulicos"},{"n":436,"nome":"Instalação Hidrosanitária - Hidrometros"},{"n":437,"nome":"Instalação Hidrosanitária - Matrial de Irrigação"},{"n":439,"nome":"Instalação Hidrosanitária - Telemetria"},{"n":440,"nome":"Instalação Hidrosanitária - Caixas de Passagens"},{"n":455,"nome":"Instalação Elétrica - Grelha/Tampa/Tampão de ferro"}],"total":15},"tubospvc":{"label":"Tubos PVC","gms":[{"n":267,"nome":"Tubo/Conexão Eletroduto PEAD"},{"n":428,"nome":"Instalação Hidrosanitária - PVC"},{"n":456,"nome":"Tubo/Conexão Eletroduto PVC"},{"n":482,"nome":"Instalação Hidrosanitária- Rede Externa de Esgoto"},{"n":484,"nome":"Instalação Hidrosanitária-Dist Predial de Esgoto"},{"n":486,"nome":"INATIVO - MATERIAL: Instalação Hidrosanitária-Dist P Águas P"},{"n":488,"nome":"Instalação Hidrosanitária- Rede Ext Água Fria"},{"n":546,"nome":"Instalação Hidrosanitária - Tubos Predial PVC"},{"n":547,"nome":"Instalação Hidrosanitária - Acessórios Predial PVC"},{"n":548,"nome":"Instalação Hidrosanitária - Acessórios Infra PVC"}],"total":10},"drywall":{"label":"Drywall","gms":[{"n":109,"nome":"Gesso"},{"n":139,"nome":"Gesso Acartonado (Dry Wall)"},{"n":489,"nome":"Forros e Acessórios Gesso"}],"total":3},"incendio":{"label":"Incêndio","gms":[{"n":215,"nome":"Alarme de Incêndio"},{"n":434,"nome":"Instalação Hidrosanitária - Rede Anti incendio"},{"n":503,"nome":"Rede Anti incendio - Porta Corta Fogo"},{"n":526,"nome":""}],"total":4},"loucassanit":{"label":"Louças Sanit.","gms":[{"n":128,"nome":"Louça Sanitária"},{"n":425,"nome":"Instalação Hidrosanitária - Louças"}],"total":2},"mecanica":{"label":"Mecânica","gms":[{"n":152,"nome":"Domo/Exaustor"},{"n":518,"nome":"Churrasqueira"}],"total":2},"pead":{"label":"PEAD","gms":[{"n":198,"nome":"Tubo/Conexão PEAD Agua Eletrofusão"},{"n":199,"nome":"Tubo/Conexão PEAD Gás Eletrofusão"},{"n":219,"nome":"INATIVO - MATERIAL: Tubo/Conexão PEAD Esgoto"},{"n":433,"nome":"Instalação Hidrosanitária - PEAD"},{"n":550,"nome":"Conexões PEAD Eletrofusão"},{"n":551,"nome":"Tubo PEAD Eletrofusão - Água"},{"n":553,"nome":"Tubo PEAD Eletrofusão - Esgoto"}],"total":7},"pecasconcreto":{"label":"Peças Concreto","gms":[{"n":225,"nome":"Poste de Concreto"},{"n":423,"nome":"Instalação Hidrosanitária - Concreto"},{"n":529,"nome":"Caixas e tampas de concreto"},{"n":530,"nome":"Anéis e tubos de concreto"}],"total":4},"perfilaco":{"label":"Perfil Aço","gms":[{"n":500,"nome":"Perfil Metálico Gesso Acartonado (Dry Wall)"}],"total":1},"portas":{"label":"Portas","gms":[{"n":138,"nome":"Fechadura/Dobradiças"},{"n":252,"nome":"Porta Pronta"}],"total":2},"revceramico":{"label":"Rev. Cerâmico","gms":[{"n":167,"nome":"Rejunte"},{"n":110,"nome":"Piso Cerâmico"},{"n":111,"nome":"Porcelanato"},{"n":114,"nome":"Azulejo Cerâmico"},{"n":153,"nome":"INATIVO-MATERIAL: Espaçador"}],"total":5},"telhasfibroc":{"label":"Telhas Fibroc","gms":[{"n":129,"nome":"Telha de Fibrocimento"}],"total":1},"bombas":{"label":"Bombas","gms":[{"n":213,"nome":"Motobomba"},{"n":557,"nome":"Motobomba/Bombas Especiais Pressurizadas"},{"n":562,"nome":""}],"total":3},"estrutura":{"label":"ESTRUTURA","gms":[{"n":470,"nome":"Portico"}],"total":1},"ferrosos":{"label":"Ferrosos","gms":[{"n":261,"nome":"INATIVO-MATERIAL: Tubo/Conexão Aço Carbono Galvanizado"},{"n":265,"nome":"INATIVO-MATERIAL: Tubo/Conexão Ferro Fundido"},{"n":268,"nome":"INATIVO - MATERIAL: Eletroduto/Conexão Aço Galvanizado"},{"n":431,"nome":"Instalação Hidrosanitária - Cobre/Bronze"},{"n":432,"nome":"Inst Hidrossanitária - Galv. rede anti-incêndio"},{"n":545,"nome":"Instalação Hidrosanitaria - Aço/Ferro Fundido"}],"total":6},"forma":{"label":"FORMA","gms":[{"n":248,"nome":"Desmoltante"},{"n":330,"nome":"Forma de Alumínio"},{"n":511,"nome":"Forma de PVC"},{"n":559,"nome":"Forma de alumínio - Painéis"},{"n":560,"nome":"Forma de alumínio - Escadas"},{"n":561,"nome":"Forma de alumínio - Acessórios e Sistema de Segur"}],"total":6},"fundacao":{"label":"FUNDAÇÃO","gms":[{"n":123,"nome":"Selador/Fundo"},{"n":154,"nome":"Gabião"},{"n":228,"nome":"Estacas para Fundação"}],"total":3},"piscina":{"label":"Piscina","gms":[{"n":517,"nome":"Itens de piscina"}],"total":1},"seguranca":{"label":"Segurança","gms":[{"n":189,"nome":"EPC (Equipamentos de Proteção Coletiva)"}],"total":1},"eletrica":{"label":"Elétrica","gms":[{"n":201,"nome":"INATIVO - MATERIAL:  Cabo Elétrico > 10mm"},{"n":204,"nome":"Tubo/Conexão Eletroduto Alumínio"},{"n":208,"nome":"INATIVO - MATERIAL: Acabamento Elétrico"},{"n":210,"nome":"Quadro Elétrico"},{"n":238,"nome":"Energia Solar"},{"n":266,"nome":"INATIVO-MATERIAL: Eletrocalha/Acessórios"},{"n":306,"nome":"Cabo/Acessório de Rede Telefônica"},{"n":409,"nome":"INATIVO - MATERIAL: Rede Eletrica"},{"n":411,"nome":"Componentes Eletricos"},{"n":443,"nome":"Instalação Elétrica - Acessórios Elétricos"},{"n":444,"nome":"Instalação Elétrica - Eletrudos Metálicos"},{"n":446,"nome":"Instalação Elétrica - Informática"},{"n":447,"nome":"Instalação Elétrica - Rede Elétrica"},{"n":449,"nome":"Instalação Elétrica - Equipamentos"},{"n":450,"nome":"Instalação Elétrica - Automação Predial"},{"n":452,"nome":"Instalação Elétrica - Telefonia/Interfonia"},{"n":454,"nome":"Instalação Elétrica - Disjuntores"},{"n":457,"nome":"Instalação Elétrica - Telefonia"},{"n":458,"nome":"Instalação Elétrica - Quadros Medidores"},{"n":459,"nome":"Instalação Elétrica - Conectores e Terminais Elétr"},{"n":460,"nome":"Instalação Elétrica - Cabos Elétricos de Alumínio"},{"n":462,"nome":"Instalação Elétrica - Barramentos"},{"n":463,"nome":"Instalação Elétrica - Eletrocalha"},{"n":466,"nome":"Instalação Elétrica - Componente Elétrico"},{"n":474,"nome":"Instalações Elétrica - Cabos Telefonia/Interfonia"},{"n":477,"nome":"Instalação Elétrica - Conectores Policarbonato"},{"n":521,"nome":"Instalação Elétrica - Poste Padrão"},{"n":538,"nome":"SISTEMA SELO DIGITAL"}],"total":28},"pisos":{"label":"Pisos","gms":[{"n":179,"nome":"Piso Emborrachado"},{"n":556,"nome":"Piso Tátil de Concreto"},{"n":158,"nome":"Piso Premoldado de concreto"},{"n":232,"nome":"Piso Intertravado Pré Moldado de Concreto"}],"total":4},"coletoreslixo":{"label":"Coletores Lixo","gms":[{"n":319,"nome":"Embalagem/Molde"},{"n":324,"nome":"Coletores de Lixo"}],"total":2},"mobiliarios":{"label":"Mobiliários","gms":[{"n":149,"nome":"Área Social Comum"},{"n":407,"nome":"Eletrodoméstico/Eletrônico"},{"n":507,"nome":"Eletrodoméstico Produto Final"},{"n":509,"nome":"Móveis Produto Final"},{"n":516,"nome":"Academia e Esportes"},{"n":519,"nome":"Móveis Luggo"},{"n":528,"nome":"Pet Place"},{"n":533,"nome":"Área de Lazer - Playground"}],"total":8},"outros":{"label":"Outros","gms":[{"n":108,"nome":"Prego"},{"n":124,"nome":"Madeira"},{"n":132,"nome":"Madeira para Telhado"},{"n":133,"nome":"Parafuso/Porca/Arruela"},{"n":134,"nome":"Estrutura Metálica para Telhado"},{"n":146,"nome":"Abrasivo"},{"n":151,"nome":"Corda/Cabo/Corrente"},{"n":157,"nome":"EPS"},{"n":159,"nome":"Lona"},{"n":164,"nome":"Moldura EPS"},{"n":174,"nome":"Gabaritos"},{"n":175,"nome":"Serralheria Aluminio"},{"n":181,"nome":"Telas de Aço/Alambrados/Similares"},{"n":186,"nome":"Compensado"},{"n":217,"nome":"INATIVO - MATERIAL: Grelha/Tampa/Tampão de Ferro Fundido"},{"n":218,"nome":"Abraçadeira"},{"n":236,"nome":"Reservatórios Metálico"},{"n":249,"nome":"Manta Acustica"},{"n":250,"nome":"Asfalto"},{"n":305,"nome":"Descartáveis"},{"n":309,"nome":"Pilhas/Baterias"},{"n":479,"nome":"Telha Metálica"},{"n":490,"nome":"Arame"},{"n":520,"nome":"INATIVO - MATERIAL: Placa Fibrocimento"},{"n":534,"nome":"Colas, Fitas Adesivas e Itens de Reparo"},{"n":537,"nome":"Emulsão e Manta Asfáltica"},{"n":544,"nome":"Protetores Presilha"}],"total":27},"spda":{"label":"SPDA","gms":[{"n":221,"nome":"SPDA"}],"total":1},"visual":{"label":"Visual","gms":[{"n":313,"nome":"Placa de Identificação Definitiva"},{"n":323,"nome":"Placa de Identificação Provisória"},{"n":325,"nome":"INATIVO-MATERIAL: Sinalização Viária"}],"total":3},"blococeramico":{"label":"Bloco Cerâmico","gms":[{"n":102,"nome":"Bloco Cerâmico"}],"total":1},"elevador":{"label":"Elevador","gms":[{"n":212,"nome":"Elevador Social"}],"total":1},"luminarias":{"label":"Luminárias","gms":[{"n":211,"nome":"INATIVO-MATERIAL: Luminária/Lâmpada"},{"n":448,"nome":"Instalação Elétrica - Luminárias"},{"n":497,"nome":"Instalação Elétrica - Luminárias Padrão"}],"total":3},"marmore":{"label":"Mármore","gms":[{"n":162,"nome":"Mármore Sintético"}],"total":1},"paisagismo":{"label":"Paisagismo","gms":[{"n":165,"nome":"Paisagismo"},{"n":207,"nome":"Acessório/Insumo para Paisagismo"}],"total":2},"vidros":{"label":"Vidros","gms":[{"n":168,"nome":"Vidro"}],"total":1}};
+// Apelidos: nomes no board que diferem do nome do GRUPO no Excel
+const GM_ALIAS = {"acabamentohidro":"acabhidro","hidrosan":"hidro"};
+function gmNorm(s){return String(s).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+function gmForNome(nome){
+  var base=String(nome).replace(/-\d+$/,"").trim();
+  var k=gmNorm(base);
+  k=GM_ALIAS[k]||k;
+  return GM_BY_GRUPO[k]||null;
+}
 const MESES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 const pd=s=>new Date(s+"T00:00:00");
 const fmtBR=d=>d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
@@ -1097,7 +1124,7 @@ function renderGantt(){
         });
 
         html+=`<div class="g-row">
-          <div class="g-lbl">
+          <div class="g-lbl" data-gnome="${g.nome.replace(/"/g,'&quot;')}">
             <div class="g-lbl-top">
               <div class="g-dot" style="background:${dot}"></div>
               <span class="g-nome" title="${g.nome}">${g.nome}</span>
@@ -1151,6 +1178,36 @@ function renderGantt(){
       el.addEventListener("mouseleave",()=>tt.style.display="none");
     });
   });
+
+  // ── Tooltip de GMs por grupo (hover no rótulo à esquerda) ──
+  const gmtt=document.getElementById("gmtt");
+  let _gmTimer=null;
+  const _gmHide=()=>{gmtt.style.display="none";};
+  function _gmShow(e,nome){
+    const info=gmForNome(nome);
+    gmtt.classList.toggle("c2", !!(info && info.total>10));
+    if(!info){
+      gmtt.innerHTML=`<h4>${nome}</h4><div class="gmtt-sub">Sem GMs vinculados no Excel.</div>`;
+    }else{
+      const items=info.gms.map(gm=>`<div class="gmtt-it"><b>${gm.n!=null?gm.n:"–"}</b><span>${gm.nome}</span></div>`).join("");
+      gmtt.innerHTML=`<h4>${info.label}<span class="gmtt-badge">${info.total} GM${info.total>1?"s":""}</span></h4>
+        <div class="gmtt-sub">Quantidade unitária total: ${info.total}</div>
+        <div class="gmtt-list">${items}</div>`;
+    }
+    gmtt.style.display="block";
+    const r=gmtt.getBoundingClientRect();
+    let x=e.clientX+16, y=e.clientY-10;
+    if(x+r.width>window.innerWidth-8)  x=Math.max(8,e.clientX-r.width-12);
+    if(y+r.height>window.innerHeight-8) y=Math.max(8,window.innerHeight-r.height-8);
+    gmtt.style.left=x+"px"; gmtt.style.top=y+"px";
+  }
+  document.querySelectorAll(".g-lbl[data-gnome]").forEach(lbl=>{
+    const nome=lbl.getAttribute("data-gnome");
+    lbl.addEventListener("mouseenter",e=>{clearTimeout(_gmTimer);_gmShow(e,nome);});
+    lbl.addEventListener("mouseleave",()=>{_gmTimer=setTimeout(_gmHide,180);});
+  });
+  gmtt.addEventListener("mouseenter",()=>clearTimeout(_gmTimer));
+  gmtt.addEventListener("mouseleave",()=>{_gmTimer=setTimeout(_gmHide,120);});
 }
 
 function toggleFase(fk){

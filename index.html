@@ -791,24 +791,6 @@ function calcRiscos(){
 
 // ══ RENDER EXEC ══
 
-function corrigirDatasLB(){
-  var count = 0;
-  GRUPOS.forEach(function(g){
-    ["MDM","ORC","BIM","COMP"].forEach(function(a){
-      if(g[a].ini    === "2026-02-19"){ g[a].ini    = "2026-04-01"; count++; }
-      if(g[a].fim    === "2026-02-19"){ g[a].fim    = "2026-04-01"; count++; }
-      if(g[a].iniLB  === "2026-02-19"){ g[a].iniLB  = "2026-04-01"; count++; }
-      if(g[a].fimLB  === "2026-02-19"){ g[a].fimLB  = "2026-04-01"; count++; }
-    });
-  });
-  if(count === 0){
-    alert("Nenhuma data 19/02/2026 encontrada nos dados.");
-    return;
-  }
-  alert(count + " data(s) corrigida(s): 19/02/2026 → 01/04/2026. Salvando no Firebase...");
-  calcCPM(); renderExec(); renderGantt(); renderBurndown(); renderHeatmap(); renderVelocidade();
-  if(window.fbSalvar) window.fbSalvar();
-}
 function updSemBIM(gi){
   var cb = document.getElementById('g-sembim-'+gi);
   var lb = document.getElementById('lsb-'+gi);
@@ -831,6 +813,28 @@ function calcPctGrupo(g){
   if(g.MDM.st==="wip") return 25;
   return 0;
 }
+// ══ TOGGLE LINHA DE BASE ══
+window._lbUnlocked = false;
+function toggleLB(){
+  window._lbUnlocked = !window._lbUnlocked;
+  var btn = document.getElementById('lb-lock-btn');
+  if(btn){
+    btn.textContent      = window._lbUnlocked ? '🔓 LB' : '🔒 LB';
+    btn.style.color      = window._lbUnlocked ? '#FF8B22' : '#ccc';
+    btn.style.borderColor= window._lbUnlocked ? '#FF8B22' : '#eee';
+    btn.style.background = window._lbUnlocked ? '#FFF3E0' : '#fafafa';
+    btn.title            = window._lbUnlocked ? 'Clique para travar a linha de base' : 'Desbloquear linha de base';
+  }
+  // Habilitar/desabilitar campos LB
+  document.querySelectorAll('[id*="-lbi-"],[id*="-lbf-"]').forEach(function(inp){
+    inp.disabled        = !window._lbUnlocked;
+    inp.style.background= window._lbUnlocked ? '#fff' : '#f0f0f0';
+    inp.style.color     = window._lbUnlocked ? '#333' : '#aaa';
+    inp.style.cursor    = window._lbUnlocked ? 'text' : 'not-allowed';
+    inp.style.borderColor= window._lbUnlocked ? '#FF8B22' : '#ddd';
+  });
+}
+
 function renderExec(){
   const k1=calcMeta1();
   const k2=CFG.kpi2;
@@ -1214,9 +1218,9 @@ function renderEpFase(){
       ${AREAS.map(a=>`
         <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 60px 88px;gap:3px;align-items:center;margin-bottom:3px">
           <label style="font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}</label>
-          <input type="date" value="${g[a].iniLB||g[a].ini}" disabled
+          <input type="date" id="g-${a}-lbi-${gi}" value="${g[a].iniLB||g[a].ini}" disabled
             style="border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;background:#f0f0f0;color:#aaa;cursor:not-allowed;width:100%">
-          <input type="date" value="${g[a].fimLB||g[a].fim}" disabled
+          <input type="date" id="g-${a}-lbf-${gi}" value="${g[a].fimLB||g[a].fim}" disabled
             style="border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;background:#f0f0f0;color:#aaa;cursor:not-allowed;width:100%">
           <input type="date" id="g-${a}-i-${gi}" value="${g[a].ini}"
             style="border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%">
@@ -1241,7 +1245,13 @@ function saveEpFase(){
       var pEl=document.getElementById('g-'+a+'-p-'+gi);
       if(pEl) g[a].pct=parseFloat(pEl.value)||0;
       g[a].st=document.getElementById(`g-${a}-s-${gi}`).value;
-      // iniLB e fimLB permanecem intocados
+      // iniLB e fimLB: só salvar se desbloqueado
+      if(window._lbUnlocked){
+        var ei=document.getElementById('g-'+a+'-lbi-'+gi);
+        var ef=document.getElementById('g-'+a+'-lbf-'+gi);
+        if(ei) g[a].iniLB=ei.value;
+        if(ef) g[a].fimLB=ef.value;
+      }
     });
     var cbSB = document.getElementById('g-sembim-'+gi);
     if(cbSB) g.semBIM = cbSB.checked;
@@ -1929,7 +1939,14 @@ if(window.fbPronto){
 }
 </script>
 <div class="edit-panel" id="ep">
-  <div class="ep-h">✏️ Painel de Edição</div>
+  <div class="ep-h" style="display:flex;align-items:center;justify-content:space-between">
+    <span>✏️ Painel de Edição</span>
+    <span id="lb-lock-btn" onclick="toggleLB()"
+      title="Desbloquear linha de base"
+      style="font-size:9px;color:#ccc;cursor:pointer;padding:2px 6px;border-radius:3px;border:1px solid #eee;background:#fafafa;user-select:none">
+      🔒 LB
+    </span>
+  </div>
   <div class="ep-grid">
     <div class="ep-card">
       <h3>Configurações Gerais</h3>
@@ -1947,7 +1964,6 @@ if(window.fbPronto){
   <div class="btn-row">
     <button class="btn p" onclick="aplicar()">✅ Aplicar</button>
     <button class="btn s" onclick="toggleEdit()">✖ Fechar</button>
-    <button class="btn s" onclick="corrigirDatasLB()" style="background:#FF8B22;color:#fff;border-color:#FF8B22" title="Substitui 19/02/2026 por 01/04/2026 em todas as datas de linha de base e previstas">🔧 Corrigir datas 19/02→01/04</button>
   </div>
 </div>
 

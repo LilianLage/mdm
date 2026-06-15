@@ -1334,18 +1334,27 @@ function renderBurndown(){
 
   // Linha REALIZADO — acumular pctMeta*pct/100 por data de conclusão
   const eventos = [];
+  // pp concluído (grupos 100% done com data <= hoje)
+  let ppConcl = 0;
+  // pp parcial (grupos em andamento — mesmo cálculo do resumo executivo)
+  let ppWip = 0;
+
   GRUPOS.forEach(g => {
-    // Realizado = apenas áreas done com data de fim <= hoje
-    let fimReal = null;
-    ["COMP","BIM","ORC","MDM"].forEach(a => {
-      if(g[a].st==="done" && pd(g[a].fim) <= hoje){
-        if(!fimReal || pd(g[a].fim) > fimReal)
-          fimReal = pd(g[a].fim);
-      }
-    });
-    if(fimReal && fimReal >= inicio && fimReal <= fimMeta){
-      // Contribuição proporcional ao progresso já efetivado até hoje
-      eventos.push({ data: fimReal, pp: g.pctMeta * g.pct / 100 });
+    const pp = g.pctMeta * g.pct / 100;
+    if(pp <= 0) return;
+    if(g.pct === 100){
+      // Grupo totalmente concluído — usar data real de conclusão
+      let fimReal = null;
+      ["COMP","BIM","ORC","MDM"].forEach(a => {
+        if(g[a].st==="done" && pd(g[a].fim) <= hoje){
+          if(!fimReal || pd(g[a].fim) > fimReal) fimReal = pd(g[a].fim);
+        }
+      });
+      if(fimReal){ ppConcl += pp; eventos.push({ data: fimReal, pp: pp }); }
+    } else {
+      // Grupo parcial (wip) — contabilizar como de hoje
+      ppWip += pp;
+      eventos.push({ data: hoje, pp: pp });
     }
   });
   eventos.sort((a,b) => a.data - b.data);
@@ -1362,6 +1371,10 @@ function renderBurndown(){
   const hojeT = Math.min(1,(hoje-inicio)/86400000/totalDias);
   const hojeX = PAD.l + hojeT*CW;
   const hojeY = PAD.t + CH - Math.min(acum/100,1)*CH;
+  // ppConcl já calculado no loop de eventos acima
+  // hojeYConcl = posição Y baseada SÓ nos grupos 100% concluídos com data <= hoje
+  const _ppConclFinal = ppConcl; // valor correto (só concluídos)
+  const hojeYConcl = PAD.t + CH - Math.min(_ppConclFinal/100,1)*CH;
   realPts.push({x:hojeX, y:hojeY});
 
   // Desenhar linha realizada
@@ -1400,7 +1413,7 @@ function renderBurndown(){
 
   // Projeção: linha laranja do ponto hoje até dez/26 no ritmo atual
   ctx.strokeStyle = "#FF8B22"; ctx.lineWidth = 1.5; ctx.setLineDash([5,3]);
-  ctx.beginPath(); ctx.moveTo(hojeX, hojeY); ctx.lineTo(fimDezX, fimDezY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(hojeX, hojeYConcl); ctx.lineTo(fimDezX, fimDezY); ctx.stroke();
   ctx.setLineDash([]);
   // Seta no fim da projeção indicando gap
   const gapPp = (90 - ppDez);
@@ -1463,7 +1476,7 @@ function renderBurndown(){
   // ── Guardar pontos para hover ──
   canvas._bdData = {
     PAD, CW, CH, inicio, totalDias, acum, ppDez,
-    hojeX, hojeY, fimDezX, fimDezY,
+    hojeX, hojeY, fimDezX, fimDezY, ppConcl: _ppConclFinal, ppWip: acum-_ppConclFinal,
     proj90X: window._proj90Date ? PAD.l+Math.min(1.1,(window._proj90Date-inicio)/86400000/totalDias)*CW : null,
   };
 
@@ -1481,11 +1494,18 @@ function renderBurndown(){
 
     if(near(hojeX,hojeY)){
       tt.style.display="block";
-      tt.style.left=(e.clientX+12)+"px";
-      tt.style.top=(e.clientY-60)+"px";
-      tt.innerHTML=`<h4>📍 Hoje — ${fmtBR(pd(CFG.hoje))}</h4>
-        <div style="font-size:11px">Meta 1 realizada: <b style="color:#A8D5C5;font-size:14px">${acum.toFixed(1)}pp</b> de 90pp<br>
-        <span style="color:#aaa;font-size:9px">${(acum/90*100).toFixed(0)}% do caminho até a meta</span></div>`;
+      const _spaceR = window.innerWidth-(e.clientX+12);
+      tt.style.left=(_spaceR>340?e.clientX+12:e.clientX-344)+"px";
+      tt.style.top=(e.clientY-80)+"px";
+      const {ppConcl,ppWip} = canvas._bdData;
+      tt.innerHTML='<h4>📊 Burndown — '+fmtBR(pd(CFG.hoje))+'</h4>'
+        +'<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">'
+        +'Meta 1 acumulada: <b style="color:#A8D5C5;font-size:14px">'+acum.toFixed(1)+'pp</b> de 90pp<br>'
+        +'<br>O valor combina dois componentes:<br>'
+        +'<b style="color:#A8D5C5">✅ '+ppConcl.toFixed(1)+'pp</b> — grupos 100% concluídos (data ≤ hoje)<br>'
+        +'<b style="color:#FFB719">⏳ '+ppWip.toFixed(1)+'pp</b> — evolução parcial em andamento<br>'
+        +'</div>'
+        +'<span style="color:#aaa;font-size:9px">'+((acum/90)*100).toFixed(0)+'% do caminho até a meta</span>';
     } else if(near(fimDezX,fimDezY)){
       tt.style.display="block";
       tt.style.left=(e.clientX+12)+"px";

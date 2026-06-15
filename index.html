@@ -980,32 +980,28 @@ function renderGantt(){
   let _proj90Date=null;
   window._proj90Date=null;
   (() => {
-    // Construir lista de grupos com data de conclusão prevista (fim do COMP se plan/wip, real se done)
-    const lista = GRUPOS.map(g=>{
-      // Data de conclusão = fim da última área a entregar
-      const fimComp = pd(g.COMP.fim);
-      const fimBIM  = pd(g.BIM.fim);
-      const fimORC  = pd(g.ORC.fim);
-      const fimMDM  = pd(g.MDM.fim);
-      const fimPrev = new Date(Math.max(fimComp,fimBIM,fimORC,fimMDM));
-      // Contribuição: se done usa pct real, se não usa 100% (esperado quando concluir)
-      const contrib = g.pct===100 ? g.pctMeta : (g.pct>0 ? g.pctMeta*(g.pct/100) : g.pctMeta);
-      return {g, fimPrev, contrib, done:g.pct===100};
-    }).sort((a,b)=>a.fimPrev-b.fimPrev);
+    // Linha de projeção 90%:
+    // Ordenar grupos pela data prevista de conclusão do COMP
+    // Acumular pctMeta até atingir 90%
+    // A linha cai na data do grupo que cruza 90%
+    const lista = GRUPOS.map(g => ({
+      fimPrev: pd(g.COMP.fim),
+      contrib: g.pctMeta          // peso total do grupo quando entregue
+    })).sort((a,b) => a.fimPrev - b.fimPrev);
 
-    // Acumular do mais cedo para o mais tarde
-    let acum=0;
+    let acum = 0;
     for(const item of lista){
       acum += item.contrib;
-      if(acum>=90){
+      if(acum >= 90){
         _proj90Date = item.fimPrev;
         window._proj90Date = item.fimPrev;
-        _proj90L = Math.max(0,Math.min(99.5,(_proj90Date-MIN_D)/86400000/TOTAL*100));
+        _proj90L = Math.max(0, Math.min(99.5,
+          (_proj90Date - MIN_D) / 86400000 / TOTAL * 100
+        ));
         break;
       }
     }
-    // Se não atingiu 90% mesmo com todos: linha no final
-    if(_proj90L===null) _proj90L=99.5;
+    if(_proj90L === null) _proj90L = 99.5;
   })();
 
   // ── Cabeçalho de tempo ──

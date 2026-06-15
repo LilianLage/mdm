@@ -317,89 +317,41 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 }
 .exp-item:hover{background:#F0F7F0;color:var(--v1)}
 .exp-item span{font-size:14px}
+
+.edit-panel{background:#fff;border:2px solid var(--v2);border-radius:8px;margin:8px auto;width:min(1500px,100%);padding:14px 18px;box-shadow:0 4px 16px rgba(0,107,63,.12);display:none;width:min(1400px,96%);margin:0 auto;padding:16px 20px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
 </style>
 
 <!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyB7URLeOjy1ofQx6TxYp4XbYhbxAxOOwdE",
-    authDomain: "dados-mestres.firebaseapp.com",
-    projectId: "dados-mestres",
-    storageBucket: "dados-mestres.firebasestorage.app",
-    messagingSenderId: "739025205181",
-    appId: "1:739025205181:web:79e344d6e203daa57604d4"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-  const REF = doc(db, "mdm", "dashboard");
-
-  // Expor funções globalmente para o dashboard usar
-  window.fbSalvar = async function() {
-    try {
-      await setDoc(REF, {
-        grupos:    JSON.stringify(window.GRUPOS),
-        plano:     JSON.stringify(window.PLANO),
-        takeaways: JSON.stringify(window.TAKEAWAYS),
-        cfg:       JSON.stringify({kpi2: window.CFG.kpi2}),
-        ts:        new Date().toISOString()
-      });
-      window.mostrarSyncStatus("✅ Dados salvos e sincronizados", "#006B3F");
-    } catch(e) {
-      window.mostrarSyncStatus("⚠️ Erro ao salvar: " + e.message, "#BF360C");
-      console.error("Firebase save error:", e);
-    }
-  };
-
-  window.fbCarregar = async function() {
-    try {
-      const snap = await getDoc(REF);
-      if (!snap.exists()) return false;
-      const d = snap.data();
-      if (d.grupos)    { const v=JSON.parse(d.grupos);    if(Array.isArray(v)&&v.length) { window.GRUPOS.splice(0,window.GRUPOS.length,...v); } }
-      if (d.plano)     { const v=JSON.parse(d.plano);     if(Array.isArray(v)) { window.PLANO.splice(0,window.PLANO.length,...v); } }
-      if (d.takeaways) { const v=JSON.parse(d.takeaways); if(Array.isArray(v)) { window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...v); } }
-      if (d.cfg)       { const v=JSON.parse(d.cfg); if(v.kpi2!==undefined) window.CFG.kpi2=v.kpi2; }
-      window.mostrarSyncStatus("🔄 Dados carregados", "#006B3F");
-      return true;
-    } catch(e) {
-      console.warn("Firebase load error:", e.message);
-      window.mostrarSyncStatus("⚠️ Usando dados locais", "#888");
-      return false;
-    }
-  };
-
-  // Carregar dados assim que o Firebase estiver pronto
-  window.fbPronto = true;
-  if(window._fbOnPronto) window._fbOnPronto();
+<script>
+// Firebase — só ativo no GitHub Pages, nunca no Claude
+(function(){
+  var isGH = window.location.hostname.indexOf('github.io') > -1;
+  if(!isGH){
+    window.fbSalvar   = function(){ console.log('Firebase desativado'); };
+    window.fbCarregar = function(){ return Promise.resolve(false); };
+    window.fbPronto   = true;
+    if(window._fbOnPronto) window._fbOnPronto();
+    return;
+  }
+  var sc = document.createElement('script');
+  sc.type = 'module';
+  sc.textContent = [
+    'import{initializeApp}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";',
+    'import{getFirestore,doc,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";',
+    'var app=initializeApp({apiKey:"AIzaSyB7URLeOjy1ofQx6TxYp4XbYhbxAxOOwdE",authDomain:"dados-mestres.firebaseapp.com",projectId:"dados-mestres",storageBucket:"dados-mestres.firebasestorage.app",messagingSenderId:"739025205181",appId:"1:739025205181:web:79e344d6e203daa57604d4"});',
+    'var db=getFirestore(app);var REF=doc(db,"mdm","dashboard");',
+    'window.fbSalvar=async function(){try{await setDoc(REF,{grupos:JSON.stringify(window.GRUPOS),plano:JSON.stringify(window.PLANO),takeaways:JSON.stringify(window.TAKEAWAYS),cfg:JSON.stringify({kpi2:window.CFG.kpi2}),ts:new Date().toISOString()});window.mostrarSyncStatus("✅ Dados salvos","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
+    'window.fbCarregar=async function(){try{var snap=await getDoc(REF);if(!snap.exists())return false;var d=snap.data();if(d.grupos){var v=JSON.parse(d.grupos);if(Array.isArray(v)&&v.length)window.GRUPOS.splice(0,window.GRUPOS.length,...v);}if(d.plano){var v2=JSON.parse(d.plano);if(Array.isArray(v2))window.PLANO.splice(0,window.PLANO.length,...v2);}if(d.takeaways){var v3=JSON.parse(d.takeaways);if(Array.isArray(v3))window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...v3);}if(d.cfg){var v4=JSON.parse(d.cfg);if(v4&&v4.kpi2!==undefined)window.CFG.kpi2=v4.kpi2;}window.mostrarSyncStatus("🔄 Carregado","#006B3F");return true;}catch(e){return false;}};',
+    'window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();'
+  ].join('');
+  sc.onerror=function(){window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();};
+  document.head.appendChild(sc);
+})();
 </script>
 </head>
 <body>
 
-<div class="edit-panel" id="ep">
-  <div class="ep-h">✏️ Painel de Edição</div>
-  <div class="ep-grid">
-    <div class="ep-card">
-      <h3>Configurações Gerais</h3>
-      <label class="ep-lbl">% Meta 2 — Utilizados em Orçamentos (realizado)</label><input class="ep-inp" type="number" id="e-k2" min="0" max="120">
-      <label class="ep-lbl">Data de Hoje (AAAA-MM-DD)</label><input class="ep-inp" type="date" id="e-hoje">
-      <label class="ep-lbl">Data do rodapé</label><input class="ep-inp" type="text" id="e-rod">
-    </div>
-    <div class="ep-card" style="grid-column:1/-1">
-      <h3>Grupos por Fase — datas, status e %</h3>
-      <p class="ep-hint">Selecione a fase. Edite: % de conclusão geral, peso na meta, e para cada área: início, fim e status (done/wip/plan).</p>
-      <div class="ep-tabs" id="ep-tabs"></div>
-      <div id="ep-fase"></div>
-    </div>
-  </div>
-  <div class="btn-row">
-    <button class="btn p" onclick="aplicar()">✅ Aplicar</button>
-    <button class="btn s" onclick="toggleEdit()">✖ Fechar</button>
-  </div>
-</div>
+
 
 <div class="wrap">
 <header>
@@ -460,14 +412,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <div class="exec-sec-body" id="div-list"></div>
   </div>
 
-  <!-- Riscos colapsável -->
-  <div class="exec-sec" id="sec-risk">
-    <div class="exec-sec-hdr" onclick="togExecSec('risk')">
-      <h3>🔴 Riscos</h3>
-      <span class="exec-sec-arrow" id="arr-risk">▲</span>
-    </div>
-    <div class="exec-sec-body" id="risk-list"></div>
-  </div>
+
 
   <!-- Plano de Ação colapsável -->
   <div class="exec-sec" id="sec-plano">
@@ -506,7 +451,14 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <!-- Linha 1: Burndown + Heatmap lado a lado -->
     <div class="charts-wrap" id="charts-wrap">
       <div class="chart-panel">
-        <h3>📉 Burndown — Meta 1 <span>pp acumulados × tempo · planejado vs realizado</span></h3>
+        <h3 style="display:flex;align-items:center;flex-wrap:wrap;gap:8px">
+          📉 Burndown — Meta 1
+          <span style="font-size:9px;font-weight:400;color:#888">pp acumulados × tempo · planejado vs realizado</span>
+          <label style="font-size:9px;font-weight:400;color:#555;display:inline-flex;align-items:center;gap:4px;cursor:pointer;margin-left:4px">
+            <input type="checkbox" id="bd-sembim" onchange="renderBurndown()">
+            Projeção sem BIM
+          </label>
+        </h3>
         <canvas id="burndown-canvas" height="130"></canvas>
       </div>
       <div class="chart-panel">
@@ -532,6 +484,14 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <option>Fase 1</option><option>Fase 2</option><option>Fase 3</option>
     <option>Fase 4</option><option>Fase 5</option><option>Fase 6</option>
     <option>Fase 7</option><option>Fase 8</option>
+  </select>
+  <span class="tl-label">Área:</span>
+  <select class="tl-select" id="f-area" size="1" style="min-height:26px" onchange="renderGantt()">
+    <option value="">Todas</option>
+    <option value="MDM">MDM</option>
+    <option value="ORC">Orçamento</option>
+    <option value="BIM">BIM</option>
+    <option value="COMP">Compilador</option>
   </select>
   <span class="tl-label">Status:</span>
   <select class="tl-select" id="f-st" multiple size="1" style="min-height:26px" onchange="renderGantt()">
@@ -602,71 +562,71 @@ const COR_A={MDM:"#006B3F",BIM:"#1565C0",ORC:"#BF360C",COMP:"#6A1B9A",PMO:"#555"
 // ── DADOS ──────────────────────────────────────────
 let GRUPOS=[
   // FASE 1
-  {fase:"Fase 1",nome:"Acab. Elétrico-2",   pct:37, pctMeta:0.8389,  MDM:{ini:"2026-04-08",fim:"2026-05-20",iniLB:"2026-04-08",fimLB:"2026-05-20",pct:89, st:"wip"}, ORC:{ini:"2026-05-21",fim:"2026-05-27",iniLB:"2026-05-21",fimLB:"2026-05-27",pct:38, st:"wip"}, BIM:{ini:"2026-05-21",fim:"2026-05-29",iniLB:"2026-05-21",fimLB:"2026-05-29",pct:0,  st:"plan"},COMP:{ini:"2026-05-25",fim:"2026-06-02",iniLB:"2026-05-25",fimLB:"2026-06-02",pct:0,  st:"plan"}},
-  {fase:"Fase 1",nome:"Argamassa-2",         pct:100,pctMeta:0.1074,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:100,st:"done"},ORC:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},COMP:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"}},
-  {fase:"Fase 1",nome:"Fios/Cabos-1",        pct:21, pctMeta:1.4541, MDM:{ini:"2026-04-08",fim:"2026-05-29",iniLB:"2026-04-08",fimLB:"2026-05-29",pct:44, st:"wip"}, ORC:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},BIM:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},COMP:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"}},
-  {fase:"Fase 1",nome:"Metais Sanit.-1",     pct:100,pctMeta:1.3858,  MDM:{ini:"2026-04-08",fim:"2026-05-13",iniLB:"2026-04-08",fimLB:"2026-05-13",pct:100,st:"done"},ORC:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"},BIM:{ini:"2026-05-13",fim:"2026-05-13",iniLB:"2026-05-13",fimLB:"2026-05-13",pct:100,st:"done"},COMP:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"}},
-  {fase:"Fase 1",nome:"Tintas/Texturas-4",   pct:90, pctMeta:0.6774,  MDM:{ini:"2026-04-08",fim:"2026-05-18",iniLB:"2026-04-08",fimLB:"2026-05-18",pct:100,st:"done"},ORC:{ini:"2026-04-16",fim:"2026-05-27",iniLB:"2026-04-16",fimLB:"2026-05-27",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-12",iniLB:"2026-05-19",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-05-19",fim:"2026-06-15",iniLB:"2026-05-19",fimLB:"2026-06-15",pct:0,  st:"plan"}},
-  {fase:"Fase 1",nome:"Concreto-14",          pct:77, pctMeta:5.0336,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:90, st:"wip"}, ORC:{ini:"2026-04-15",fim:"2026-07-02",iniLB:"2026-04-15",fimLB:"2026-07-02",pct:63, st:"wip"}, BIM:{ini:"2026-04-24",fim:"2026-05-15",iniLB:"2026-04-24",fimLB:"2026-05-15",pct:100,st:"done"},COMP:{ini:"2026-04-15",fim:"2026-06-09",iniLB:"2026-04-15",fimLB:"2026-06-09",pct:60, st:"wip"}},
-  {fase:"Fase 1",nome:"Argamassa-3",          pct:100,pctMeta:0.4954,  MDM:{ini:"2026-02-19",fim:"2026-06-01",iniLB:"2026-02-19",fimLB:"2026-06-01",pct:100,st:"done"},ORC:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},BIM:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},COMP:{ini:"2026-06-09",fim:"2026-06-09",iniLB:"2026-06-09",fimLB:"2026-06-09",pct:100,st:"done"}},
-  {fase:"Fase 1",nome:"Drenagem-3",           pct:65, pctMeta:0.9011,  MDM:{ini:"2026-04-01",fim:"2026-05-29",iniLB:"2026-04-01",fimLB:"2026-05-29",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-08",iniLB:"2026-05-18",fimLB:"2026-06-08",pct:100,st:"done"},BIM:{ini:"2026-05-18",fim:"2026-06-19",iniLB:"2026-05-18",fimLB:"2026-06-19",pct:36, st:"wip"}, COMP:{ini:"2026-05-26",fim:"2026-06-15",iniLB:"2026-05-26",fimLB:"2026-06-15",pct:3,  st:"wip"}},
-  {fase:"Fase 1",nome:"Tintas/Texturas-5",   pct:95, pctMeta:0.6774,  MDM:{ini:"2026-04-01",fim:"2026-05-29",iniLB:"2026-04-01",fimLB:"2026-05-29",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-03",iniLB:"2026-05-18",fimLB:"2026-06-03",pct:100,st:"done"},BIM:{ini:"2026-06-01",fim:"2026-06-12",iniLB:"2026-06-01",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-06-01",fim:"2026-06-15",iniLB:"2026-06-01",fimLB:"2026-06-15",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Acab. Elétrico-2",   pct:37, pctMeta:0.8389,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:89, st:"wip"}, ORC:{ini:"2026-05-21",fim:"2026-05-27",iniLB:"2026-05-21",fimLB:"2026-05-27",pct:38, st:"wip"}, BIM:{ini:"2026-05-21",fim:"2026-05-29",iniLB:"2026-05-21",fimLB:"2026-05-29",pct:0,  st:"plan"},COMP:{ini:"2026-05-25",fim:"2026-06-02",iniLB:"2026-05-25",fimLB:"2026-06-02",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Argamassa-2",         pct:100,pctMeta:0.1074,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"},COMP:{ini:"2026-05-19",fim:"2026-06-09",iniLB:"2026-05-19",fimLB:"2026-06-09",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Fios/Cabos-1",        pct:21, pctMeta:1.4541, MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:44, st:"wip"}, ORC:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},BIM:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"},COMP:{ini:"2026-06-01",fim:"2026-06-08",iniLB:"2026-06-01",fimLB:"2026-06-08",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Metais Sanit.-1",     pct:100,pctMeta:1.3858,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"},BIM:{ini:"2026-05-13",fim:"2026-05-13",iniLB:"2026-05-13",fimLB:"2026-05-13",pct:100,st:"done"},COMP:{ini:"2026-05-13",fim:"2026-05-19",iniLB:"2026-05-13",fimLB:"2026-05-19",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Tintas/Texturas-4",   pct:90, pctMeta:0.6774,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-04-16",fim:"2026-05-27",iniLB:"2026-04-16",fimLB:"2026-05-27",pct:100,st:"done"},BIM:{ini:"2026-05-19",fim:"2026-06-12",iniLB:"2026-05-19",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-05-19",fim:"2026-06-15",iniLB:"2026-05-19",fimLB:"2026-06-15",pct:0,  st:"plan"}},
+  {fase:"Fase 1",nome:"Concreto-14",          pct:77, pctMeta:5.0336,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:90, st:"wip"}, ORC:{ini:"2026-04-15",fim:"2026-07-02",iniLB:"2026-04-15",fimLB:"2026-07-02",pct:63, st:"wip"}, BIM:{ini:"2026-04-24",fim:"2026-05-15",iniLB:"2026-04-24",fimLB:"2026-05-15",pct:100,st:"done"},COMP:{ini:"2026-04-15",fim:"2026-06-09",iniLB:"2026-04-15",fimLB:"2026-06-09",pct:60, st:"wip"}},
+  {fase:"Fase 1",nome:"Argamassa-3",          pct:100,pctMeta:0.4954,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},BIM:{ini:"2026-03-20",fim:"2026-06-11",iniLB:"2026-03-20",fimLB:"2026-06-11",pct:100,st:"done"},COMP:{ini:"2026-06-09",fim:"2026-06-09",iniLB:"2026-06-09",fimLB:"2026-06-09",pct:100,st:"done"}},
+  {fase:"Fase 1",nome:"Drenagem-3",           pct:65, pctMeta:0.9011,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-08",iniLB:"2026-05-18",fimLB:"2026-06-08",pct:100,st:"done"},BIM:{ini:"2026-05-18",fim:"2026-06-19",iniLB:"2026-05-18",fimLB:"2026-06-19",pct:36, st:"wip"}, COMP:{ini:"2026-05-26",fim:"2026-06-15",iniLB:"2026-05-26",fimLB:"2026-06-15",pct:3,  st:"wip"}},
+  {fase:"Fase 1",nome:"Tintas/Texturas-5",   pct:95, pctMeta:0.6774,  MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-03",iniLB:"2026-05-18",fimLB:"2026-06-03",pct:100,st:"done"},BIM:{ini:"2026-06-01",fim:"2026-06-12",iniLB:"2026-06-01",fimLB:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-06-01",fim:"2026-06-15",iniLB:"2026-06-01",fimLB:"2026-06-15",pct:0,  st:"plan"}},
   // FASE 2
-  {fase:"Fase 2",nome:"Tintas/Texturas", pct:10,pctMeta:0.6774, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Pedras",          pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Aço",             pct:10,pctMeta:2.8026, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},BIM:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-15",iniLB:"2026-07-09",fimLB:"2026-07-15",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Ardósia (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-20",iniLB:"2026-07-09",fimLB:"2026-07-20",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-23",iniLB:"2026-06-22",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-23",iniLB:"2026-07-09",fimLB:"2026-07-23",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Esquadrias",      pct:10,pctMeta:17.7107,MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-16",iniLB:"2026-07-09",fimLB:"2026-07-16",pct:0,st:"plan"},BIM:{ini:"2026-07-24",fim:"2026-09-03",iniLB:"2026-07-24",fimLB:"2026-09-03",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Gas",             pct:10,pctMeta:0.3107, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-24",iniLB:"2026-06-22",fimLB:"2026-06-24",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-29",iniLB:"2026-06-22",fimLB:"2026-06-29",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Granito (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-04",fim:"2026-09-21",iniLB:"2026-09-04",fimLB:"2026-09-21",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Piso Laminado",  pct:10,pctMeta:0.2796, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-22",fim:"2026-09-24",iniLB:"2026-09-22",fimLB:"2026-09-24",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Tubos PEX",      pct:10,pctMeta:1.3361, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-30",fim:"2026-07-07",iniLB:"2026-06-30",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-06-29",fim:"2026-07-03",iniLB:"2026-06-29",fimLB:"2026-07-03",pct:0,st:"plan"}},
-  {fase:"Fase 2",nome:"Outros Acabamentos",    pct:10,pctMeta:0.3405, MDM:{ini:"2026-06-12",fim:"2026-06-19",iniLB:"2026-06-12",fimLB:"2026-06-19",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Tintas/Texturas", pct:10,pctMeta:0.6774, MDM:{ini:"2026-04-01",fim:"2026-04-22",iniLB:"2026-04-01",fimLB:"2026-04-22",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Pedras",          pct:10,pctMeta:1.3837, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-07-06",iniLB:"2026-06-22",fimLB:"2026-07-06",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Aço",             pct:10,pctMeta:2.8026, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},BIM:{ini:"2026-06-29",fim:"2026-07-08",iniLB:"2026-06-29",fimLB:"2026-07-08",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-15",iniLB:"2026-07-09",fimLB:"2026-07-15",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Ardósia (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-20",iniLB:"2026-07-09",fimLB:"2026-07-20",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-23",iniLB:"2026-06-22",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-23",iniLB:"2026-07-09",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Esquadrias",      pct:10,pctMeta:17.7107,MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-16",iniLB:"2026-07-09",fimLB:"2026-07-16",pct:0,st:"plan"},BIM:{ini:"2026-07-24",fim:"2026-09-03",iniLB:"2026-07-24",fimLB:"2026-09-03",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Gas",             pct:10,pctMeta:0.3107, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-24",iniLB:"2026-06-22",fimLB:"2026-06-24",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-29",iniLB:"2026-06-22",fimLB:"2026-06-29",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Granito (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-04",fim:"2026-09-21",iniLB:"2026-09-04",fimLB:"2026-09-21",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Piso Laminado",  pct:10,pctMeta:0.2796, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-09-22",fim:"2026-09-24",iniLB:"2026-09-22",fimLB:"2026-09-24",pct:0,st:"plan"},COMP:{ini:"2026-07-24",fim:"2026-07-30",iniLB:"2026-07-24",fimLB:"2026-07-30",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Tubos PEX",      pct:10,pctMeta:1.3361, MDM:{ini:"2026-04-23",fim:"2026-05-13",iniLB:"2026-04-23",fimLB:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",iniLB:"2026-06-22",fimLB:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-30",fim:"2026-07-07",iniLB:"2026-06-30",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-06-29",fim:"2026-07-03",iniLB:"2026-06-29",fimLB:"2026-07-03",pct:0,st:"plan"}},
+  {fase:"Fase 2",nome:"Outros Acabamentos",    pct:10,pctMeta:0.3405, MDM:{ini:"2026-04-23",fim:"2026-08-14",iniLB:"2026-04-23",fimLB:"2026-08-14",pct:10, st:"wip"},ORC:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},BIM:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-17",fim:"2026-07-23",iniLB:"2026-07-17",fimLB:"2026-07-23",pct:0,st:"plan"}},
   // FASE 3
-  {fase:"Fase 3",nome:"Acabamento Hidro",pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},BIM:{ini:"2026-07-01",fim:"2026-07-07",iniLB:"2026-07-01",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-07-08",fim:"2026-07-14",iniLB:"2026-07-08",fimLB:"2026-07-14",pct:0,st:"plan"}},
-  {fase:"Fase 3",nome:"Hidrosan.",       pct:0,pctMeta:2.8648,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-21",iniLB:"2026-07-01",fimLB:"2026-07-21",pct:0,st:"plan"},BIM:{ini:"2026-07-08",fim:"2026-07-31",iniLB:"2026-07-08",fimLB:"2026-07-31",pct:0,st:"plan"},COMP:{ini:"2026-08-03",fim:"2026-08-04",iniLB:"2026-08-03",fimLB:"2026-08-04",pct:0,st:"plan"}},
-  {fase:"Fase 3",nome:"Tubos PVC",       pct:0,pctMeta:4.263,MDM:{ini:"2026-06-12",fim:"2026-06-30",iniLB:"2026-06-12",fimLB:"2026-06-30",pct:0,st:"plan"},ORC:{ini:"2026-07-22",fim:"2026-08-04",iniLB:"2026-07-22",fimLB:"2026-08-04",pct:0,st:"plan"},BIM:{ini:"2026-08-03",fim:"2026-08-21",iniLB:"2026-08-03",fimLB:"2026-08-21",pct:0,st:"plan"},COMP:{ini:"2026-08-24",fim:"2026-08-25",iniLB:"2026-08-24",fimLB:"2026-08-25",pct:0,st:"plan"}},
+  {fase:"Fase 3",nome:"Acabamento Hidro",pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-08",fim:"2026-07-06",iniLB:"2026-06-08",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},BIM:{ini:"2026-07-01",fim:"2026-07-07",iniLB:"2026-07-01",fimLB:"2026-07-07",pct:0,st:"plan"},COMP:{ini:"2026-07-08",fim:"2026-07-14",iniLB:"2026-07-08",fimLB:"2026-07-14",pct:0,st:"plan"}},
+  {fase:"Fase 3",nome:"Hidrosan.",       pct:0,pctMeta:2.8648,MDM:{ini:"2026-06-08",fim:"2026-06-11",iniLB:"2026-06-08",fimLB:"2026-06-11",pct:0,st:"plan"},ORC:{ini:"2026-07-01",fim:"2026-07-21",iniLB:"2026-07-01",fimLB:"2026-07-21",pct:0,st:"plan"},BIM:{ini:"2026-07-08",fim:"2026-07-31",iniLB:"2026-07-08",fimLB:"2026-07-31",pct:0,st:"plan"},COMP:{ini:"2026-08-03",fim:"2026-08-04",iniLB:"2026-08-03",fimLB:"2026-08-04",pct:0,st:"plan"}},
+  {fase:"Fase 3",nome:"Tubos PVC",       pct:0,pctMeta:4.263,MDM:{ini:"2026-06-08",fim:"2026-06-11",iniLB:"2026-06-08",fimLB:"2026-06-11",pct:0,st:"plan"},ORC:{ini:"2026-07-22",fim:"2026-08-04",iniLB:"2026-07-22",fimLB:"2026-08-04",pct:0,st:"plan"},BIM:{ini:"2026-08-03",fim:"2026-08-21",iniLB:"2026-08-03",fimLB:"2026-08-21",pct:0,st:"plan"},COMP:{ini:"2026-08-24",fim:"2026-08-25",iniLB:"2026-08-24",fimLB:"2026-08-25",pct:0,st:"plan"}},
   // FASE 4
-  {fase:"Fase 4",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-24",fim:"2026-07-29",iniLB:"2026-07-24",fimLB:"2026-07-29",pct:0,st:"plan"},BIM:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},COMP:{ini:"2026-08-06",fim:"2026-08-12",iniLB:"2026-08-06",fimLB:"2026-08-12",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Drywall",        pct:0,pctMeta:0.6774,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-07",iniLB:"2026-07-30",fimLB:"2026-08-07",pct:0,st:"plan"},BIM:{ini:"2026-09-30",fim:"2026-10-06",iniLB:"2026-09-30",fimLB:"2026-10-06",pct:0,st:"plan"},COMP:{ini:"2026-10-07",fim:"2026-10-07",iniLB:"2026-10-07",fimLB:"2026-10-07",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Incêndio",       pct:0,pctMeta:0.7209,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-05",fim:"2026-08-11",iniLB:"2026-08-05",fimLB:"2026-08-11",pct:0,st:"plan"},BIM:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Louças Sanit.",  pct:0,pctMeta:0.3915,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},BIM:{ini:"2026-10-07",fim:"2026-10-13",iniLB:"2026-10-07",fimLB:"2026-10-13",pct:0,st:"plan"},COMP:{ini:"2026-10-14",fim:"2026-10-14",iniLB:"2026-10-14",fimLB:"2026-10-14",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Mecânica",       pct:0,pctMeta:0.3045,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},BIM:{ini:"2026-08-11",fim:"2026-08-11",iniLB:"2026-08-11",fimLB:"2026-08-11",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"PEAD",           pct:0,pctMeta:0.9881,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-12",fim:"2026-08-25",iniLB:"2026-08-12",fimLB:"2026-08-25",pct:0,st:"plan"},BIM:{ini:"2026-10-14",fim:"2026-10-20",iniLB:"2026-10-14",fimLB:"2026-10-20",pct:0,st:"plan"},COMP:{ini:"2026-10-21",fim:"2026-10-21",iniLB:"2026-10-21",fimLB:"2026-10-21",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Peças Concreto", pct:0,pctMeta:2.0569,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-26",fim:"2026-09-01",iniLB:"2026-08-26",fimLB:"2026-09-01",pct:0,st:"plan"},BIM:{ini:"2026-10-21",fim:"2026-10-27",iniLB:"2026-10-21",fimLB:"2026-10-27",pct:0,st:"plan"},COMP:{ini:"2026-10-28",fim:"2026-10-28",iniLB:"2026-10-28",fimLB:"2026-10-28",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Perfil Aço",     pct:0,pctMeta:0.1616,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-11",fim:"2026-08-13",iniLB:"2026-08-11",fimLB:"2026-08-13",pct:0,st:"plan"},BIM:{ini:"2026-10-28",fim:"2026-11-04",iniLB:"2026-10-28",fimLB:"2026-11-04",pct:0,st:"plan"},COMP:{ini:"2026-11-05",fim:"2026-11-05",iniLB:"2026-11-05",fimLB:"2026-11-05",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Portas",         pct:0,pctMeta:1.6965,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-14",fim:"2026-08-27",iniLB:"2026-08-14",fimLB:"2026-08-27",pct:0,st:"plan"},BIM:{ini:"2026-11-05",fim:"2026-11-11",iniLB:"2026-11-05",fimLB:"2026-11-11",pct:0,st:"plan"},COMP:{ini:"2026-11-12",fim:"2026-11-12",iniLB:"2026-11-12",fimLB:"2026-11-12",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Rev. Cerâmico",  pct:0,pctMeta:0.2505,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-09-04",iniLB:"2026-08-28",fimLB:"2026-09-04",pct:0,st:"plan"},BIM:{ini:"2026-11-12",fim:"2026-11-23",iniLB:"2026-11-12",fimLB:"2026-11-23",pct:0,st:"plan"},COMP:{ini:"2026-11-24",fim:"2026-11-24",iniLB:"2026-11-24",fimLB:"2026-11-24",pct:0,st:"plan"}},
-  {fase:"Fase 4",nome:"Telhas Fibroc",  pct:0,pctMeta:0.1554,MDM:{ini:"2026-06-22",fim:"2026-07-15",iniLB:"2026-06-22",fimLB:"2026-07-15",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-08-28",iniLB:"2026-08-28",fimLB:"2026-08-28",pct:0,st:"plan"},BIM:{ini:"2026-11-24",fim:"2026-11-25",iniLB:"2026-11-24",fimLB:"2026-11-25",pct:0,st:"plan"},COMP:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-08",fim:"2026-07-06",iniLB:"2026-06-08",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-07-24",fim:"2026-07-29",iniLB:"2026-07-24",fimLB:"2026-07-29",pct:0,st:"plan"},BIM:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},COMP:{ini:"2026-08-06",fim:"2026-08-12",iniLB:"2026-08-06",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Drywall",        pct:0,pctMeta:0.6774,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-07",iniLB:"2026-07-30",fimLB:"2026-08-07",pct:0,st:"plan"},BIM:{ini:"2026-09-30",fim:"2026-10-06",iniLB:"2026-09-30",fimLB:"2026-10-06",pct:0,st:"plan"},COMP:{ini:"2026-10-07",fim:"2026-10-07",iniLB:"2026-10-07",fimLB:"2026-10-07",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Incêndio",       pct:0,pctMeta:0.7209,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-05",fim:"2026-08-11",iniLB:"2026-08-05",fimLB:"2026-08-11",pct:0,st:"plan"},BIM:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Louças Sanit.",  pct:0,pctMeta:0.3915,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-07-30",fim:"2026-08-05",iniLB:"2026-07-30",fimLB:"2026-08-05",pct:0,st:"plan"},BIM:{ini:"2026-10-07",fim:"2026-10-13",iniLB:"2026-10-07",fimLB:"2026-10-13",pct:0,st:"plan"},COMP:{ini:"2026-10-14",fim:"2026-10-14",iniLB:"2026-10-14",fimLB:"2026-10-14",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Mecânica",       pct:0,pctMeta:0.3045,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-06",fim:"2026-08-10",iniLB:"2026-08-06",fimLB:"2026-08-10",pct:0,st:"plan"},BIM:{ini:"2026-08-11",fim:"2026-08-11",iniLB:"2026-08-11",fimLB:"2026-08-11",pct:0,st:"plan"},COMP:{ini:"2026-08-12",fim:"2026-08-12",iniLB:"2026-08-12",fimLB:"2026-08-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"PEAD",           pct:0,pctMeta:0.9881,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-12",fim:"2026-08-25",iniLB:"2026-08-12",fimLB:"2026-08-25",pct:0,st:"plan"},BIM:{ini:"2026-10-14",fim:"2026-10-20",iniLB:"2026-10-14",fimLB:"2026-10-20",pct:0,st:"plan"},COMP:{ini:"2026-10-21",fim:"2026-10-21",iniLB:"2026-10-21",fimLB:"2026-10-21",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Peças Concreto", pct:0,pctMeta:2.0569,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-26",fim:"2026-09-01",iniLB:"2026-08-26",fimLB:"2026-09-01",pct:0,st:"plan"},BIM:{ini:"2026-10-21",fim:"2026-10-27",iniLB:"2026-10-21",fimLB:"2026-10-27",pct:0,st:"plan"},COMP:{ini:"2026-10-28",fim:"2026-10-28",iniLB:"2026-10-28",fimLB:"2026-10-28",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Perfil Aço",     pct:0,pctMeta:0.1616,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-11",fim:"2026-08-13",iniLB:"2026-08-11",fimLB:"2026-08-13",pct:0,st:"plan"},BIM:{ini:"2026-10-28",fim:"2026-11-04",iniLB:"2026-10-28",fimLB:"2026-11-04",pct:0,st:"plan"},COMP:{ini:"2026-11-05",fim:"2026-11-05",iniLB:"2026-11-05",fimLB:"2026-11-05",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Portas",         pct:0,pctMeta:1.6965,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-14",fim:"2026-08-27",iniLB:"2026-08-14",fimLB:"2026-08-27",pct:0,st:"plan"},BIM:{ini:"2026-11-05",fim:"2026-11-11",iniLB:"2026-11-05",fimLB:"2026-11-11",pct:0,st:"plan"},COMP:{ini:"2026-11-12",fim:"2026-11-12",iniLB:"2026-11-12",fimLB:"2026-11-12",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Rev. Cerâmico",  pct:0,pctMeta:0.2505,MDM:{ini:"2026-06-16",fim:"2026-07-06",iniLB:"2026-06-16",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-09-04",iniLB:"2026-08-28",fimLB:"2026-09-04",pct:0,st:"plan"},BIM:{ini:"2026-11-12",fim:"2026-11-23",iniLB:"2026-11-12",fimLB:"2026-11-23",pct:0,st:"plan"},COMP:{ini:"2026-11-24",fim:"2026-11-24",iniLB:"2026-11-24",fimLB:"2026-11-24",pct:0,st:"plan"}},
+  {fase:"Fase 4",nome:"Telhas Fibroc",  pct:0,pctMeta:0.1554,MDM:{ini:"2026-06-16",fim:"2026-06-19",iniLB:"2026-06-16",fimLB:"2026-06-19",pct:0,st:"plan"},ORC:{ini:"2026-08-28",fim:"2026-08-28",iniLB:"2026-08-28",fimLB:"2026-08-28",pct:0,st:"plan"},BIM:{ini:"2026-11-24",fim:"2026-11-25",iniLB:"2026-11-24",fimLB:"2026-11-25",pct:0,st:"plan"},COMP:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"}},
   // FASE 5
-  {fase:"Fase 5",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-02",fim:"2026-09-09",iniLB:"2026-09-02",fimLB:"2026-09-09",pct:0,st:"plan"},BIM:{ini:"2026-08-12",fim:"2026-08-18",iniLB:"2026-08-12",fimLB:"2026-08-18",pct:0,st:"plan"},COMP:{ini:"2026-09-10",fim:"2026-09-16",iniLB:"2026-09-10",fimLB:"2026-09-16",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Bombas",        pct:0,pctMeta:1.2926,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-10",fim:"2026-09-23",iniLB:"2026-09-10",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2026-08-19",fim:"2026-08-19",iniLB:"2026-08-19",fimLB:"2026-08-19",pct:0,st:"plan"},COMP:{ini:"2026-09-24",fim:"2026-09-30",iniLB:"2026-09-24",fimLB:"2026-09-30",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Estrutura",     pct:0,pctMeta:0.0746,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-08-31",iniLB:"2026-08-31",fimLB:"2026-08-31",pct:0,st:"plan"},BIM:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"},COMP:{ini:"2026-11-27",fim:"2026-11-27",iniLB:"2026-11-27",fimLB:"2026-11-27",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Ferrosos",      pct:0,pctMeta:2.9953,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-10-07",iniLB:"2026-09-24",fimLB:"2026-10-07",pct:0,st:"plan"},BIM:{ini:"2026-11-27",fim:"2026-12-17",iniLB:"2026-11-27",fimLB:"2026-12-17",pct:0,st:"plan"},COMP:{ini:"2026-12-18",fim:"2026-12-21",iniLB:"2026-12-18",fimLB:"2026-12-21",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Forma",         pct:0,pctMeta:3.4241,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-09-03",iniLB:"2026-08-31",fimLB:"2026-09-03",pct:0,st:"plan"},BIM:{ini:"2026-12-18",fim:"2027-01-11",iniLB:"2026-12-18",fimLB:"2027-01-11",pct:0,st:"plan"},COMP:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Fundação",      pct:0,pctMeta:0.5531,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-04",fim:"2026-09-14",iniLB:"2026-09-04",fimLB:"2026-09-14",pct:0,st:"plan"},BIM:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"},COMP:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Piscina",       pct:0,pctMeta:0.1802,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-17",iniLB:"2026-09-15",fimLB:"2026-09-17",pct:0,st:"plan"},BIM:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"},COMP:{ini:"2027-01-14",fim:"2027-01-14",iniLB:"2027-01-14",fimLB:"2027-01-14",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Rev. Cerâmico", pct:0,pctMeta:0.5263,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-23",iniLB:"2026-09-15",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2027-01-14",fim:"2027-01-22",iniLB:"2027-01-14",fimLB:"2027-01-22",pct:0,st:"plan"},COMP:{ini:"2027-01-25",fim:"2027-01-25",iniLB:"2027-01-25",fimLB:"2027-01-25",pct:0,st:"plan"}},
-  {fase:"Fase 5",nome:"Segurança",     pct:0,pctMeta:0.1989,MDM:{ini:"2026-07-07",fim:"2026-07-31",iniLB:"2026-07-07",fimLB:"2026-07-31",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-09-28",iniLB:"2026-09-24",fimLB:"2026-09-28",pct:0,st:"plan"},BIM:{ini:"2027-01-25",fim:"2027-01-26",iniLB:"2027-01-25",fimLB:"2027-01-26",pct:0,st:"plan"},COMP:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Acab. Hidro",   pct:0,pctMeta:0.3874,MDM:{ini:"2026-06-08",fim:"2026-07-06",iniLB:"2026-06-08",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-02",fim:"2026-09-09",iniLB:"2026-09-02",fimLB:"2026-09-09",pct:0,st:"plan"},BIM:{ini:"2026-08-12",fim:"2026-08-18",iniLB:"2026-08-12",fimLB:"2026-08-18",pct:0,st:"plan"},COMP:{ini:"2026-09-10",fim:"2026-09-16",iniLB:"2026-09-10",fimLB:"2026-09-16",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Bombas",        pct:0,pctMeta:1.2926,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-10",fim:"2026-09-23",iniLB:"2026-09-10",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2026-08-19",fim:"2026-08-19",iniLB:"2026-08-19",fimLB:"2026-08-19",pct:0,st:"plan"},COMP:{ini:"2026-09-24",fim:"2026-09-30",iniLB:"2026-09-24",fimLB:"2026-09-30",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Estrutura",     pct:0,pctMeta:0.0746,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-08-31",iniLB:"2026-08-31",fimLB:"2026-08-31",pct:0,st:"plan"},BIM:{ini:"2026-11-26",fim:"2026-11-26",iniLB:"2026-11-26",fimLB:"2026-11-26",pct:0,st:"plan"},COMP:{ini:"2026-11-27",fim:"2026-11-27",iniLB:"2026-11-27",fimLB:"2026-11-27",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Ferrosos",      pct:0,pctMeta:2.9953,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-10-07",iniLB:"2026-09-24",fimLB:"2026-10-07",pct:0,st:"plan"},BIM:{ini:"2026-11-27",fim:"2026-12-17",iniLB:"2026-11-27",fimLB:"2026-12-17",pct:0,st:"plan"},COMP:{ini:"2026-12-18",fim:"2026-12-21",iniLB:"2026-12-18",fimLB:"2026-12-21",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Forma",         pct:0,pctMeta:3.4241,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-08-31",fim:"2026-09-03",iniLB:"2026-08-31",fimLB:"2026-09-03",pct:0,st:"plan"},BIM:{ini:"2026-12-18",fim:"2027-01-11",iniLB:"2026-12-18",fimLB:"2027-01-11",pct:0,st:"plan"},COMP:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Fundação",      pct:0,pctMeta:0.5531,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-04",fim:"2026-09-14",iniLB:"2026-09-04",fimLB:"2026-09-14",pct:0,st:"plan"},BIM:{ini:"2027-01-12",fim:"2027-01-12",iniLB:"2027-01-12",fimLB:"2027-01-12",pct:0,st:"plan"},COMP:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Piscina",       pct:0,pctMeta:0.1802,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-17",iniLB:"2026-09-15",fimLB:"2026-09-17",pct:0,st:"plan"},BIM:{ini:"2027-01-13",fim:"2027-01-13",iniLB:"2027-01-13",fimLB:"2027-01-13",pct:0,st:"plan"},COMP:{ini:"2027-01-14",fim:"2027-01-14",iniLB:"2027-01-14",fimLB:"2027-01-14",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Rev. Cerâmico", pct:0,pctMeta:0.5263,MDM:{ini:"2026-06-16",fim:"2026-07-06",iniLB:"2026-06-16",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-15",fim:"2026-09-23",iniLB:"2026-09-15",fimLB:"2026-09-23",pct:0,st:"plan"},BIM:{ini:"2027-01-14",fim:"2027-01-22",iniLB:"2027-01-14",fimLB:"2027-01-22",pct:0,st:"plan"},COMP:{ini:"2027-01-25",fim:"2027-01-25",iniLB:"2027-01-25",fimLB:"2027-01-25",pct:0,st:"plan"}},
+  {fase:"Fase 5",nome:"Segurança",     pct:0,pctMeta:0.1989,MDM:{ini:"2026-07-01",fim:"2026-07-06",iniLB:"2026-07-01",fimLB:"2026-07-06",pct:0,st:"plan"},ORC:{ini:"2026-09-24",fim:"2026-09-28",iniLB:"2026-09-24",fimLB:"2026-09-28",pct:0,st:"plan"},BIM:{ini:"2027-01-25",fim:"2027-01-26",iniLB:"2027-01-25",fimLB:"2027-01-26",pct:0,st:"plan"},COMP:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"}},
   // FASE 6
-  {fase:"Fase 6",nome:"Elétrica",          pct:0,pctMeta:6.5996,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-10-08",fim:"2026-10-29",iniLB:"2026-10-08",fimLB:"2026-10-29",pct:0,st:"plan"},BIM:{ini:"2026-08-26",fim:"2026-11-09",iniLB:"2026-08-26",fimLB:"2026-11-09",pct:0,st:"plan"},COMP:{ini:"2026-11-10",fim:"2026-11-12",iniLB:"2026-11-10",fimLB:"2026-11-12",pct:0,st:"plan"}},
-  {fase:"Fase 6",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-06",iniLB:"2026-09-29",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"},COMP:{ini:"2027-01-28",fim:"2027-01-28",iniLB:"2027-01-28",fimLB:"2027-01-28",pct:0,st:"plan"}},
-  {fase:"Fase 6",nome:"Pisos",             pct:0,pctMeta:0.3387,MDM:{ini:"2026-08-07",fim:"2026-08-25",iniLB:"2026-08-07",fimLB:"2026-08-25",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-01",iniLB:"2026-09-29",fimLB:"2026-10-01",pct:0,st:"plan"},BIM:{ini:"2027-01-28",fim:"2027-02-02",iniLB:"2027-01-28",fimLB:"2027-02-02",pct:0,st:"plan"},COMP:{ini:"2027-02-03",fim:"2027-02-03",iniLB:"2027-02-03",fimLB:"2027-02-03",pct:0,st:"plan"}},
+  {fase:"Fase 6",nome:"Elétrica",          pct:0,pctMeta:6.5996,MDM:{ini:"2026-07-16",fim:"2026-07-21",iniLB:"2026-07-16",fimLB:"2026-07-21",pct:0,st:"plan"},ORC:{ini:"2026-10-08",fim:"2026-10-29",iniLB:"2026-10-08",fimLB:"2026-10-29",pct:0,st:"plan"},BIM:{ini:"2026-08-26",fim:"2026-11-09",iniLB:"2026-08-26",fimLB:"2026-11-09",pct:0,st:"plan"},COMP:{ini:"2026-11-10",fim:"2026-11-12",iniLB:"2026-11-10",fimLB:"2026-11-12",pct:0,st:"plan"}},
+  {fase:"Fase 6",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-04-23",fim:"2026-08-14",iniLB:"2026-04-23",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-06",iniLB:"2026-09-29",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-01-27",fim:"2027-01-27",iniLB:"2027-01-27",fimLB:"2027-01-27",pct:0,st:"plan"},COMP:{ini:"2027-01-28",fim:"2027-01-28",iniLB:"2027-01-28",fimLB:"2027-01-28",pct:0,st:"plan"}},
+  {fase:"Fase 6",nome:"Pisos",             pct:0,pctMeta:0.3387,MDM:{ini:"2026-07-16",fim:"2026-08-31",iniLB:"2026-07-16",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-09-29",fim:"2026-10-01",iniLB:"2026-09-29",fimLB:"2026-10-01",pct:0,st:"plan"},BIM:{ini:"2027-01-28",fim:"2027-02-02",iniLB:"2027-01-28",fimLB:"2027-02-02",pct:0,st:"plan"},COMP:{ini:"2027-02-03",fim:"2027-02-03",iniLB:"2027-02-03",fimLB:"2027-02-03",pct:0,st:"plan"}},
   // FASE 7
-  {fase:"Fase 7",nome:"Coletores Lixo",    pct:0,pctMeta:0.7022,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-06",iniLB:"2026-10-02",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-02-03",fim:"2027-02-05",iniLB:"2027-02-03",fimLB:"2027-02-05",pct:0,st:"plan"},COMP:{ini:"2027-02-10",fim:"2027-02-10",iniLB:"2027-02-10",fimLB:"2027-02-10",pct:0,st:"plan"}},
-  {fase:"Fase 7",nome:"Mobiliários",       pct:0,pctMeta:4.7726,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-13",iniLB:"2026-10-02",fimLB:"2026-10-13",pct:0,st:"plan"},BIM:{ini:"2027-02-10",fim:"2027-03-22",iniLB:"2027-02-10",fimLB:"2027-03-22",pct:0,st:"plan"},COMP:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"}},
-  {fase:"Fase 7",nome:"Outros",            pct:0,pctMeta:5.6363,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-11-04",iniLB:"2026-10-14",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"},COMP:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"}},
-  {fase:"Fase 7",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-10-15",iniLB:"2026-10-14",fimLB:"2026-10-15",pct:0,st:"plan"},BIM:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"},COMP:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"}},
-  {fase:"Fase 7",nome:"SPDA",              pct:0,pctMeta:0.3169,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-10-30",iniLB:"2026-10-30",fimLB:"2026-10-30",pct:0,st:"plan"},BIM:{ini:"2026-09-28",fim:"2026-09-30",iniLB:"2026-09-28",fimLB:"2026-09-30",pct:0,st:"plan"},COMP:{ini:"2026-11-03",fim:"2026-11-03",iniLB:"2026-11-03",fimLB:"2026-11-03",pct:0,st:"plan"}},
-  {fase:"Fase 7",nome:"Visual",            pct:0,pctMeta:1.9948,MDM:{ini:"2026-08-17",fim:"2026-09-25",iniLB:"2026-08-17",fimLB:"2026-09-25",pct:0,st:"plan"},ORC:{ini:"2026-10-16",fim:"2026-10-20",iniLB:"2026-10-16",fimLB:"2026-10-20",pct:0,st:"plan"},BIM:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"},COMP:{ini:"2027-03-29",fim:"2027-03-29",iniLB:"2027-03-29",fimLB:"2027-03-29",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Coletores Lixo",    pct:0,pctMeta:0.7022,MDM:{ini:"2026-08-11",fim:"2026-08-14",iniLB:"2026-08-11",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-06",iniLB:"2026-10-02",fimLB:"2026-10-06",pct:0,st:"plan"},BIM:{ini:"2027-02-03",fim:"2027-02-05",iniLB:"2027-02-03",fimLB:"2027-02-05",pct:0,st:"plan"},COMP:{ini:"2027-02-10",fim:"2027-02-10",iniLB:"2027-02-10",fimLB:"2027-02-10",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Mobiliários",       pct:0,pctMeta:4.7726,MDM:{ini:"2026-08-11",fim:"2026-08-14",iniLB:"2026-08-11",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-02",fim:"2026-10-13",iniLB:"2026-10-02",fimLB:"2026-10-13",pct:0,st:"plan"},BIM:{ini:"2027-02-10",fim:"2027-03-22",iniLB:"2027-02-10",fimLB:"2027-03-22",pct:0,st:"plan"},COMP:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Outros",            pct:0,pctMeta:5.6363,MDM:{ini:"2026-08-11",fim:"2026-08-14",iniLB:"2026-08-11",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-11-04",iniLB:"2026-10-14",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-23",fim:"2027-03-23",iniLB:"2027-03-23",fimLB:"2027-03-23",pct:0,st:"plan"},COMP:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Outros Acabamentos",pct:0,pctMeta:0.3405,MDM:{ini:"2026-04-23",fim:"2026-08-14",iniLB:"2026-04-23",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-14",fim:"2026-10-15",iniLB:"2026-10-14",fimLB:"2026-10-15",pct:0,st:"plan"},BIM:{ini:"2027-03-24",fim:"2027-03-24",iniLB:"2027-03-24",fimLB:"2027-03-24",pct:0,st:"plan"},COMP:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"SPDA",              pct:0,pctMeta:0.3169,MDM:{ini:"2026-08-11",fim:"2026-08-14",iniLB:"2026-08-11",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-10-30",iniLB:"2026-10-30",fimLB:"2026-10-30",pct:0,st:"plan"},BIM:{ini:"2026-09-28",fim:"2026-09-30",iniLB:"2026-09-28",fimLB:"2026-09-30",pct:0,st:"plan"},COMP:{ini:"2026-11-03",fim:"2026-11-03",iniLB:"2026-11-03",fimLB:"2026-11-03",pct:0,st:"plan"}},
+  {fase:"Fase 7",nome:"Visual",            pct:0,pctMeta:1.9948,MDM:{ini:"2026-08-11",fim:"2026-08-14",iniLB:"2026-08-11",fimLB:"2026-08-14",pct:0,st:"plan"},ORC:{ini:"2026-10-16",fim:"2026-10-20",iniLB:"2026-10-16",fimLB:"2026-10-20",pct:0,st:"plan"},BIM:{ini:"2027-03-25",fim:"2027-03-25",iniLB:"2027-03-25",fimLB:"2027-03-25",pct:0,st:"plan"},COMP:{ini:"2027-03-29",fim:"2027-03-29",iniLB:"2027-03-29",fimLB:"2027-03-29",pct:0,st:"plan"}},
   // FASE 8
-  {fase:"Fase 8",nome:"Bloco Cerâmico",pct:0,pctMeta:0.3405,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-11-04",iniLB:"2026-10-30",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-29",fim:"2027-04-06",iniLB:"2027-03-29",fimLB:"2027-04-06",pct:0,st:"plan"},COMP:{ini:"2027-04-07",fim:"2027-04-07",iniLB:"2027-04-07",fimLB:"2027-04-07",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Elevador",      pct:0,pctMeta:7.2583,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-05",fim:"2026-11-13",iniLB:"2026-11-05",fimLB:"2026-11-13",pct:0,st:"plan"},BIM:{ini:"2027-04-07",fim:"2027-04-09",iniLB:"2027-04-07",fimLB:"2027-04-09",pct:0,st:"plan"},COMP:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Luminárias",    pct:0,pctMeta:1.7089,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-03",fim:"2026-11-09",iniLB:"2026-11-03",fimLB:"2026-11-09",pct:0,st:"plan"},BIM:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"},COMP:{ini:"2027-04-13",fim:"2027-04-13",iniLB:"2027-04-13",fimLB:"2027-04-13",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Mármore",       pct:0,pctMeta:0.3405,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-16",fim:"2026-11-23",iniLB:"2026-11-16",fimLB:"2026-11-23",pct:0,st:"plan"},BIM:{ini:"2027-04-13",fim:"2027-04-19",iniLB:"2027-04-13",fimLB:"2027-04-19",pct:0,st:"plan"},COMP:{ini:"2027-04-20",fim:"2027-04-27",iniLB:"2027-04-20",fimLB:"2027-04-27",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Paisagismo",    pct:0,pctMeta:4.2692,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-11-24",fim:"2026-12-02",iniLB:"2026-11-24",fimLB:"2026-12-02",pct:0,st:"plan"},BIM:{ini:"2027-04-20",fim:"2027-06-04",iniLB:"2027-04-20",fimLB:"2027-06-04",pct:0,st:"plan"},COMP:{ini:"2027-06-07",fim:"2027-06-07",iniLB:"2027-06-07",fimLB:"2027-06-07",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Pisos",         pct:0,pctMeta:0.3387,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-12-03",fim:"2026-12-11",iniLB:"2026-12-03",fimLB:"2026-12-11",pct:0,st:"plan"},BIM:{ini:"2027-06-07",fim:"2027-06-10",iniLB:"2027-06-07",fimLB:"2027-06-10",pct:0,st:"plan"},COMP:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"}},
-  {fase:"Fase 8",nome:"Vidros",        pct:0,pctMeta:0.5841,MDM:{ini:"2026-09-01",fim:"2026-10-26",iniLB:"2026-09-01",fimLB:"2026-10-26",pct:0,st:"plan"},ORC:{ini:"2026-12-14",fim:"2026-12-16",iniLB:"2026-12-14",fimLB:"2026-12-16",pct:0,st:"plan"},BIM:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"},COMP:{ini:"2027-06-30",fim:"2027-06-30",iniLB:"2027-06-30",fimLB:"2027-06-30",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Bloco Cerâmico",pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-10-30",fim:"2026-11-04",iniLB:"2026-10-30",fimLB:"2026-11-04",pct:0,st:"plan"},BIM:{ini:"2027-03-29",fim:"2027-04-06",iniLB:"2027-03-29",fimLB:"2027-04-06",pct:0,st:"plan"},COMP:{ini:"2027-04-07",fim:"2027-04-07",iniLB:"2027-04-07",fimLB:"2027-04-07",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Elevador",      pct:0,pctMeta:7.2583,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-11-05",fim:"2026-11-13",iniLB:"2026-11-05",fimLB:"2026-11-13",pct:0,st:"plan"},BIM:{ini:"2027-04-07",fim:"2027-04-09",iniLB:"2027-04-07",fimLB:"2027-04-09",pct:0,st:"plan"},COMP:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Luminárias",    pct:0,pctMeta:1.7089,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-11-03",fim:"2026-11-09",iniLB:"2026-11-03",fimLB:"2026-11-09",pct:0,st:"plan"},BIM:{ini:"2027-04-12",fim:"2027-04-12",iniLB:"2027-04-12",fimLB:"2027-04-12",pct:0,st:"plan"},COMP:{ini:"2027-04-13",fim:"2027-04-13",iniLB:"2027-04-13",fimLB:"2027-04-13",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Mármore",       pct:0,pctMeta:0.3405,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-11-16",fim:"2026-11-23",iniLB:"2026-11-16",fimLB:"2026-11-23",pct:0,st:"plan"},BIM:{ini:"2027-04-13",fim:"2027-04-19",iniLB:"2027-04-13",fimLB:"2027-04-19",pct:0,st:"plan"},COMP:{ini:"2027-04-20",fim:"2027-04-27",iniLB:"2027-04-20",fimLB:"2027-04-27",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Paisagismo",    pct:0,pctMeta:4.2692,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-11-24",fim:"2026-12-02",iniLB:"2026-11-24",fimLB:"2026-12-02",pct:0,st:"plan"},BIM:{ini:"2027-04-20",fim:"2027-06-04",iniLB:"2027-04-20",fimLB:"2027-06-04",pct:0,st:"plan"},COMP:{ini:"2027-06-07",fim:"2027-06-07",iniLB:"2027-06-07",fimLB:"2027-06-07",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Pisos",         pct:0,pctMeta:0.3387,MDM:{ini:"2026-07-16",fim:"2026-08-31",iniLB:"2026-07-16",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-12-03",fim:"2026-12-11",iniLB:"2026-12-03",fimLB:"2026-12-11",pct:0,st:"plan"},BIM:{ini:"2027-06-07",fim:"2027-06-10",iniLB:"2027-06-07",fimLB:"2027-06-10",pct:0,st:"plan"},COMP:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"}},
+  {fase:"Fase 8",nome:"Vidros",        pct:0,pctMeta:0.5841,MDM:{ini:"2026-08-26",fim:"2026-08-31",iniLB:"2026-08-26",fimLB:"2026-08-31",pct:0,st:"plan"},ORC:{ini:"2026-12-14",fim:"2026-12-16",iniLB:"2026-12-14",fimLB:"2026-12-16",pct:0,st:"plan"},BIM:{ini:"2027-06-11",fim:"2027-06-11",iniLB:"2027-06-11",fimLB:"2027-06-11",pct:0,st:"plan"},COMP:{ini:"2027-06-30",fim:"2027-06-30",iniLB:"2027-06-30",fimLB:"2027-06-30",pct:0,st:"plan"}},
 ];
 
 // ══════════════════════════════════════════════════
@@ -675,7 +635,7 @@ const ACFG={MDM:{label:"MDM",cor:"#006B3F"},BIM:{label:"BIM",cor:"#793F98"},ORC:
 const MESES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
 const pd=s=>new Date(s+"T00:00:00");
 const fmtBR=d=>d.toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit",year:"2-digit"});
-const MIN_D=pd("2026-02-01"),MAX_D=pd("2027-07-15");
+const MIN_D=pd("2026-04-01"),MAX_D=pd("2027-07-15");
 const TOTAL=(MAX_D-MIN_D)/86400000;
 const bPos=(d0,d1)=>{
   const l=Math.max(0,(pd(d0)-MIN_D)/86400000/TOTAL*100);
@@ -711,7 +671,7 @@ function calcMeta1(){ return GRUPOS.reduce((s,g)=>s+g.pctMeta*g.pct/100,0); }
 function calcRitmo(){
   const hoje=pd(CFG.hoje);
   const fimAno=pd("2026-12-31");
-  const inicio=pd("2026-02-01"); // início do projeto
+  const inicio=pd("2026-04-01"); // início do projeto
   const totalDiasProjeto=(fimAno-inicio)/86400000;
   const diasPassados=(hoje-inicio)/86400000;
   const diasRestantes=(fimAno-hoje)/86400000;
@@ -830,6 +790,29 @@ function calcRiscos(){
 }
 
 // ══ RENDER EXEC ══
+
+function updSemBIM(gi){
+  var cb = document.getElementById('g-sembim-'+gi);
+  var lb = document.getElementById('lsb-'+gi);
+  if(!lb || !cb) return;
+  lb.style.background  = cb.checked ? '#FFF3E0' : '#f9f9f9';
+  lb.style.borderColor = cb.checked ? '#FF8B22' : '#ddd';
+  // Salvar imediatamente no grupo correspondente da fase atual
+  var fk = FASES[epFase];
+  var its = GRUPOS.filter(function(g){return g.fase===fk;});
+  if(its[gi]) its[gi].semBIM = cb.checked;
+  // Re-renderizar burndown se toggle estiver ativo
+  if(document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked){
+    renderBurndown();
+  }
+}
+function calcPctGrupo(g){
+  if(g.COMP.st==="done") return 100;
+  if(g.ORC.st==="wip"||g.BIM.st==="wip"||g.ORC.st==="done"||g.BIM.st==="done") return 75;
+  if(g.MDM.st==="done") return 50;
+  if(g.MDM.st==="wip") return 25;
+  return 0;
+}
 function renderExec(){
   const k1=calcMeta1();
   const k2=CFG.kpi2;
@@ -881,21 +864,12 @@ function renderExec(){
     ?`<div class="d-item ok"><span>✅</span>Sem divergências detectadas</div>`
     :divs.map(d=>`<div class="d-item ${d.cls}"><span class="d-ic">${d.ic}</span><span>${d.txt}</span></div>`).join("");
 
-  const risks=calcRiscos();
-  document.getElementById("risk-list").innerHTML=risks.length===0
-    ?`<div class="r-item"><span class="rbg ok">OK</span><span>Nenhum risco</span></div>`
-    :risks.map(r=>`<div class="r-item" style="flex-direction:column;align-items:flex-start;gap:2px;padding:4px 6px">
-        <div style="display:flex;align-items:center;gap:5px;width:100%">
-          <span class="rbg ${r.niv}">${r.niv==="alto"?"Alto":"Médio"}</span>
-          <span style="flex:1;font-weight:600">${r.txt}</span>
-          ${r.pp?`<span style="font-size:8px;color:var(--warn);font-weight:700;white-space:nowrap">${r.pp}%</span>`:""}
-        </div>
-        ${r.sit?`<div style="font-size:8.5px;color:#666;padding-left:2px">↳ ${r.sit}</div>`:""}
-      </div>`).join("");
+
 
   renderPlano();
 }
 
+function mudarAreaAcao(i,v){PLANO[i].area=v;renderPlano();if(window.fbSalvar)window.fbSalvar();}
 function renderPlano(){
   document.getElementById("plano-list").innerHTML=PLANO.length===0
     ?`<span style="font-size:9px;color:#aaa">Nenhuma ação.</span>`
@@ -903,7 +877,7 @@ function renderPlano(){
       <div class="p-item">
         <div class="p-chk ${p.done?"done":""}" onclick="togAcao(${i})">${p.done?"✓":""}</div>
         <span class="p-txt ${p.done?"done":""}" onclick="editAcao(${i})">${p.txt}</span>
-        <span class="p-area" style="background:${COR_A[p.area]||"#555"}">${p.area}</span>
+        <select onchange="mudarAreaAcao(${i},this.value)" style="font-size:8px;border:1px solid #ddd;border-radius:3px;padding:1px 3px;background:${p.area==='MDM'?'#006B3F':p.area==='ORC'?'#FF8B22':p.area==='BIM'?'#793F98':p.area==='COMP'?'#AC41D8':'#f5f5f5'};color:${p.area?'#fff':'#888'}"><option value="" ${!p.area?'selected':''}>— Área</option><option value="MDM" ${p.area==='MDM'?'selected':''}>MDM</option><option value="ORC" ${p.area==='ORC'?'selected':''}>Orçamento</option><option value="BIM" ${p.area==='BIM'?'selected':''}>BIM</option><option value="COMP" ${p.area==='COMP'?'selected':''}>Compilador</option></select>
         <button class="p-del" onclick="delAcao(${i})">✕</button>
       </div>`).join("");
 }
@@ -962,7 +936,7 @@ function renderGantt(){
   // Ela representa o nível esperado — colocamos ela DESLOCADA para a posição
   // onde o plano linear diria que estaríamos, dentro do período fev→dez/26:
   // Posição X proporcional a (_ppPlanejadoHoje / 90) dentro do período total do projeto
-  const _inicioProj=pd("2026-02-01");
+  const _inicioProj=pd("2026-04-01");
   const _fimMeta=pd("2026-12-31");
   const _duracaoTotal=(_fimMeta-_inicioProj)/86400000;
   // Data equivalente: quando o plano linear atingiria _ppPlanejadoHoje
@@ -984,10 +958,17 @@ function renderGantt(){
     // Ordenar grupos pela data prevista de conclusão do COMP
     // Acumular pctMeta até atingir 90%
     // A linha cai na data do grupo que cruza 90%
-    const lista = GRUPOS.map(g => ({
-      fimPrev: pd(g.COMP.fim),
-      contrib: g.pctMeta          // peso total do grupo quando entregue
-    })).sort((a,b) => a.fimPrev - b.fimPrev);
+    var _semBIMOn = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
+    const lista = GRUPOS.map(function(g){
+      var fimPrev;
+      if(_semBIMOn && g.semBIM){
+        // Grupo sem BIM: usar a data mais tardia entre MDM e ORC (ignora BIM)
+        fimPrev = new Date(Math.max(pd(g.MDM.fim).getTime(), pd(g.ORC.fim).getTime()));
+      } else {
+        fimPrev = pd(g.COMP.fim);
+      }
+      return {fimPrev: fimPrev, contrib: g.pctMeta};
+    }).sort(function(a,b){ return a.fimPrev - b.fimPrev; });
 
     let acum = 0;
     for(const item of lista){
@@ -1075,7 +1056,9 @@ function renderGantt(){
         const dot=g.pct===100?"#006B3F":g.pct>0?"#FF8B22":"#ccc";
         // Sub-linhas por área
         let subs="";
+        var _fArea=(document.getElementById("f-area")||{value:""}).value;
         AREAS.forEach((a,ai)=>{
+          if(_fArea && a!==_fArea) return;
           const b=g[a];
           const {l,w}=bPos(b.ini,b.fim);
           const cor=ACFG[a].cor;
@@ -1194,20 +1177,24 @@ function renderEpFase(){
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
         <b style="font-size:11px;color:var(--v1);flex:1">${g.nome}</b>
         <label class="ep-lbl" style="margin:0">% conclusão:</label>
-        <input type="number" id="g-pct-${gi}" value="${g.pct}" min="0" max="100" style="width:52px;border:1px solid var(--bdr);border-radius:3px;padding:3px 5px;font-size:10px">
-        <label class="ep-lbl" style="margin:0;color:var(--v1)">% meta:</label>
-        <input type="number" id="g-meta-${gi}" value="${g.pctMeta}" min="0" max="100" step="0.01" style="width:62px;border:1px solid var(--bdr);border-radius:3px;padding:3px 5px;font-size:10px">
+        <span style="font-size:9px;background:#f0f0f0;padding:2px 8px;border-radius:10px;color:#555">Conclusão: <b>${g.pct}%</b> (auto)</span>
+        <span style="font-size:9px;background:#e8f5ee;padding:2px 8px;border-radius:10px;color:var(--v1)">% meta: <b>${g.pctMeta.toFixed(4)}%</b></span>
+        <label id="lsb-${gi}" style="font-size:9px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:2px 8px;border-radius:10px;border:1px solid #ddd;background:#f9f9f9">
+          <input type="checkbox" id="g-sembim-${gi}" ${g.semBIM?"checked":""} onchange="updSemBIM(${gi})">
+          Sem BIM
+        </label>
       </div>
-      <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 88px;gap:3px;margin-bottom:3px">
+      <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 60px 88px;gap:3px;margin-bottom:3px">
         <span></span>
         <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center;background:#eee;padding:2px;border-radius:2px">Início LB 🔒</span>
         <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center;background:#eee;padding:2px;border-radius:2px">Fim LB 🔒</span>
         <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Início Prev.</span>
         <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Fim Prev.</span>
+        <span style="font-size:8px;font-weight:700;color:#793F98;text-align:center;background:#f3eaff;padding:2px;border-radius:2px">% Heatmap</span>
         <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center">Status</span>
       </div>
       ${AREAS.map(a=>`
-        <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 88px;gap:3px;align-items:center;margin-bottom:3px">
+        <div style="display:grid;grid-template-columns:72px 1fr 1fr 1fr 1fr 60px 88px;gap:3px;align-items:center;margin-bottom:3px">
           <label style="font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}</label>
           <input type="date" value="${g[a].iniLB||g[a].ini}" disabled
             style="border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;background:#f0f0f0;color:#aaa;cursor:not-allowed;width:100%">
@@ -1217,6 +1204,7 @@ function renderEpFase(){
             style="border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%">
           <input type="date" id="g-${a}-f-${gi}" value="${g[a].fim}"
             style="border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%">
+          <input type="number" id="g-${a}-p-${gi}" value="${g[a].pct||0}" min="0" max="100" style="border:1px solid #793F98;border-radius:3px;padding:2px 3px;font-size:8.5px;width:100%;color:#793F98">
           <select id="g-${a}-s-${gi}" class="ep-inp" style="font-size:8.5px">${stOpt(g[a].st)}</select>
         </div>`).join("")}
     </div>`).join("");
@@ -1225,16 +1213,21 @@ function renderEpFase(){
 function saveEpFase(){
   const fk=FASES[epFase];
   GRUPOS.filter(g=>g.fase===fk).forEach((g,gi)=>{
-    g.pct=parseFloat(document.getElementById(`g-pct-${gi}`).value)||0;
+    // pct calculado automaticamente pelo status das áreas
     g.pctMeta=parseFloat(document.getElementById(`g-meta-${gi}`).value)||0;
     AREAS.forEach(a=>{
       // Preservar linha de base (iniLB/fimLB) — nunca sobrescrever
       // Só atualizar ini/fim (previsto/realizado)
       g[a].ini=document.getElementById(`g-${a}-i-${gi}`).value;
       g[a].fim=document.getElementById(`g-${a}-f-${gi}`).value;
+      var pEl=document.getElementById('g-'+a+'-p-'+gi);
+      if(pEl) g[a].pct=parseFloat(pEl.value)||0;
       g[a].st=document.getElementById(`g-${a}-s-${gi}`).value;
       // iniLB e fimLB permanecem intocados
     });
+    var cbSB = document.getElementById('g-sembim-'+gi);
+    if(cbSB) g.semBIM = cbSB.checked;
+    g.pct = calcPctGrupo(g);
   });
 }
 
@@ -1268,7 +1261,7 @@ function renderBurndown(){
   const CW = W - PAD.l - PAD.r;
   const CH = H - PAD.t - PAD.b;
 
-  const inicio = pd("2026-02-01");
+  const inicio = pd("2026-04-01");
   const fimMeta = pd("2026-12-31");
   const totalDias = (fimMeta - inicio) / 86400000;
   const hoje = pd(CFG.hoje);
@@ -1301,7 +1294,7 @@ function renderBurndown(){
   });
 
   // Grade vertical — meses
-  const MESES_PT = ["Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+  const MESES_PT = ["Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
   MESES_PT.forEach((m,i) => {
     const t = (i*30.5) / totalDias;
     if(t > 1) return;
@@ -1324,16 +1317,17 @@ function renderBurndown(){
   // Linha REALIZADO — acumular pctMeta*pct/100 por data de conclusão
   const eventos = [];
   GRUPOS.forEach(g => {
-    if(g.pct > 0){
-      // data de conclusão = fim da área mais avançada concluída
-      let fimReal = null;
-      ["COMP","BIM","ORC","MDM"].forEach(a => {
-        if(g[a].st==="done" && (!fimReal || pd(g[a].fim) > fimReal))
+    // Realizado = apenas áreas done com data de fim <= hoje
+    let fimReal = null;
+    ["COMP","BIM","ORC","MDM"].forEach(a => {
+      if(g[a].st==="done" && pd(g[a].fim) <= hoje){
+        if(!fimReal || pd(g[a].fim) > fimReal)
           fimReal = pd(g[a].fim);
-      });
-      if(!fimReal) fimReal = pd(g.MDM.fim);
-      if(fimReal >= inicio && fimReal <= fimMeta)
-        eventos.push({ data: fimReal, pp: g.pctMeta * g.pct / 100 });
+      }
+    });
+    if(fimReal && fimReal >= inicio && fimReal <= fimMeta){
+      // Contribuição proporcional ao progresso já efetivado até hoje
+      eventos.push({ data: fimReal, pp: g.pctMeta * g.pct / 100 });
     }
   });
   eventos.sort((a,b) => a.data - b.data);
@@ -1529,7 +1523,12 @@ function renderHeatmap(){
     fases.forEach(f => {
       const gs = GRUPOS.filter(g=>g.fase===f);
       if(!gs.length){ html+=`<div class="hm-cell" style="background:#eee"></div>`; return; }
-      const med = Math.round(gs.reduce((s,g)=>s+g[a].pct,0)/gs.length);
+      // Converter status da área em % pela mesma lógica do calcPctGrupo
+      const med = Math.round(gs.reduce((acc,g)=>{
+        var ap = g[a].st==="done" ? 100 :
+                 g[a].st==="wip"  ? (a==="MDM" ? 50 : 75) : 0;
+        return acc+ap;
+      },0)/gs.length);
       const {bg,fg} = hmCor(med);
       html += `<div class="hm-cell" style="background:${bg};color:${fg}" title="${f}·${areaLabels[a]}: ${med}%">${med}%</div>`;
     });
@@ -1628,31 +1627,50 @@ function renderVelocidade(){
       .sort((a2,b2)=>pd(a2[a].fim)-pd(b2[a].fim))
       .slice(0,3);
 
+    // Ritmo atual: grupos concluídos nos últimos 30 dias
+    // Ritmo atual: total concluído desde 01/04 ÷ semanas decorridas
+    // (datas do plano são passadas, janela 30d retorna sempre 0)
+    var inicioProj = pd("2026-04-01");
+    var semanasDecorr = Math.max(1, (hoje - inicioProj) / 86400000 / 7);
+    var totalConcl = GRUPOS.filter(function(g){return g[a].st==="done";}).length;
+    var ritmoAtual = (totalConcl / semanasDecorr).toFixed(1);
+    var ritmoAtualCor = totalConcl>0?"#006B3F":"#aaa";
+    var aguardandoTxt = aguardando.length>0?(aguardando.length+" aguardam predecessor"):"";
+    var aguardandoHtml = aguardandoTxt ? '<div style="font-size:7px;color:#aaa">'+aguardandoTxt+'</div>' : '';
+    var ritmoPendTxt = pendentes.length>0?ritmo.toFixed(1)+"/sem":"—";
+
+    var _atHtml = (diasProx!==null && diasProx<0)
+      ? '<span style="color:#BF360C">('+Math.abs(diasProx)+'d atrasado)</span>'
+      : '<span style="color:#888">(em '+diasProx+'d)</span>';
+    var _proxHtml = proximoGrupo
+      ? '<b>Próxima entrega:</b> '+proximoGrupo.nome+' · '+fmtBR(proximaData)+' '+_atHtml
+      : '<span style="color:#888">Aguardando predecessores liberarem</span>';
     html += `<div style="border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;background:#fff;border-left:4px solid ${cor}">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <span style="font-size:10px;font-weight:700;color:${cor};flex:1">${label}</span>
         <span style="font-size:8px;font-weight:700;padding:2px 6px;border-radius:10px;background:${statusBg};color:${statusCor}">${statusTxt}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:6px">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-bottom:6px">
         <div style="background:#F5FAF5;border-radius:3px;padding:4px 6px">
-          <div style="font-size:7.5px;color:#888">Acionáveis agora</div>
-          <div style="font-size:14px;font-weight:700;color:${cor}">${pendentes.length}<span style="font-size:9px;color:#aaa"> / ${todosPendentes.length} pend.</span></div>
-          ${aguardando.length>0?`<div style="font-size:7.5px;color:#aaa">${aguardando.length} aguard. predecessor</div>`:""}
+          <div style="font-size:7.5px;color:#888">Pendentes liberados</div>
+          <div style="font-size:13px;font-weight:700;color:${cor}">${pendentes.length}<span style="font-size:9px;color:#aaa"> / ${todosPendentes.length}</span></div>
+          ${aguardandoHtml}
+        </div>
+        <div style="background:#F5FAF5;border-radius:3px;padding:4px 6px">
+          <div style="font-size:7.5px;color:#888">Ritmo atual (30d)</div>
+          <div style="font-size:13px;font-weight:700;color:${ritmoAtualCor}">${ritmoAtual}<span style="font-size:9px;color:#aaa"> /sem</span></div>
         </div>
         <div style="background:#F5FAF5;border-radius:3px;padding:4px 6px">
           <div style="font-size:7.5px;color:#888">Ritmo necessário</div>
-          <div style="font-size:14px;font-weight:700;color:${statusCor}">${pendentes.length>0?ritmo.toFixed(1)+"<span style='font-size:9px;color:#aaa'> /sem</span>":"—"}</div>
+          <div style="font-size:13px;font-weight:700;color:${statusCor}">${pendentes.length>0?ritmo.toFixed(1):"—"}<span style="font-size:9px;color:#aaa"> /sem</span></div>
         </div>
       </div>
       <div style="font-size:8px;color:#555;margin-bottom:4px">
-        ${proximoGrupo
-          ? `<b>Próxima entrega:</b> ${proximoGrupo.nome} · ${fmtBR(proximaData)}
-             ${diasProx<0?`<span style="color:#BF360C">(${Math.abs(diasProx)}d atrasado)</span>`:`<span style="color:#888">(em ${diasProx}d)</span>`}`
-          : `<span style="color:#888">Aguardando predecessores liberarem</span>`}
+        ${_proxHtml}
       </div>
       <div style="font-size:8px;color:#888;border-top:1px solid #eee;padding-top:4px">
         ${proximos.map(g=>`<div style="display:flex;justify-content:space-between"><span>${g.fase} · ${g.nome}</span><span style="color:#aaa">${fmtBR(pd(g[a].fim))}</span></div>`).join("")}
-        ${pendentes.length>3?`<div style="color:#aaa">+${pendentes.length-3} outros</div>`:""}
+        ${pendentes.length>3?`<div style="color:#aaa;font-style:italic">+ ${pendentes.length-3} grupos com predecessor liberado</div>`:""}
         ${aguardando.length>0 && pendentes.length===0?`<div style="color:#aaa;font-style:italic">${aguardando.length} grupos aguardam liberação do predecessor</div>`:""}
       </div>
     </div>`;
@@ -1827,6 +1845,10 @@ window.TAKEAWAYS = TAKEAWAYS;
 window.CFG    = CFG;
 
 function renderTudo(){
+  // Recalcular % de conclusão de todos os grupos pelo status atual
+  if(typeof calcPctGrupo === "function"){
+    GRUPOS.forEach(function(g){ g.pct = calcPctGrupo(g); });
+  }
   CFG.hoje = _HOJE_STR;
   CFG.rod  = "Atualizado em " + _HOJE_BR;
   document.getElementById("hoje-txt").textContent = _HOJE_BR;
@@ -1868,5 +1890,27 @@ if(window.fbPronto){
   setTimeout(() => { if(!window.fbPronto) renderTudo(); }, 3000);
 }
 </script>
+<div class="edit-panel" id="ep">
+  <div class="ep-h">✏️ Painel de Edição</div>
+  <div class="ep-grid">
+    <div class="ep-card">
+      <h3>Configurações Gerais</h3>
+      <label class="ep-lbl">% Meta 2 — Utilizados em Orçamentos (realizado)</label><input class="ep-inp" type="number" id="e-k2" min="0" max="120">
+      <label class="ep-lbl">Data de Hoje (AAAA-MM-DD)</label><input class="ep-inp" type="date" id="e-hoje">
+      <label class="ep-lbl">Data do rodapé</label><input class="ep-inp" type="text" id="e-rod">
+    </div>
+    <div class="ep-card" style="grid-column:1/-1">
+      <h3>Grupos por Fase — datas, status e %</h3>
+      <p class="ep-hint">Selecione a fase. Edite: % de conclusão geral, peso na meta, e para cada área: início, fim e status (done/wip/plan).</p>
+      <div class="ep-tabs" id="ep-tabs"></div>
+      <div id="ep-fase"></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn p" onclick="aplicar()">✅ Aplicar</button>
+    <button class="btn s" onclick="toggleEdit()">✖ Fechar</button>
+  </div>
+</div>
+
 </body>
 </html>

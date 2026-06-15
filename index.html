@@ -791,6 +791,24 @@ function calcRiscos(){
 
 // ══ RENDER EXEC ══
 
+function corrigirDatasLB(){
+  var count = 0;
+  GRUPOS.forEach(function(g){
+    ["MDM","ORC","BIM","COMP"].forEach(function(a){
+      if(g[a].ini    === "2026-02-19"){ g[a].ini    = "2026-04-01"; count++; }
+      if(g[a].fim    === "2026-02-19"){ g[a].fim    = "2026-04-01"; count++; }
+      if(g[a].iniLB  === "2026-02-19"){ g[a].iniLB  = "2026-04-01"; count++; }
+      if(g[a].fimLB  === "2026-02-19"){ g[a].fimLB  = "2026-04-01"; count++; }
+    });
+  });
+  if(count === 0){
+    alert("Nenhuma data 19/02/2026 encontrada nos dados.");
+    return;
+  }
+  alert(count + " data(s) corrigida(s): 19/02/2026 → 01/04/2026. Salvando no Firebase...");
+  calcCPM(); renderExec(); renderGantt(); renderBurndown(); renderHeatmap(); renderVelocidade();
+  if(window.fbSalvar) window.fbSalvar();
+}
 function updSemBIM(gi){
   var cb = document.getElementById('g-sembim-'+gi);
   var lb = document.getElementById('lsb-'+gi);
@@ -1909,6 +1927,7 @@ if(window.fbPronto){
   <div class="btn-row">
     <button class="btn p" onclick="aplicar()">✅ Aplicar</button>
     <button class="btn s" onclick="toggleEdit()">✖ Fechar</button>
+    <button class="btn s" onclick="corrigirDatasLB()" style="background:#FF8B22;color:#fff;border-color:#FF8B22" title="Substitui 19/02/2026 por 01/04/2026 em todas as datas de linha de base e previstas">🔧 Corrigir datas 19/02→01/04</button>
   </div>
 </div>
 

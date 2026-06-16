@@ -1260,7 +1260,7 @@ function renderGantt(){
         || `<div class="gmtt-sub">Nenhum GM nesta fase.</div>`;
       const totIt=info.gms.reduce((s,g)=>s+(g.it||0),0);
       gmtt.innerHTML=`<h4>${info.label}<span class="gmtt-badge">${info.total} GM${info.total!==1?"s":""}</span></h4>
-        <div class="gmtt-sub">Fase ${fase} · quantidade unitária total: ${info.total}${totIt>0?` · ${totIt} itens`:''}${info.gms.some(g=>g.nt==="SIM")?' · ★ = notável':''}</div>
+        <div class="gmtt-sub">Fase ${fase} · ${info.total} grupo${info.total!==1?"s":""}${totIt>0?` · ${totIt} itens`:''}${info.gms.some(g=>g.nt==="SIM")?' · ★ = notável':''}</div>
         <div class="gmtt-list">${items}</div>`;
     }
     gmtt.style.display="block";

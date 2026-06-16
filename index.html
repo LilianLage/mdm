@@ -1144,6 +1144,8 @@ function renderGantt(){
     const metaF=all.reduce((s,g)=>s+g.pctMeta,0).toFixed(1);
     const gmF=sumGM(all);
     const itF=sumItens(all);
+    const gmConc=sumGM(all.filter(g=>g.pct===100));
+    const pctGM=gmF?Math.round(all.reduce((s,g)=>s+g.pct*gmCount(g),0)/gmF):0;
     const isCollapsed=!!COLLAPSED[fk];
 
     html+=`<div class="fase-hdr" onclick="toggleFase('${fk}')" id="hdr-${fk.replace(" ","")}">
@@ -1156,7 +1158,10 @@ function renderGantt(){
       </div>
       <div class="fase-prog">
         <div class="fase-prog-bar"><div class="fase-prog-fill" style="width:${pctF}%"></div></div>
-        <span class="fase-prog-txt">${nConc}/${all.length} concluídos · ${pctF}%</span>
+        <span class="fase-prog-txt" style="display:flex;flex-direction:column;line-height:1.25;text-align:right">
+          <span>${nConc}/${all.length} grupos concluídos · ${pctF}%</span>
+          <span style="font-weight:600;opacity:.85">${gmConc}/${gmF} GMs concluídos · ${pctGM}%</span>
+        </span>
       </div>
     <div class="fase-grid"></div>
     </div>`;

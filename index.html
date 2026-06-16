@@ -404,8 +404,17 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div class="kpi-block">
     <div class="kpi-item">
       <div class="kpi-label">Meta 1 — Aptos p/ Operação</div>
-      <div class="kpi-val" id="k1-v">—</div>
-      <div class="kpi-sub">Realizado · Meta: 90% até dez/26</div>
+      <div class="kpi-val" id="k1-v" style="display:flex;align-items:baseline;gap:16px;cursor:help">
+        <span style="display:inline-flex;flex-direction:column;line-height:1.05">
+          <span id="k1-prog">—</span>
+          <span style="font-size:9px;font-weight:600;color:#888;letter-spacing:.3px">progresso</span>
+        </span>
+        <span style="display:inline-flex;flex-direction:column;line-height:1.05">
+          <span id="k1-concl" style="color:#52B788">—</span>
+          <span style="font-size:9px;font-weight:600;color:#888;letter-spacing:.3px">concluído</span>
+        </span>
+      </div>
+      <div class="kpi-sub">Progresso e concluído · Meta: 90% até dez/26</div>
       <div class="kpi-bar"><div class="kpi-fill" id="k1-b"></div></div>
     </div>
     <div class="kpi-item">
@@ -921,12 +930,12 @@ function renderExec(){
   const k1=calcMeta1();
   const k2=CFG.kpi2;
   const k1El = document.getElementById("k1-v");
-  k1El.textContent=k1.toFixed(1)+"%";
   // Tooltip customizado: listar grupos 100% concluídos
   const _aptos = GRUPOS.filter(g=>g.pct===100);
+  const k1Concl = _aptos.reduce((s,g)=>s+g.pctMeta,0); // concluído por todas as áreas
+  document.getElementById("k1-prog").textContent  = k1.toFixed(1)+"%";
+  document.getElementById("k1-concl").textContent = k1Concl.toFixed(1)+"%";
   k1El.style.cursor = "help";
-  k1El.style.textDecoration = "underline dotted";
-  k1El.style.textDecorationColor = "rgba(0,107,63,.4)";
   k1El.onmouseenter = (e) => {
     const tt = document.getElementById("tt");
     const linhas = _aptos.length

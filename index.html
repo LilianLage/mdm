@@ -350,11 +350,13 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   sc.type = 'module';
   sc.textContent = [
     'import{initializeApp}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";',
-    'import{getFirestore,doc,getDoc,setDoc}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";',
+    'import{getFirestore,doc,getDoc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";',
     'var app=initializeApp({apiKey:"AIzaSyB7URLeOjy1ofQx6TxYp4XbYhbxAxOOwdE",authDomain:"dados-mestres.firebaseapp.com",projectId:"dados-mestres",storageBucket:"dados-mestres.firebasestorage.app",messagingSenderId:"739025205181",appId:"1:739025205181:web:79e344d6e203daa57604d4"});',
     'var db=getFirestore(app);var REF=doc(db,"mdm","dashboard");',
-    'window.fbSalvar=async function(){try{await setDoc(REF,{grupos:JSON.stringify(window.GRUPOS),plano:JSON.stringify(window.PLANO),takeaways:JSON.stringify(window.TAKEAWAYS),cfg:JSON.stringify({kpi2:window.CFG.kpi2}),ts:new Date().toISOString()});window.mostrarSyncStatus("✅ Dados salvos","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
-    'window.fbCarregar=async function(){try{var snap=await getDoc(REF);if(!snap.exists())return false;var d=snap.data();if(d.grupos){var v=JSON.parse(d.grupos);if(Array.isArray(v)&&v.length)window.GRUPOS.splice(0,window.GRUPOS.length,...v);}if(d.plano){var v2=JSON.parse(d.plano);if(Array.isArray(v2))window.PLANO.splice(0,window.PLANO.length,...v2);}if(d.takeaways){var v3=JSON.parse(d.takeaways);if(Array.isArray(v3))window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...v3);}if(d.cfg){var v4=JSON.parse(d.cfg);if(v4&&v4.kpi2!==undefined)window.CFG.kpi2=v4.kpi2;}window.mostrarSyncStatus("🔄 Carregado","#006B3F");return true;}catch(e){return false;}};',
+    'window.fbSalvarParcial=async function(payload){try{if(!payload)return;var out={ts:new Date().toISOString()};if(payload.cells&&Object.keys(payload.cells).length)out.cells=payload.cells;if(payload.meta&&Object.keys(payload.meta).length)out.meta=payload.meta;if(payload.cfg)out.cfg=payload.cfg;if(payload.plano)out.plano=payload.plano;if(payload.takeaways)out.takeaways=payload.takeaways;await setDoc(REF,out,{merge:true});window.mostrarSyncStatus("✅ Salvo","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
+    'window.fbSalvar=async function(){try{var p=window.fbCellsPayload?window.fbCellsPayload():{};p.plano=JSON.stringify(window.PLANO);p.takeaways=JSON.stringify(window.TAKEAWAYS);p.cfg=JSON.stringify({kpi2:window.CFG.kpi2});p.ts=new Date().toISOString();await setDoc(REF,p,{merge:true});window.mostrarSyncStatus("✅ Dados salvos","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
+    'window._fbListen=function(){try{onSnapshot(REF,function(snap){if(!snap.exists())return;if(snap.metadata&&snap.metadata.hasPendingWrites)return;window.fbAplicarRemoto(snap.data());if(window.renderTudo)window.renderTudo();});}catch(e){}};',
+    'window.fbCarregar=async function(){try{var snap=await getDoc(REF);if(snap.exists()){var d=snap.data();if(d.cells||d.meta){window.fbAplicarRemoto(d);}else if(d.grupos){var v=JSON.parse(d.grupos);if(Array.isArray(v)&&v.length)window.GRUPOS.splice(0,window.GRUPOS.length,...v);window._GIDS=null;if(d.plano){var p2=JSON.parse(d.plano);if(Array.isArray(p2))window.PLANO.splice(0,window.PLANO.length,...p2);}if(d.takeaways){var t3=JSON.parse(d.takeaways);if(Array.isArray(t3))window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...t3);}if(d.cfg){var c4=JSON.parse(d.cfg);if(c4&&c4.kpi2!==undefined)window.CFG.kpi2=c4.kpi2;}await window.fbSalvar();}}else{await window.fbSalvar();}window._fbListen();window.mostrarSyncStatus("🔄 Sincronizado ao vivo","#006B3F");return true;}catch(e){return false;}};',
     'window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();'
   ].join('');
   sc.onerror=function(){window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();};
@@ -1140,6 +1142,8 @@ function renderGantt(){
     const nConc=all.filter(g=>g.pct===100).length;
     const pctF=Math.round(all.reduce((s,g)=>s+g.pct,0)/all.length);
     const metaF=all.reduce((s,g)=>s+g.pctMeta,0).toFixed(1);
+    const gmF=sumGM(all);
+    const itF=sumItens(all);
     const isCollapsed=!!COLLAPSED[fk];
 
     html+=`<div class="fase-hdr" onclick="toggleFase('${fk}')" id="hdr-${fk.replace(" ","")}">
@@ -1147,7 +1151,7 @@ function renderGantt(){
         <span class="fase-arrow ${isCollapsed?"collapsed":""}">▼</span>
         <div class="fase-info">
           <span class="fase-nome">${fk}</span>
-          <span class="fase-meta">${all.length} grupos · peso: ${metaF}%</span>
+          <span class="fase-meta">${all.length} grupos · ${gmF} GMs · ${itF.toLocaleString('pt-BR')} itens · peso: ${metaF}%</span>
         </div>
       </div>
       <div class="fase-prog">
@@ -1357,28 +1361,35 @@ function renderEpFase(){
 
 function saveEpFase(){
   const fk=FASES[epFase];
+  var dirty={cells:{}, meta:{}};
   GRUPOS.filter(g=>g.fase===fk).forEach((g,gi)=>{
-    // pct e pctMeta são automáticos: pct pelo status das áreas; pctMeta pela fração de GMs (renderTudo)
+    var gid = window.gidOf ? window.gidOf(g) : null;
+    // pct e pctMeta são automáticos: pct pelo status das áreas; pctMeta = peso financeiro
     AREAS.forEach(a=>{
-      // Preservar linha de base (iniLB/fimLB) — nunca sobrescrever
-      // Só atualizar ini/fim (previsto/realizado)
-      g[a].ini=document.getElementById(`g-${a}-i-${gi}`).value;
-      g[a].fim=document.getElementById(`g-${a}-f-${gi}`).value;
+      var ni=document.getElementById(`g-${a}-i-${gi}`).value;
+      var nf=document.getElementById(`g-${a}-f-${gi}`).value;
       var pEl=document.getElementById('g-'+a+'-p-'+gi);
-      if(pEl) g[a].pct=parseFloat(pEl.value)||0;
-      g[a].st=document.getElementById(`g-${a}-s-${gi}`).value;
-      // iniLB e fimLB: só salvar se desbloqueado
+      var np=pEl?(parseFloat(pEl.value)||0):(g[a].pct||0);
+      var ns=document.getElementById(`g-${a}-s-${gi}`).value;
+      var changed=(ni!==g[a].ini)||(nf!==g[a].fim)||(np!==(g[a].pct||0))||(ns!==g[a].st);
+      // Linha de base (iniLB/fimLB): só salvar se desbloqueado
       if(window._lbUnlocked){
         var ei=document.getElementById('g-'+a+'-lbi-'+gi);
         var ef=document.getElementById('g-'+a+'-lbf-'+gi);
-        if(ei) g[a].iniLB=ei.value;
-        if(ef) g[a].fimLB=ef.value;
+        if(ei && ei.value!==(g[a].iniLB||g[a].ini)){ g[a].iniLB=ei.value; changed=true; }
+        if(ef && ef.value!==(g[a].fimLB||g[a].fim)){ g[a].fimLB=ef.value; changed=true; }
       }
+      g[a].ini=ni; g[a].fim=nf; if(pEl) g[a].pct=np; g[a].st=ns;
+      // Registrar só a célula (grupo+área) que a pessoa de fato alterou
+      if(changed && gid){ dirty.cells[gid+"__"+a]={ini:g[a].ini,fim:g[a].fim,iniLB:g[a].iniLB||null,fimLB:g[a].fimLB||null,st:g[a].st,pct:g[a].pct||0}; }
     });
     var cbSB = document.getElementById('g-sembim-'+gi);
+    var oldSB = !!g.semBIM;
     if(cbSB) g.semBIM = cbSB.checked;
     g.pct = calcPctGrupo(g);
+    if(gid && (!!g.semBIM)!==oldSB){ dirty.meta[gid]={pctMeta:g.pctMeta,semBIM:!!g.semBIM}; }
   });
+  window._epDirty = dirty;
 }
 
 function aplicar(){
@@ -1388,7 +1399,11 @@ function aplicar(){
   saveEpFase();
   calcCPM();
   renderExec();renderGantt();renderBurndown();renderHeatmap();renderVelocidade();toggleEdit();
-  if(window.fbSalvar) window.fbSalvar();
+  // Salvar SÓ o que mudou (sem sobrescrever as áreas dos outros)
+  var payload = window._epDirty || {cells:{},meta:{}};
+  payload.cfg = JSON.stringify({kpi2:CFG.kpi2});
+  if(window.fbSalvarParcial) window.fbSalvarParcial(payload);
+  else if(window.fbSalvar) window.fbSalvar();
 }
 
 
@@ -2045,6 +2060,45 @@ window.PLANO  = PLANO;
 window.TAKEAWAYS = TAKEAWAYS;
 window.CFG    = CFG;
 
+// ── Sincronização por célula (evita que uma área sobrescreva a outra) ──
+window._GIDS = null;
+window.gidOf = function(g){
+  if(!window._GIDS){
+    window._GIDS = new Map(); var used={};
+    GRUPOS.forEach(function(x){
+      var base=(x.fase+"__"+x.nome).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]/g,"_");
+      var id=base, k=1; while(used[id]){ id=base+"_"+(k++); } used[id]=1;
+      window._GIDS.set(x,id);
+    });
+  }
+  return window._GIDS.get(g);
+};
+// aplica células/meta recebidas do Firebase sobre o GRUPOS local (mescla, não substitui)
+window.fbAplicarRemoto = function(d){
+  if(!d) return;
+  var AS=["MDM","ORC","BIM","COMP"];
+  if(d.cells){ GRUPOS.forEach(function(g){ var id=window.gidOf(g); AS.forEach(function(a){
+    var c=d.cells[id+"__"+a]; if(!c) return;
+    if(c.ini!=null)g[a].ini=c.ini; if(c.fim!=null)g[a].fim=c.fim;
+    if(c.iniLB!=null)g[a].iniLB=c.iniLB; if(c.fimLB!=null)g[a].fimLB=c.fimLB;
+    if(c.st!=null)g[a].st=c.st; if(c.pct!=null)g[a].pct=c.pct;
+  }); }); }
+  if(d.meta){ GRUPOS.forEach(function(g){ var m=d.meta[window.gidOf(g)]; if(!m)return;
+    if(m.pctMeta!=null)g.pctMeta=m.pctMeta; if(m.semBIM!=null)g.semBIM=m.semBIM; }); }
+  if(d.plano){try{var p=JSON.parse(d.plano);if(Array.isArray(p))PLANO.splice(0,PLANO.length,...p);}catch(e){}}
+  if(d.takeaways){try{var t=JSON.parse(d.takeaways);if(Array.isArray(t))TAKEAWAYS.splice(0,TAKEAWAYS.length,...t);}catch(e){}}
+  if(d.cfg){try{var c=JSON.parse(d.cfg);if(c&&c.kpi2!==undefined)CFG.kpi2=c.kpi2;}catch(e){}}
+};
+// monta o pacote completo de células (para salvar tudo ou migrar do formato antigo)
+window.fbCellsPayload = function(){
+  var cells={}, meta={}, AS=["MDM","ORC","BIM","COMP"];
+  GRUPOS.forEach(function(g){ var id=window.gidOf(g);
+    AS.forEach(function(a){ cells[id+"__"+a]={ini:g[a].ini,fim:g[a].fim,iniLB:g[a].iniLB||null,fimLB:g[a].fimLB||null,st:g[a].st,pct:g[a].pct||0}; });
+    meta[id]={pctMeta:g.pctMeta,semBIM:!!g.semBIM};
+  });
+  return {cells:cells, meta:meta};
+};
+
 function renderTudo(){
   // Recalcular % de conclusão de todos os grupos pelo status atual
   if(typeof calcPctGrupo === "function"){
@@ -2064,6 +2118,7 @@ function renderTudo(){
   renderHeatmap();
   renderVelocidade();
 }
+window.renderTudo = renderTudo;
 
 // Botão salvar fixo
 (function(){

@@ -342,6 +342,8 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   if(!isGH){
     window.fbSalvar   = function(){ console.log('Firebase desativado'); };
     window.fbCarregar = function(){ return Promise.resolve(false); };
+    window._fbLog     = function(){};
+    window._fbCarregarLog = function(){ return Promise.resolve([]); };
     window.fbPronto   = true;
     if(window._fbOnPronto) window._fbOnPronto();
     return;
@@ -350,13 +352,15 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   sc.type = 'module';
   sc.textContent = [
     'import{initializeApp}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";',
-    'import{getFirestore,doc,getDoc,setDoc,onSnapshot}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";',
+    'import{getFirestore,doc,getDoc,setDoc,onSnapshot,collection,addDoc,query,orderBy,limit,getDocs}from"https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";',
     'var app=initializeApp({apiKey:"AIzaSyB7URLeOjy1ofQx6TxYp4XbYhbxAxOOwdE",authDomain:"dados-mestres.firebaseapp.com",projectId:"dados-mestres",storageBucket:"dados-mestres.firebasestorage.app",messagingSenderId:"739025205181",appId:"1:739025205181:web:79e344d6e203daa57604d4"});',
     'var db=getFirestore(app);var REF=doc(db,"mdm","dashboard");',
     'window.fbSalvarParcial=async function(payload){try{if(!payload)return;var out={ts:new Date().toISOString()};if(payload.cells&&Object.keys(payload.cells).length)out.cells=payload.cells;if(payload.meta&&Object.keys(payload.meta).length)out.meta=payload.meta;if(payload.cfg)out.cfg=payload.cfg;if(payload.plano)out.plano=payload.plano;if(payload.takeaways)out.takeaways=payload.takeaways;await setDoc(REF,out,{merge:true});window.mostrarSyncStatus("✅ Salvo","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
     'window.fbSalvar=async function(){try{var p=window.fbCellsPayload?window.fbCellsPayload():{};p.plano=JSON.stringify(window.PLANO);p.takeaways=JSON.stringify(window.TAKEAWAYS);p.cfg=JSON.stringify({kpi2:window.CFG.kpi2});p.ts=new Date().toISOString();await setDoc(REF,p,{merge:true});window.mostrarSyncStatus("✅ Dados salvos","#006B3F");}catch(e){window.mostrarSyncStatus("⚠️ "+e.message,"#BF360C");}};',
     'window._fbListen=function(){try{onSnapshot(REF,function(snap){if(!snap.exists())return;if(snap.metadata&&snap.metadata.hasPendingWrites)return;window.fbAplicarRemoto(snap.data());if(window.renderTudo)window.renderTudo();});}catch(e){}};',
     'window.fbCarregar=async function(){try{var snap=await getDoc(REF);if(snap.exists()){var d=snap.data();if(d.cells||d.meta){window.fbAplicarRemoto(d);}else if(d.grupos){var v=JSON.parse(d.grupos);if(Array.isArray(v)&&v.length)window.GRUPOS.splice(0,window.GRUPOS.length,...v);window._GIDS=null;if(d.plano){var p2=JSON.parse(d.plano);if(Array.isArray(p2))window.PLANO.splice(0,window.PLANO.length,...p2);}if(d.takeaways){var t3=JSON.parse(d.takeaways);if(Array.isArray(t3))window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...t3);}if(d.cfg){var c4=JSON.parse(d.cfg);if(c4&&c4.kpi2!==undefined)window.CFG.kpi2=c4.kpi2;}await window.fbSalvar();}}else{await window.fbSalvar();}window._fbListen();window.mostrarSyncStatus("🔄 Sincronizado ao vivo","#006B3F");return true;}catch(e){return false;}};',
+    'window._fbLog=async function(e){try{if(!e)return;await addDoc(collection(db,"audit_log"),e);}catch(err){}};',
+    'window._fbCarregarLog=async function(){try{var q=query(collection(db,"audit_log"),orderBy("ts","desc"),limit(300));var s=await getDocs(q);var out=[];s.forEach(function(d){out.push(d.data());});return out;}catch(err){return [];}};',
     'window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();'
   ].join('');
   sc.onerror=function(){window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();};
@@ -395,6 +399,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
       <button class="exp-item" onclick="exportarPDF()"><span>📄</span> Exportar PDF</button>
       <button class="exp-item" onclick="exportarCSV()"><span>📊</span> Exportar CSV</button>
       <button class="exp-item" onclick="exportarJSON()"><span>📦</span> Exportar JSON</button>
+      <button class="exp-item" onclick="abrirHistorico()"><span>📜</span> Histórico de edições</button>
     </div>
   </div>
 </header>
@@ -984,7 +989,7 @@ function renderExec(){
   renderPlano();
 }
 
-function mudarAreaAcao(i,v){PLANO[i].area=v;renderPlano();if(window.fbSalvar)window.fbSalvar();}
+function mudarAreaAcao(i,v){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>mudarAreaAcao(i,v)))return;var _oa=PLANO[i].area||"—";PLANO[i].area=v;renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Editou",'"'+PLANO[i].txt+'" — área: '+_oa+' → '+(v||"—"));if(window.fbSalvar)window.fbSalvar();}
 function renderPlano(){
   document.getElementById("plano-list").innerHTML=PLANO.length===0
     ?`<span style="font-size:9px;color:#aaa">Nenhuma ação.</span>`
@@ -1007,16 +1012,16 @@ function renderTA(){
         <button class="ta-del" onclick="delTA(${i})" title="Remover">✕</button>
       </div>`).join("");
 }
-function togTADest(i){TAKEAWAYS[i].dest=!TAKEAWAYS[i].dest;renderTA();if(window.fbSalvar)window.fbSalvar();}
-function editTA(i){const n=prompt("Editar take away:",TAKEAWAYS[i].txt);if(n===null)return;if(!n.trim()){delTA(i);return;}TAKEAWAYS[i].txt=n.trim();renderTA();}
-function delTA(i){if(!confirm(`Remover?
-"${TAKEAWAYS[i].txt.slice(0,60)}..."`))return;TAKEAWAYS.splice(i,1);renderTA();}
-function addTA(){const t=prompt("Novo take away:");if(!t||!t.trim())return;TAKEAWAYS.push({txt:t.trim(),dest:false});renderTA();if(window.fbSalvar)window.fbSalvar();}
+function togTADest(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>togTADest(i)))return;TAKEAWAYS[i].dest=!TAKEAWAYS[i].dest;renderTA();if(window.mdmLog)mdmLog("Take aways",TAKEAWAYS[i].dest?"Destacou":"Removeu destaque",'"'+TAKEAWAYS[i].txt+'"');if(window.fbSalvar)window.fbSalvar();}
+function editTA(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>editTA(i)))return;var _o=TAKEAWAYS[i].txt;const n=prompt("Editar take away:",TAKEAWAYS[i].txt);if(n===null)return;if(!n.trim()){delTA(i);return;}TAKEAWAYS[i].txt=n.trim();renderTA();if(window.mdmLog)mdmLog("Take aways","Editou",'"'+_o+'" → "'+n.trim()+'"');if(window.fbSalvar)window.fbSalvar();}
+function delTA(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>delTA(i)))return;var _t=TAKEAWAYS[i].txt;if(!confirm(`Remover?
+"${TAKEAWAYS[i].txt.slice(0,60)}..."`))return;TAKEAWAYS.splice(i,1);renderTA();if(window.mdmLog)mdmLog("Take aways","Removeu",'"'+_t+'"');if(window.fbSalvar)window.fbSalvar();}
+function addTA(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addTA))return;const t=prompt("Novo take away:");if(!t||!t.trim())return;TAKEAWAYS.push({txt:t.trim(),dest:false});renderTA();if(window.mdmLog)mdmLog("Take aways","Adicionou",'"'+t.trim()+'"');if(window.fbSalvar)window.fbSalvar();}
 
-function togAcao(i){PLANO[i].done=!PLANO[i].done;renderPlano();if(window.fbSalvar)window.fbSalvar();}
-function editAcao(i){const n=prompt("Editar:",PLANO[i].txt);if(n===null)return;if(!n.trim()){delAcao(i);return;}PLANO[i].txt=n.trim();renderPlano();}
-function delAcao(i){if(!confirm(`Remover?\n"${PLANO[i].txt}"`))return;PLANO.splice(i,1);renderPlano();}
-function addAcao(){const t=prompt("Descrição:");if(!t||!t.trim())return;const a=(prompt("Área (MDM/BIM/ORC/COMP/PMO):")||"MDM").toUpperCase().trim();PLANO.push({txt:t.trim(),area:a,done:false});renderPlano();}
+function togAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>togAcao(i)))return;PLANO[i].done=!PLANO[i].done;renderPlano();if(window.mdmLog)mdmLog("Plano de ação",PLANO[i].done?"Concluiu":"Reabriu",'"'+PLANO[i].txt+'"');if(window.fbSalvar)window.fbSalvar();}
+function editAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>editAcao(i)))return;var _o=PLANO[i].txt;const n=prompt("Editar:",PLANO[i].txt);if(n===null)return;if(!n.trim()){delAcao(i);return;}PLANO[i].txt=n.trim();renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Editou",'"'+_o+'" → "'+n.trim()+'"');if(window.fbSalvar)window.fbSalvar();}
+function delAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>delAcao(i)))return;if(!confirm(`Remover?\n"${PLANO[i].txt}"`))return;var _t=PLANO[i].txt;PLANO.splice(i,1);renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Removeu",'"'+_t+'"');if(window.fbSalvar)window.fbSalvar();}
+function addAcao(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addAcao))return;const t=prompt("Descrição:");if(!t||!t.trim())return;const a=(prompt("Área (MDM/BIM/ORC/COMP/PMO):")||"MDM").toUpperCase().trim();PLANO.push({txt:t.trim(),area:a,done:false});renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Adicionou",'"'+t.trim()+'" (área '+a+')');if(window.fbSalvar)window.fbSalvar();}
 
 // ══ GANTT ══
 function getSelValues(id){
@@ -1314,6 +1319,7 @@ function loadEp(){
   document.getElementById("ep-tabs").innerHTML=FASES.map((f,i)=>
     `<button class="ep-tab ${i===epFase?"on":""}" onclick="setEpFase(${i})">${f}</button>`).join("");
   renderEpFase();
+  if(window._mdmSnap) window._mdmSnap();
 }
 
 function setEpFase(i){epFase=i;document.querySelectorAll(".ep-tab").forEach((t,ti)=>t.classList.toggle("on",ti===i));renderEpFase();}
@@ -1398,12 +1404,14 @@ function saveEpFase(){
 }
 
 function aplicar(){
+  if(window.mdmEnsureUser && !window.mdmEnsureUser(aplicar)) return;
   CFG.kpi2=parseFloat(document.getElementById("e-k2").value)||0;
   CFG.hoje=document.getElementById("e-hoje").value;
   CFG.rod=document.getElementById("e-rod").value;
   saveEpFase();
   calcCPM();
   renderExec();renderGantt();renderBurndown();renderHeatmap();renderVelocidade();toggleEdit();
+  if(window._mdmLogAplicar) window._mdmLogAplicar();
   // Salvar SÓ o que mudou (sem sobrescrever as áreas dos outros)
   var payload = window._epDirty || {cells:{},meta:{}};
   payload.cfg = JSON.stringify({kpi2:CFG.kpi2});
@@ -1556,10 +1564,14 @@ function renderBurndown(){
   const fimDezT = Math.min(1,(fimDez-inicio)/86400000/totalDias);
   const fimDezX = PAD.l + fimDezT*CW;
   const _rt = window._ritmoAtual || {ritmoAtual:0};
-  let ppDez = acum;
-  if(_rt.ritmoAtual > 0){
+  // Ritmo de CONCLUSÃO realizado: pp de grupos 100% concluídos (ppConcl) ÷ dias decorridos desde 01/04.
+  // Projeta a partir do concluído DE FATO (não do acumulado que inclui WIP parcial), mantendo o mesmo ritmo até dez/26.
+  const _diasPass = Math.max(1,(hoje-inicio)/86400000);
+  const _ritmoConcl = _ppConclFinal/_diasPass;
+  let ppDez = _ppConclFinal;
+  if(_ritmoConcl > 0){
     const diasAteDez = (fimDez-hoje)/86400000;
-    ppDez = Math.min(100, acum + _rt.ritmoAtual*diasAteDez);
+    ppDez = Math.min(100, _ppConclFinal + _ritmoConcl*diasAteDez);
   }
   const fimDezY = PAD.t + CH - Math.min(ppDez/100,1)*CH;
 
@@ -1592,7 +1604,7 @@ function renderBurndown(){
   const legs = [
     {cor:"rgba(0,107,63,.25)",dash:true,  lbl:"Planejado linear"},
     {cor:"#006B3F",           dash:false, lbl:`Realizado (${acum.toFixed(1)}pp)`},
-    {cor:"#FF8B22",           dash:true,  lbl:`Projeção ritmo atual (→${ppDez.toFixed(1)}pp em dez/26)`},
+    {cor:"#FF8B22",           dash:true,  lbl:`Projeção (ritmo de conclusão → ${ppDez.toFixed(1)}pp em dez/26)`},
     {cor:_semBIMon?"#793F98":"#006B3F", dash:true, lbl:`Meta 90%${_semBIMon?" (s/ BIM)":""}: ${window._proj90Date?fmtBR(window._proj90Date):">2026"}`},
   ];
   let lx = PAD.l;
@@ -1677,9 +1689,10 @@ function renderBurndown(){
       tt.style.display="block";
       tt.style.left=(e.clientX+12)+"px";
       tt.style.top=(e.clientY-60)+"px";
-      tt.innerHTML=`<h4>🎯 Dez/26 — se continuar no ritmo atual</h4>
+      tt.innerHTML=`<h4>🎯 Dez/26 — no ritmo de conclusão atual</h4>
         <div style="font-size:11px">
           Chegará em: <b style="color:#FF8B22;font-size:14px">${ppDez.toFixed(1)}pp</b> de 90pp necessários<br>
+          <span style="color:#aaa;font-size:9px">Extrapola só o que foi 100% concluído até hoje (${_ppConclFinal.toFixed(1)}pp desde 01/04), no mesmo ritmo</span><br>
           <span style="color:#FF5252;font-size:10px;font-weight:700">Gap: ${(90-ppDez).toFixed(1)}pp abaixo da meta</span><br>
           <span style="color:#aaa;font-size:9px">Para atingir 90pp seria necessário acelerar ${((90-ppDez)/Math.max(1,(pd("2026-12-31")-pd(CFG.hoje))/86400000)*7).toFixed(1)}pp/sem adicionais</span>
         </div>`;
@@ -2152,6 +2165,237 @@ if(window.fbPronto){
   // Fallback: se Firebase demorar mais de 3s, renderiza com dados locais
   setTimeout(() => { if(!window.fbPronto) renderTudo(); }, 3000);
 }
+</script>
+<!-- ══════════ HISTÓRICO DE EDIÇÕES (identidade + log + painel) ══════════ -->
+<script>
+(function(){
+  // ── estilos do modal / selo / painel ──
+  var st = document.createElement('style');
+  st.textContent = [
+    '.mdm-ov{position:fixed;inset:0;background:rgba(0,20,10,.55);z-index:100000;display:none;align-items:center;justify-content:center;padding:16px}',
+    '.mdm-ov.on{display:flex}',
+    '.mdm-card{background:#fff;border-radius:10px;width:min(420px,100%);box-shadow:0 16px 50px rgba(0,0,0,.35);overflow:hidden;font-family:Arial,sans-serif}',
+    '.mdm-card h3{background:#006B3F;color:#fff;font-size:13px;padding:12px 16px;display:flex;align-items:center;gap:8px}',
+    '.mdm-bd{padding:16px}',
+    '.mdm-bd p{font-size:11.5px;color:#3A5A3A;line-height:1.5;margin-bottom:10px}',
+    '.mdm-inp{width:100%;border:1px solid #C8DAC8;border-radius:5px;padding:9px 11px;font-size:13px;font-family:Arial,sans-serif;outline:none}',
+    '.mdm-inp:focus{border-color:#006B3F}',
+    '.mdm-err{color:#BF360C;font-size:10.5px;margin-top:6px;min-height:14px}',
+    '.mdm-row{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}',
+    '.mdm-b{border:none;border-radius:5px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer}',
+    '.mdm-b.p{background:#006B3F;color:#fff}.mdm-b.p:hover{background:#005030}',
+    '.mdm-b.s{background:#fff;color:#3A5A3A;border:1px solid #C8DAC8}.mdm-b.s:hover{background:#f3f7f3}',
+    '.mdm-badge{background:rgba(255,255,255,.12);border-radius:4px;padding:4px 10px;font-size:10px;color:#fff;white-space:nowrap;flex-shrink:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;border:1px solid rgba(255,255,255,.18)}',
+    '.mdm-badge:hover{background:rgba(255,255,255,.22)}',
+    '.mdm-badge .t{font-size:8px;color:#A8D5C5;font-weight:700;letter-spacing:.5px}',
+    '.mdm-badge .n{font-weight:700;font-size:11px}',
+    '.mdm-hist{background:#fff;border-radius:10px;width:min(680px,100%);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 16px 50px rgba(0,0,0,.35);overflow:hidden;font-family:Arial,sans-serif}',
+    '.mdm-hist h3{background:#006B3F;color:#fff;font-size:13px;padding:12px 16px;display:flex;align-items:center;gap:8px}',
+    '.mdm-hist h3 .x{margin-left:auto;cursor:pointer;font-size:16px;opacity:.85}.mdm-hist h3 .x:hover{opacity:1}',
+    '.mdm-search{padding:10px 16px;border-bottom:1px solid #E5EEE5}',
+    '.mdm-search input{width:100%;border:1px solid #C8DAC8;border-radius:5px;padding:7px 10px;font-size:12px;outline:none}',
+    '.mdm-search input:focus{border-color:#006B3F}',
+    '.mdm-log{overflow-y:auto;padding:8px 16px 16px;flex:1}',
+    '.mdm-day{font-size:10px;font-weight:700;color:#006B3F;text-transform:uppercase;letter-spacing:.4px;margin:14px 0 6px;border-bottom:1px solid #E5EEE5;padding-bottom:3px}',
+    '.mdm-e{display:flex;gap:8px;padding:6px 4px;border-bottom:1px solid #F2F6F2;font-size:11.5px;line-height:1.45}',
+    '.mdm-e .tm{color:#8aa;flex-shrink:0;font-variant-numeric:tabular-nums}',
+    '.mdm-e .who{font-weight:700;color:#1A2A1A;flex-shrink:0}',
+    '.mdm-e .sc{font-size:9px;font-weight:700;color:#fff;background:#7B9E8C;border-radius:8px;padding:1px 7px;align-self:center;white-space:nowrap;flex-shrink:0}',
+    '.mdm-e .dt{color:#3A5A3A;flex:1}',
+    '.mdm-e .ac{font-weight:700;color:#006B3F}',
+    '.mdm-empty{text-align:center;color:#9ab;font-size:12px;padding:30px 10px}'
+  ].join('');
+  document.head.appendChild(st);
+
+  // ── validação de e-mail MRV ──
+  function valEmail(e){ e=String(e||'').trim().toLowerCase(); return /^[a-z0-9._%+-]+@mrv\.com\.br$/.test(e)?e:''; }
+  window.mdmGetUser = function(){ try{ return valEmail(localStorage.getItem('MDM_USER')||''); }catch(_){ return ''; } };
+  function setUser(e){ try{ localStorage.setItem('MDM_USER', e); }catch(_){} renderBadge(); }
+  function nameOf(e){ e=e||''; var i=e.indexOf('@'); return i>0?e.slice(0,i):e; }
+
+  // ── selo no header ──
+  function renderBadge(){
+    var u = window.mdmGetUser();
+    var b = document.getElementById('mdm-badge');
+    if(!b){
+      b = document.createElement('div');
+      b.id = 'mdm-badge'; b.className = 'mdm-badge';
+      b.onclick = function(){ openModal(true); };
+      var anchor = document.getElementById('hoje-badge');
+      if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(b, anchor);
+      else document.querySelector('header') && document.querySelector('header').appendChild(b);
+    }
+    if(u){
+      b.innerHTML = '<span class="t">VOCÊ</span><span class="n">👤 '+nameOf(u)+' ▾</span>';
+      b.title = 'Identificado como '+u+' — clique para trocar';
+    } else {
+      b.innerHTML = '<span class="t">EDIÇÕES</span><span class="n">👤 Identificar-se ▾</span>';
+      b.title = 'Clique para informar seu e-mail MRV';
+    }
+  }
+
+  // ── modal de identidade ──
+  var _pending = null;
+  function buildModal(){
+    var ov = document.createElement('div');
+    ov.className = 'mdm-ov'; ov.id = 'mdm-ov';
+    ov.innerHTML =
+      '<div class="mdm-card">'
+      + '<h3>👤 Identifique-se para editar</h3>'
+      + '<div class="mdm-bd">'
+      + '<p>Suas edições neste cronograma ficam registradas no histórico (quem · quando · o quê). Informe seu e-mail <b>@mrv.com.br</b>. É pedido uma única vez neste dispositivo.</p>'
+      + '<input class="mdm-inp" id="mdm-email" type="email" placeholder="nome@mrv.com.br" autocomplete="email">'
+      + '<div class="mdm-err" id="mdm-err"></div>'
+      + '<div class="mdm-row">'
+      + '<button class="mdm-b s" id="mdm-cancel">Cancelar</button>'
+      + '<button class="mdm-b p" id="mdm-ok">Confirmar</button>'
+      + '</div></div></div>';
+    document.body.appendChild(ov);
+    document.getElementById('mdm-ok').onclick = confirmModal;
+    document.getElementById('mdm-cancel').onclick = function(){ _pending=null; closeModal(); };
+    document.getElementById('mdm-email').addEventListener('keydown', function(ev){ if(ev.key==='Enter') confirmModal(); });
+    ov.addEventListener('mousedown', function(ev){ if(ev.target===ov){ _pending=null; closeModal(); } });
+    return ov;
+  }
+  function openModal(prefill){
+    var ov = document.getElementById('mdm-ov') || buildModal();
+    var inp = document.getElementById('mdm-email');
+    inp.value = prefill ? (window.mdmGetUser()||'') : '';
+    document.getElementById('mdm-err').textContent = '';
+    ov.classList.add('on');
+    setTimeout(function(){ inp.focus(); }, 30);
+  }
+  function closeModal(){ var ov=document.getElementById('mdm-ov'); if(ov) ov.classList.remove('on'); }
+  function confirmModal(){
+    var raw = document.getElementById('mdm-email').value;
+    var e = valEmail(raw);
+    if(!e){ document.getElementById('mdm-err').textContent = 'E-mail inválido. Use o formato nome@mrv.com.br'; return; }
+    setUser(e); closeModal();
+    var cb = _pending; _pending = null;
+    if(typeof cb === 'function'){ try{ cb(); }catch(_){} }   // padrão NÃO recursivo: roda 1x
+  }
+
+  // gate: retorna true se já identificado (segue o fluxo); senão abre modal e guarda a ação
+  window.mdmEnsureUser = function(cb){
+    if(window.mdmGetUser()) return true;
+    _pending = (typeof cb === 'function') ? cb : null;
+    openModal(false);
+    return false;
+  };
+
+  // ── registro de edição (fire-and-forget) ──
+  window.mdmLog = function(escopo, acao, detalhe){
+    var quem = window.mdmGetUser(); if(!quem) return;
+    var entry = { quem:quem, ts:new Date().toISOString(), escopo:String(escopo||''), acao:String(acao||''), detalhe:String(detalhe||'') };
+    try{ if(window._fbLog) window._fbLog(entry); }catch(_){}
+  };
+
+  // ── helpers de diff do cronograma ──
+  function stLabel(s){ return s==='done'?'Concluído':s==='wip'?'Em andamento':s==='plan'?'Planejado':(s||'—'); }
+  function dBR(d){ if(!d) return '—'; var p=String(d).split('-'); return p.length===3?(p[2]+'/'+p[1]+'/'+p[0]):String(d); }
+  function gid(g){ return window.gidOf ? window.gidOf(g) : (g.fase+'|'+g.nome); }
+
+  window._mdmSnap = function(){
+    if(typeof GRUPOS==='undefined') return;
+    var snap = { cfg:{kpi2:CFG.kpi2,hoje:CFG.hoje,rod:CFG.rod}, g:{} };
+    GRUPOS.forEach(function(g){
+      var o = { semBIM:!!g.semBIM, areas:{} };
+      AREAS.forEach(function(a){ o.areas[a]={ini:g[a].ini,fim:g[a].fim,iniLB:g[a].iniLB||null,fimLB:g[a].fimLB||null,st:g[a].st,pct:g[a].pct||0}; });
+      snap.g[gid(g)] = o;
+    });
+    window.__epSnap = snap;
+  };
+
+  window._mdmLogAplicar = function(){
+    var snap = window.__epSnap; if(!snap) return;
+    if(snap.cfg){
+      if(CFG.kpi2 !== snap.cfg.kpi2) mdmLog('Configurações','Editou','% Meta 2: '+snap.cfg.kpi2+'% → '+CFG.kpi2+'%');
+      if(CFG.hoje !== snap.cfg.hoje) mdmLog('Configurações','Editou','Data de hoje: '+dBR(snap.cfg.hoje)+' → '+dBR(CFG.hoje));
+      if(CFG.rod  !== snap.cfg.rod ) mdmLog('Configurações','Editou','Rodapé: "'+snap.cfg.rod+'" → "'+CFG.rod+'"');
+    }
+    GRUPOS.forEach(function(g){
+      var o = snap.g[gid(g)]; if(!o) return;
+      var ctx = g.fase+' · '+g.nome;
+      AREAS.forEach(function(a){
+        var n=g[a], v=o.areas[a]; if(!v) return; var ch=[];
+        if(n.st !== v.st) ch.push('Status: '+stLabel(v.st)+' → '+stLabel(n.st));
+        if(n.ini !== v.ini) ch.push('Início: '+dBR(v.ini)+' → '+dBR(n.ini));
+        if(n.fim !== v.fim) ch.push('Fim: '+dBR(v.fim)+' → '+dBR(n.fim));
+        if((n.pct||0) !== (v.pct||0)) ch.push('% Heatmap: '+(v.pct||0)+'% → '+(n.pct||0)+'%');
+        if((n.iniLB||null) !== (v.iniLB||null)) ch.push('LB Início: '+dBR(v.iniLB)+' → '+dBR(n.iniLB));
+        if((n.fimLB||null) !== (v.fimLB||null)) ch.push('LB Fim: '+dBR(v.fimLB)+' → '+dBR(n.fimLB));
+        if(ch.length) mdmLog('Cronograma','Editou', ctx+' · '+ACFG[a].label+' — '+ch.join('; '));
+      });
+      if((!!g.semBIM) !== (!!o.semBIM)) mdmLog('Cronograma','Editou', ctx+' — Simular sem BIM: '+(g.semBIM?'ativado':'desativado'));
+    });
+    window.__epSnap = null;
+  };
+
+  // ── painel de histórico ──
+  var _allLogs = [];
+  function buildHist(){
+    var ov = document.createElement('div');
+    ov.className = 'mdm-ov'; ov.id = 'mdm-hist-ov';
+    ov.innerHTML =
+      '<div class="mdm-hist">'
+      + '<h3>📜 Histórico de edições <span class="x" id="mdm-hist-x">✕</span></h3>'
+      + '<div class="mdm-search"><input id="mdm-hist-q" placeholder="Buscar por pessoa, escopo ou descrição…"></div>'
+      + '<div class="mdm-log" id="mdm-hist-list"></div>'
+      + '</div>';
+    document.body.appendChild(ov);
+    document.getElementById('mdm-hist-x').onclick = function(){ ov.classList.remove('on'); };
+    ov.addEventListener('mousedown', function(ev){ if(ev.target===ov) ov.classList.remove('on'); });
+    document.getElementById('mdm-hist-q').addEventListener('input', function(){ renderHist(this.value); });
+    return ov;
+  }
+  function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function renderHist(term){
+    term = String(term||'').trim().toLowerCase();
+    var list = document.getElementById('mdm-hist-list');
+    var rows = _allLogs.slice().sort(function(a,b){ return (a.ts<b.ts?1:a.ts>b.ts?-1:0); });
+    if(term){ rows = rows.filter(function(r){
+      return ((r.quem||'')+' '+(r.escopo||'')+' '+(r.acao||'')+' '+(r.detalhe||'')).toLowerCase().indexOf(term)>-1;
+    }); }
+    if(!rows.length){
+      list.innerHTML = '<div class="mdm-empty">'+(_allLogs.length?'Nenhum registro para essa busca.':'Nenhuma edição registrada ainda.<br><span style="font-size:10px">O log começa a contar a partir de agora — e só grava quando publicado no GitHub Pages.</span>')+'</div>';
+      return;
+    }
+    var html = '', lastDay = '';
+    rows.forEach(function(r){
+      var d = new Date(r.ts);
+      var day = isNaN(d) ? '—' : d.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      if(day !== lastDay){ html += '<div class="mdm-day">'+esc(day)+'</div>'; lastDay = day; }
+      var tm = isNaN(d) ? '' : d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      html += '<div class="mdm-e">'
+        + '<span class="tm">'+tm+'</span>'
+        + '<span class="who">'+esc(nameOf(r.quem))+'</span>'
+        + '<span class="sc">'+esc(r.escopo)+'</span>'
+        + '<span class="dt"><span class="ac">'+esc(r.acao)+'</span> '+esc(r.detalhe)+'</span>'
+        + '</div>';
+    });
+    list.innerHTML = html;
+  }
+  window.abrirHistorico = function(){
+    document.getElementById('exp-btn') && document.getElementById('exp-btn').classList.remove('open');
+    var ov = document.getElementById('mdm-hist-ov') || buildHist();
+    ov.classList.add('on');
+    var list = document.getElementById('mdm-hist-list');
+    list.innerHTML = '<div class="mdm-empty">Carregando…</div>';
+    document.getElementById('mdm-hist-q').value = '';
+    Promise.resolve(window._fbCarregarLog ? window._fbCarregarLog() : []).then(function(arr){
+      _allLogs = Array.isArray(arr) ? arr : [];
+      renderHist('');
+    });
+  };
+
+  // ── init: selo + pergunta automática (só se ainda não houver e-mail) ──
+  function init(){
+    renderBadge();
+    if(!window.mdmGetUser()) openModal(false);  // mantém Cancelar (view-only)
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
 </script>
 <div class="edit-panel" id="ep">
   <div class="ep-h" style="display:flex;align-items:center;justify-content:space-between">

@@ -1054,37 +1054,46 @@ function gmRowsHtml(gms,fk,hojeL){
     AREAS.forEach(function(a,ai){
       if(_fArea && a!==_fArea) return;
       var w2=win[a], p=bPos(w2.ini,w2.fim), cor=ACFG[a].cor, bg=ai%2===0?"":"rgba(0,107,63,.03)";
-      var rbar='';
-      if(m[a].iniR||m[a].fimR){var rI=m[a].iniR||w2.ini,rF=m[a].fimR||CFG.hoje,rp=bPos(rI,rF),lt=(m[a].fimR&&pd(m[a].fimR)>pd(w2.fim));rbar='<div class="g-bar-real'+(lt?" over":"")+'" style="left:'+rp.l+'%;width:'+rp.w+'%"></div>';}
       subs+='<div class="g-sub" style="background:'+bg+'"><div class="today-line" style="left:'+hojeL+'%"></div>'
-        +'<div class="g-bar '+m[a].st+'" style="left:'+p.l+'%;width:'+p.w+'%;background:'+cor+'" title="'+ACFG[a].label+': '+w2.ini+' \u2192 '+w2.fim+' ('+(m[a].dur||0)+'d)">'+(parseFloat(p.w)>3?ACFG[a].label:'')+'</div>'+rbar+'</div>';
+        +'<div class="g-bar '+m[a].st+'" style="left:'+p.l+'%;width:'+p.w+'%;background:'+cor+'" title="'+ACFG[a].label+': '+w2.ini+' \u2192 '+w2.fim+' ('+(m[a].dur||0)+'d)">'+(parseFloat(p.w)>3?ACFG[a].label:'')+'</div></div>';
     });
     var inativo=(m.w===0), nm=(m.nm||("GM "+m.n)).replace(/"/g,"&quot;");
-    out+='<div class="g-row gm-row'+(inativo?" gm-inativo":"")+'"><div class="g-lbl gm-lbl" onclick="abrirGmEdit('+m.n+')" title="Editar GM '+m.n+'">'
+    out+='<div class="g-row gm-row'+(inativo?" gm-inativo":"")+'"><div class="g-lbl gm-lbl" onclick="abrirGmEdit('+m.n+')" title="Detalhe do GM '+m.n+' (datas/dura\u00e7\u00e3o)">'
       +'<div class="g-lbl-top"><span class="gm-bullet">\u2514</span><span class="g-nome" title="'+nm+'">'+nm+'</span></div>'
       +'<div class="g-stats">peso <b style="color:var(--v1)">'+(m.w*100).toFixed(3)+'%</b> &nbsp;\u00b7&nbsp; '+(m.it||0)+' itens'+(inativo?' &nbsp;\u00b7&nbsp; <span style="color:#999">INATIVO</span>':'')+'</div>'
-      +'<div style="padding-left:0;margin-top:1px">'+AREAS.map(function(a){return '<div style="height:20px;display:flex;align-items:center;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+'">'+ACFG[a].label+'</div>';}).join("")+'</div>'
+      +'<div style="padding-left:0;margin-top:1px">'+AREAS.map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+'</div>';}).join("")+'</div>'
       +'</div><div class="g-subs">'+subs+'</div></div>';
   });
   return out;
 }
 var _gmEditN=null;
+function gmCycle(n,a){
+  if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){gmCycle(n,a);})) return;
+  var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
+  var order=["plan","wip","done"], cur=m[a].st||"plan", nx=order[(order.indexOf(cur)+1)%3], antes=cur;
+  m[a].st=nx;
+  var c={st:m[a].st,dur:m[a].dur||0,iniR:m[a].iniR||null,fimR:m[a].fimR||null}; if(a==="MDM")c.ini=m.MDM.ini;
+  var gmcells={}; gmcells[m.n+"__"+a]=c;
+  if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
+  if(window.mdmLog) mdmLog("GM "+m.f,"Status "+ACFG[a].label+" GM "+m.n,(m.nm||"")+": "+antes+" \u2192 "+nx);
+  if(window.renderTudo) renderTudo(); else renderGantt();
+}
 function abrirGmEdit(n){
   if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){abrirGmEdit(n);})) return;
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
   _gmEditN=n;
-  document.getElementById("gmEditTit").textContent="GM "+m.n+" \u00b7 "+(m.nm||"")+"  \u2014  "+m.g+" \u00b7 "+m.f;
-  var opt={plan:"\u26AA Plan",wip:"\u23F3 Andamento",done:"\u2705 Conclu\u00eddo"};
+  document.getElementById("gmEditTit").textContent="GM "+m.n+" · "+(m.nm||"")+"  —  "+m.g+" · "+m.f+" · "+(m.it||0)+" itens";
+  var opt={plan:"⚪ Plan",wip:"⏳ Andamento",done:"✅ Concluído"};
+  var win=gmAreaWin(m);
   var body=AREAS.map(function(a){
-    var ar=m[a];
-    var ini=(a==="MDM")?'<label>In\u00edcio</label><input type="date" id="gm-MDM-ini" value="'+(m.MDM.ini||"")+'"> ':'';
-    var dur='<label>Dura\u00e7\u00e3o (d)</label><input type="number" min="0" id="gm-'+a+'-dur" value="'+(ar.dur||0)+'" style="width:60px">';
-    var sel='<select id="gm-'+a+'-st">'+["plan","wip","done"].map(function(s){return '<option value="'+s+'"'+(ar.st===s?" selected":"")+'>'+opt[s]+'</option>';}).join("")+'</select>';
-    return '<div class="gm-arow"><div class="gm-aname" style="color:'+ACFG[a].cor+'">'+ACFG[a].label+'</div>'+sel+' '+ini+dur
-      +' <label>Real ini</label><input type="date" id="gm-'+a+'-ir" value="'+(ar.iniR||"")+'">'
-      +' <label>fim</label><input type="date" id="gm-'+a+'-fr" value="'+(ar.fimR||"")+'"></div>';
+    var ar=m[a], w2=win[a];
+    var sel='<select id="gm-'+a+'-st">'+["plan","wip","done"].map(function(ss){return '<option value="'+ss+'"'+(ar.st===ss?" selected":"")+'>'+opt[ss]+'</option>';}).join("")+'</select>';
+    var ini=(a==="MDM")?' <label>In\u00edcio</label><input type="date" id="gm-MDM-ini" value="'+(m.MDM.ini||"")+'">':'';
+    var dur=' <label>Dura\u00e7\u00e3o (d)</label><input type="number" min="0" id="gm-'+a+'-dur" value="'+(ar.dur||0)+'" style="width:58px">';
+    var datas=' <span style="color:#999;font-size:10px">'+(a==="MDM"?"":("in\u00edcio "+w2.ini+" \u00b7 "))+'fim '+w2.fim+'</span>';
+    return '<div class="gm-arow"><div class="gm-aname" style="color:'+ACFG[a].cor+'">'+ACFG[a].label+'</div>'+sel+ini+dur+datas+'</div>';
   }).join("");
-  document.getElementById("gmEditBody").innerHTML=body+'<div style="font-size:10px;color:#888;margin-top:8px">Avan\u00e7o do GM pela r\u00e9gua: MDM conclu\u00eddo \u2248 50%, ORC/BIM \u2248 75%, COMP = 100%. Salvar move a meta e atualiza as datas.</div>';
+  document.getElementById("gmEditBody").innerHTML=body+'<div style="font-size:10px;color:#888;margin-top:8px">Datas calculadas pela <b>dura\u00e7\u00e3o</b> (MDM dispara; ORC/BIM seguem o MDM; COMP fecha por \u00faltimo). O status define real \u00d7 planejado: <b>conclu\u00eddo</b> \u2192 datas reais; <b>em andamento</b> \u2192 in\u00edcio real, fim planejado; <b>planejado</b> \u2192 ambas planejadas. Salvar move a meta e atualiza o grupo.</div>';
   document.getElementById("gmEditOv").style.display="flex";
 }
 function fecharGmEdit(){var o=document.getElementById("gmEditOv");if(o)o.style.display="none";_gmEditN=null;}
@@ -1095,15 +1104,13 @@ function salvarGmEdit(){
   AREAS.forEach(function(a){
     var st=document.getElementById("gm-"+a+"-st"); if(st)m[a].st=st.value;
     var du=document.getElementById("gm-"+a+"-dur"); if(du){var v=parseInt(du.value,10);m[a].dur=(isNaN(v)||v<0)?0:v;}
-    var ir=document.getElementById("gm-"+a+"-ir"); if(ir)m[a].iniR=ir.value||null;
-    var fr=document.getElementById("gm-"+a+"-fr"); if(fr)m[a].fimR=fr.value||null;
   });
   var mi=document.getElementById("gm-MDM-ini"); if(mi&&mi.value)m.MDM.ini=mi.value;
   var gmcells={};
-  AREAS.forEach(function(a){var c={st:m[a].st,dur:m[a].dur||0,iniR:m[a].iniR||null,fimR:m[a].fimR||null};if(a==="MDM")c.ini=m.MDM.ini;gmcells[m.n+"__"+a]=c;});
+  AREAS.forEach(function(a){var c={st:m[a].st,dur:m[a].dur||0};if(a==="MDM")c.ini=m.MDM.ini;gmcells[m.n+"__"+a]=c;});
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
   var depois=AREAS.map(function(a){return ACFG[a].label+"="+m[a].st;}).join(", ");
-  if(window.mdmLog) mdmLog("GM "+m.f,"Editou GM "+m.n,(m.nm||"")+" \u2014 ["+antes+"] \u2192 ["+depois+"]");
+  if(window.mdmLog) mdmLog("GM "+m.f,"Editou GM "+m.n,(m.nm||"")+" — ["+antes+"] → ["+depois+"]");
   fecharGmEdit();
   if(window.renderTudo) renderTudo(); else { if(window.renderExec)renderExec(); if(window.renderGantt)renderGantt(); }
 }
@@ -1251,6 +1258,32 @@ function renderGantt(){
 
     if(!isCollapsed){
       itens.forEach((g,gi)=>{
+        // ── Grupo = consequência dos GMs: 1ª/última data (plan + real), status e % derivados ──
+        var _gk=gmKey(g.nome);
+        var _gms=GMS.filter(function(m){return m.gk===_gk && m.f===g.fase;});
+        var _gmsAt=_gms.filter(function(m){return m.w>0;});
+        (function(){
+          var wsum=_gmsAt.reduce(function(s,m){return s+m.w;},0);
+          var _hojeAg=pd(CFG.hoje);
+          AREAS.forEach(function(a){
+            var iniP=null,fimP=null,iniR=null,fimR=null,nDone=0,nStart=0,nTot=0;
+            _gms.forEach(function(m){
+              var w=gmAreaWin(m)[a];
+              if(w.ini&&(!iniP||w.ini<iniP))iniP=w.ini;
+              if(w.fim&&(!fimP||w.fim>fimP))fimP=w.fim;
+              var ri=((m[a].st==="done"||m[a].st==="wip")&&w.ini&&pd(w.ini)<=_hojeAg)?w.ini:null;
+              var rf=(m[a].st==="done"&&w.fim&&pd(w.fim)<=_hojeAg)?w.fim:null;
+              if(ri&&(!iniR||ri<iniR))iniR=ri;
+              if(rf&&(!fimR||rf>fimR))fimR=rf;
+            });
+            _gmsAt.forEach(function(m){nTot++; if(m[a].st==="done")nDone++; if(m[a].st!=="plan")nStart++;});
+            if(iniP)g[a].ini=iniP; if(fimP)g[a].fim=fimP;
+            g[a].iniR=iniR; g[a].fimR=fimR;
+            g[a].st = nTot===0?"plan" : (nDone===nTot?"done" : (nStart>0?"wip":"plan"));
+          });
+          g.pct = wsum>0 ? Math.round(_gmsAt.reduce(function(s,m){return s+calcPctGrupo(m)*m.w;},0)/wsum) : 0;
+          g.pctMeta = _gms.reduce(function(s,m){return s+m.w*100;},0);
+        })();
         const dot=g.pct===100?"#006B3F":g.pct>0?"#FF8B22":"#ccc";
         // Sub-linhas por área
         let subs="";
@@ -1281,8 +1314,7 @@ function renderGantt(){
           </div>`;
         });
 
-        const _gk=gmKey(g.nome), _gexp=!!GM_EXP[fk+"|"+gi];
-        const _gms=GMS.filter(m=>m.gk===_gk && m.f===g.fase);
+        var _gexp=!!GM_EXP[fk+"|"+gi];
         html+=`<div class="g-row">
           <div class="g-lbl" data-gnome="${g.nome.replace(/"/g,'&quot;')}" data-gfase="${(g.fase.match(/\d+/)||[0])[0]}">
             <div class="g-lbl-top">
@@ -1417,76 +1449,13 @@ function setEpFase(i){epFase=i;document.querySelectorAll(".ep-tab").forEach((t,t
 
 function renderEpFase(){
   const fk=FASES[epFase];
-  const its=GRUPOS.filter(g=>g.fase===fk);
   var recBlock='<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 10px;padding:8px 10px;background:#FFF6EC;border:1px solid #FFD9B0;border-radius:5px">'
-    +'<b style="font-size:10px;color:#B25A00">👥 Recursos nesta fase (pessoas por time):</b>'
+    +'<b style="font-size:10px;color:#B25A00">\ud83d\udc65 Recursos nesta fase (pessoas por time):</b>'
     +REC_TEAMS.map(function(t){return '<label style="font-size:9px;display:inline-flex;align-items:center;gap:4px;color:'+ACFG[t].cor+';font-weight:700">'+ACFG[t].label+': <input type="number" min="1" id="rec-'+t+'" value="'+recOf(fk,t)+'" onchange="epLive()" style="width:48px;border:1px solid '+ACFG[t].cor+';border-radius:3px;padding:2px 4px;font-size:9px;text-align:center;color:'+ACFG[t].cor+'"></label>';}).join("")
-    +'<span style="font-size:8.5px;color:#a98">1 = grupos em série · N = até N em paralelo</span>'
+    +'<span style="font-size:8.5px;color:#a98">1 = grupos em s\u00e9rie \u00b7 N = at\u00e9 N em paralelo</span>'
     +'</div>';
-  document.getElementById("ep-fase").innerHTML=recBlock+its.map((g,gi)=>`
-    <div style="margin-bottom:10px;padding:8px;background:#F5FAF5;border-radius:4px;border-left:3px solid var(--v1)">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap">
-        <b style="font-size:11px;color:var(--v1);flex:1">${g.nome}</b>
-        <label class="ep-lbl" style="margin:0">% conclusão:</label>
-        <span style="font-size:9px;background:#f0f0f0;padding:2px 8px;border-radius:10px;color:#555">Conclusão: <b>${g.pct}%</b> (auto)</span>
-        <span style="font-size:9px;background:#e8f5ee;padding:2px 8px;border-radius:10px;color:var(--v1)">peso Meta 1: <b>${g.pctMeta.toFixed(2)}%</b> (financ.) · ${gmCount(g)} GMs</span>
-        <label id="lsb-${gi}" style="font-size:9px;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:2px 8px;border-radius:10px;border:1px solid #ddd;background:#f9f9f9">
-          <input type="checkbox" id="g-sembim-${gi}" ${g.semBIM?"checked":""} onchange="updSemBIM(${gi})">
-          Simular sem BIM
-        </label>
-      </div>
-      ${(()=>{ const _ms=gmsOf(g); const _ti=_ms.reduce((s,m)=>s+(m.it||0),0);
-        return `<div style="display:flex;flex-wrap:wrap;gap:4px;margin:0 0 8px;padding:6px 7px;background:#fff;border:1px dashed #cfe6da;border-radius:4px">
-          <span style="font-size:8.5px;font-weight:700;color:var(--v1);align-self:center;margin-right:2px">GMs (${_ms.length})${_ti>0?` · ${_ti} itens`:''}:</span>
-          ${_ms.length? _ms.map(m=>`<span style="font-size:8.5px;background:#F0F7F3;border:1px solid #DDEBE3;border-radius:10px;padding:2px 7px;color:#2f5446"><b style="color:#FF8B22">${m.n!=null?m.n:'–'}</b> ${m.nome}${m.it!=null?` <b style="color:var(--v1)">· ${m.it} itens</b>`:''}</span>`).join("") : '<span style="font-size:8.5px;color:#aaa">Nenhum GM vinculado nesta fase</span>'}
-        </div>`; })()}
-      <div style="display:grid;grid-template-columns:72px 1fr 1fr 64px 56px 84px;gap:3px;margin-bottom:3px">
-        <span></span>
-        <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Início</span>
-        <span style="font-size:8px;font-weight:700;color:var(--v1);text-align:center;background:#e8f5ee;padding:2px;border-radius:2px">Fim</span>
-        <span style="font-size:8px;font-weight:700;color:#B25A00;text-align:center;background:#FFF1E0;padding:2px;border-radius:2px">Duração</span>
-        <span style="font-size:8px;font-weight:700;color:#793F98;text-align:center;background:#f3eaff;padding:2px;border-radius:2px">% Heat</span>
-        <span style="font-size:8px;font-weight:700;color:#aaa;text-align:center">Status</span>
-      </div>
-      <div style="font-size:8px;color:#999;margin:0 0 4px 74px">MDM: datas digitadas · ORC/BIM/COMP: datas <b>calculadas</b> (cinza, você edita a <b style="color:#B25A00">duração</b>) · linha <b style="color:#9a7fb0">🔴 real</b>: datas reais (replanejam as seguintes)</div>
-      ${AREAS.map(function(a){
-        var isMDM=(a==="MDM");
-        var ds='border:1px solid var(--v1);border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%';
-        var ro='border:1px solid #ddd;border-radius:3px;padding:2px 4px;font-size:8.5px;width:100%;background:#eef0ee;color:#789;cursor:not-allowed';
-        var iCell,fCell,dCell;
-        if(isMDM){
-          iCell='<input type="date" id="g-'+a+'-i-'+gi+'" value="'+g[a].ini+'" onchange="epLive()" style="'+ds+'">';
-          fCell='<input type="date" id="g-'+a+'-f-'+gi+'" value="'+g[a].fim+'" onchange="epLive()" style="'+ds+'">';
-          var md=Math.max(0,Math.round((_msISO(g.MDM.fim)-_msISO(g.MDM.ini))/_MSDAY));
-          dCell='<span style="font-size:8px;color:#bbb;text-align:center;display:block">'+md+'d</span>';
-        }else{
-          iCell='<input type="date" id="g-'+a+'-i-'+gi+'" value="'+g[a].ini+'" disabled title="Calculado: predecessora + duração + recursos" style="'+ro+'">';
-          fCell='<input type="date" id="g-'+a+'-f-'+gi+'" value="'+g[a].fim+'" disabled title="Calculado: predecessora + duração + recursos" style="'+ro+'">';
-          var dv=(g[a].dur!=null?g[a].dur:Math.max(0,Math.round((_msISO(g[a].fim)-_msISO(g[a].ini))/_MSDAY)));
-          dCell='<input type="number" min="0" id="g-'+a+'-dur-'+gi+'" value="'+dv+'" onchange="epLive()" style="border:1px solid #FF8B22;border-radius:3px;padding:2px 3px;font-size:8.5px;width:100%;color:#B25A00;text-align:center">';
-        }
-        var pCell='<input type="number" id="g-'+a+'-p-'+gi+'" value="'+(g[a].pct||0)+'" min="0" max="100" style="border:1px solid #793F98;border-radius:3px;padding:2px 3px;font-size:8.5px;width:100%;color:#793F98">';
-        var sCell='<select id="g-'+a+'-s-'+gi+'" class="ep-inp" style="font-size:8.5px">'+stOpt(g[a].st)+'</select>';
-        var planRow='<div style="display:grid;grid-template-columns:72px 1fr 1fr 64px 56px 84px;gap:3px;align-items:center;margin-bottom:1px">'
-          +'<label style="font-size:9px;font-weight:700;color:'+ACFG[a].cor+'">'+ACFG[a].label+'</label>'
-          +iCell+fCell+dCell+pCell+sCell+'</div>';
-        // ── linha REAL (todas as áreas): início/fim reais, opcionais ──
-        var iR=g[a].iniR||'', fR=g[a].fimR||'';
-        var rst='border:1px solid #c9b3d6;border-radius:3px;padding:1px 3px;font-size:8px;width:100%;color:#444';
-        var vChip='';
-        if(fR){ var dd=Math.round((_msISO(fR)-_msISO(g[a].fim))/_MSDAY);
-          vChip = dd>0 ? '<span style="font-size:7.5px;font-weight:700;color:#BF360C">+'+dd+'d</span>'
-                : dd<0 ? '<span style="font-size:7.5px;font-weight:700;color:#006B3F">'+dd+'d</span>'
-                :        '<span style="font-size:7.5px;font-weight:700;color:#006B3F">no prazo</span>'; }
-        else if(iR){ vChip='<span style="font-size:7.5px;color:#888">em and.</span>'; }
-        var realRow='<div style="display:grid;grid-template-columns:72px 1fr 1fr 64px 56px 84px;gap:3px;align-items:center;margin-bottom:5px">'
-          +'<span style="font-size:7.5px;font-weight:700;color:#9a7fb0;text-align:right;padding-right:4px">🔴 real</span>'
-          +'<input type="date" id="g-'+a+'-ir-'+gi+'" value="'+iR+'" onchange="epLive()" title="Início real" style="'+rst+'">'
-          +'<input type="date" id="g-'+a+'-fr-'+gi+'" value="'+fR+'" onchange="epLive()" title="Fim real" style="'+rst+'">'
-          +'<span style="text-align:center">'+vChip+'</span><span></span><span></span></div>';
-        return planRow+realRow;
-      }).join("")}
-    </div>`).join("");
+  var aviso='<div style="font-size:11px;color:#555;padding:10px 12px;background:#F5FAF5;border-radius:4px;border-left:3px solid var(--v1);line-height:1.5">As <b>datas, status e %</b> dos grupos agora s\u00e3o <b>derivados dos GMs</b> (1\u00aa/\u00faltima data = min/m\u00e1x dos GMs do grupo). Para editar, abra o grupo no Gantt e clique no <b>GM</b>. Aqui ficam s\u00f3 as <b>configura\u00e7\u00f5es gerais</b> e os <b>recursos por fase</b>.</div>';
+  document.getElementById("ep-fase").innerHTML=recBlock+aviso;
 }
 
 function saveEpFase(){
@@ -1643,171 +1612,105 @@ function renderBurndown(){
   ctx.lineTo(PAD.l+CW, PAD.t+CH - 0.9*CH);
   ctx.stroke(); ctx.setLineDash([]);
 
-  // Linha REALIZADO — acumular pctMeta*pct/100 por data de conclusão
-  const eventos = [];
-  // pp concluído (grupos 100% done com data <= hoje)
-  let ppConcl = 0;
-  // pp parcial (grupos em andamento — mesmo cálculo do resumo executivo)
-  let ppWip = 0;
-
-  GRUPOS.forEach(g => {
-    const pp = g.pctMeta * g.pct / 100;
-    if(pp <= 0) return;
-    if(g.pct === 100){
-      // Grupo totalmente concluído — usar data real de conclusão
-      let fimReal = null;
-      ["COMP","BIM","ORC","MDM"].forEach(a => {
-        if(g[a].st==="done" && pd(g[a].fim) <= hoje){
-          if(!fimReal || pd(g[a].fim) > fimReal) fimReal = pd(g[a].fim);
-        }
-      });
-      if(fimReal){ ppConcl += pp; eventos.push({ data: fimReal, pp: pp }); }
-    } else {
-      // Grupo parcial (wip) — contabilizar como de hoje
-      ppWip += pp;
-      eventos.push({ data: hoje, pp: pp });
-    }
+  // ── REALIZADO por GM: concluído (todas as áreas done) e progresso (crédito parcial) ──
+  const evC = [];
+  let concluido = 0, progresso = 0;
+  GMS.forEach(function(m){
+    if(!(m.w>0)) return;
+    var p = calcPctGrupo(m), ppFull = m.w*100;
+    if(p===100){
+      var dC = pd(gmAreaWin(m).COMP.fim || CFG.hoje);
+      if(dC > hoje) dC = hoje;
+      concluido += ppFull; progresso += ppFull;
+      evC.push({data:dC, pp:ppFull});
+    } else if(p>0){ progresso += ppFull*p/100; }
   });
-  eventos.sort((a,b) => a.data - b.data);
+  evC.sort(function(a,b){return a.data-b.data;});
 
-  let acum = 0;
-  const realPts = [{x: PAD.l, y: PAD.t+CH}];
-  eventos.forEach(e => {
-    acum += e.pp;
-    const t = (e.data - inicio) / 86400000 / totalDias;
-    realPts.push({ x: PAD.l + t*CW, y: PAD.t + CH - Math.min(acum/100, 1)*CH });
-  });
-
-  // Ponto hoje
   const hojeT = Math.min(1,(hoje-inicio)/86400000/totalDias);
   const hojeX = PAD.l + hojeT*CW;
-  const hojeY = PAD.t + CH - Math.min(acum/100,1)*CH;
-  // ppConcl já calculado no loop de eventos acima
-  // hojeYConcl = posição Y baseada SÓ nos grupos 100% concluídos com data <= hoje
-  const _ppConclFinal = ppConcl; // valor correto (só concluídos)
-  const hojeYConcl = PAD.t + CH - Math.min(_ppConclFinal/100,1)*CH;
-  realPts.push({x:hojeX, y:hojeY});
+  function _yOf(v){ return PAD.t + CH - Math.min(v/100,1)*CH; }
 
-  // Desenhar linha realizada
-  ctx.strokeStyle = "#006B3F"; ctx.lineWidth = 2.5; ctx.setLineDash([]);
-  ctx.beginPath();
-  realPts.forEach((p,i) => i===0 ? ctx.moveTo(p.x,p.y) : ctx.lineTo(p.x,p.y));
-  ctx.stroke();
+  let aC = 0; const concPts = [{x:PAD.l, y:PAD.t+CH}];
+  evC.forEach(function(e){ aC += e.pp; var t=(e.data-inicio)/86400000/totalDias; concPts.push({x:PAD.l+t*CW, y:_yOf(aC)}); });
+  concPts.push({x:hojeX, y:_yOf(concluido)});
+  const hojeYConcl = _yOf(concluido);
 
-  // Área sob a linha realizada
-  ctx.fillStyle = "rgba(0,107,63,.07)";
-  ctx.beginPath();
-  ctx.moveTo(PAD.l, PAD.t+CH);
-  realPts.forEach(p => ctx.lineTo(p.x,p.y));
-  ctx.lineTo(hojeX, PAD.t+CH);
-  ctx.closePath(); ctx.fill();
+  const progPts = concPts.slice(0,-1).map(function(pt){return {x:pt.x,y:pt.y};});
+  progPts.push({x:hojeX, y:_yOf(progresso)});
+  const hojeY = _yOf(progresso);
 
-  // Linha HOJE
-  ctx.strokeStyle = "rgba(191,54,12,.8)"; ctx.lineWidth = 1.5; ctx.setLineDash([3,2]);
-  ctx.beginPath(); ctx.moveTo(hojeX,PAD.t); ctx.lineTo(hojeX,PAD.t+CH); ctx.stroke();
-  ctx.setLineDash([]);
-  ctx.fillStyle = "rgba(191,54,12,.9)";
-  ctx.font = "bold 8px Arial"; ctx.textAlign = "center";
+  ctx.fillStyle="rgba(0,107,63,.06)";
+  ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t+CH);
+  progPts.forEach(function(pt){ctx.lineTo(pt.x,pt.y);}); ctx.lineTo(hojeX,PAD.t+CH); ctx.closePath(); ctx.fill();
+
+  ctx.strokeStyle="#5FBF93"; ctx.lineWidth=2; ctx.setLineDash([]);
+  ctx.beginPath(); progPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
+
+  ctx.strokeStyle="#006B3F"; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.beginPath(); concPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
+
+  ctx.strokeStyle="rgba(191,54,12,.8)"; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
+  ctx.beginPath(); ctx.moveTo(hojeX,PAD.t); ctx.lineTo(hojeX,PAD.t+CH); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle="rgba(191,54,12,.9)"; ctx.font="bold 8px Arial"; ctx.textAlign="center";
   ctx.fillText("Hoje", hojeX, PAD.t-4);
 
-  // Calcular ponto dez/26 ANTES de desenhar projeção
   const fimDez = pd("2026-12-31");
   const fimDezT = Math.min(1,(fimDez-inicio)/86400000/totalDias);
   const fimDezX = PAD.l + fimDezT*CW;
-  const _rt = window._ritmoAtual || {ritmoAtual:0};
-  // Ritmo de CONCLUSÃO realizado: pp de grupos 100% concluídos (ppConcl) ÷ dias decorridos desde 01/04.
-  // Projeta a partir do concluído DE FATO (não do acumulado que inclui WIP parcial), mantendo o mesmo ritmo até dez/26.
   const _diasPass = Math.max(1,(hoje-inicio)/86400000);
-  const _ritmoConcl = _ppConclFinal/_diasPass;
-  let ppDez = _ppConclFinal;
-  if(_ritmoConcl > 0){
-    const diasAteDez = (fimDez-hoje)/86400000;
-    ppDez = Math.min(100, _ppConclFinal + _ritmoConcl*diasAteDez);
-  }
-  const fimDezY = PAD.t + CH - Math.min(ppDez/100,1)*CH;
+  const _ritmoConcl = concluido/_diasPass;
+  let ppDez = concluido;
+  if(_ritmoConcl>0){ ppDez = Math.min(100, concluido + _ritmoConcl*((fimDez-hoje)/86400000)); }
+  const fimDezY = _yOf(ppDez);
+  ctx.strokeStyle="#FF8B22"; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+  ctx.beginPath(); ctx.moveTo(hojeX, hojeYConcl); ctx.lineTo(fimDezX, fimDezY); ctx.stroke(); ctx.setLineDash([]);
 
-  // Projeção: linha laranja do ponto hoje até dez/26 no ritmo atual
-  ctx.strokeStyle = "#FF8B22"; ctx.lineWidth = 1.5; ctx.setLineDash([5,3]);
-  ctx.beginPath(); ctx.moveTo(hojeX, hojeYConcl); ctx.lineTo(fimDezX, fimDezY); ctx.stroke();
-  ctx.setLineDash([]);
-  // Seta no fim da projeção indicando gap
-  const gapPp = (90 - ppDez);
-  if(gapPp > 0){
-    // Linha vertical do gap: de ppDez até 90pp em dez/26
-    ctx.strokeStyle = "rgba(191,54,12,.4)"; ctx.lineWidth = 1; ctx.setLineDash([2,2]);
-    const y90 = PAD.t + CH - 0.9*CH;
-    ctx.beginPath(); ctx.moveTo(fimDezX, fimDezY); ctx.lineTo(fimDezX, y90); ctx.stroke();
-    ctx.setLineDash([]);
-    // Label do gap
-    ctx.fillStyle = "#BF360C";
-    ctx.font = "bold 8px Arial"; ctx.textAlign = "left";
-    ctx.fillText(`Gap: ${gapPp.toFixed(1)}pp`, fimDezX+4, (fimDezY+y90)/2+3);
+  const y90 = _yOf(90), gapPp = 90 - ppDez;
+  if(gapPp > 0.1){
+    ctx.strokeStyle="rgba(191,54,12,.4)"; ctx.lineWidth=1; ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(fimDezX, fimDezY); ctx.lineTo(fimDezX, y90); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#BF360C"; ctx.font="bold 8px Arial"; ctx.textAlign="right";
+    ctx.fillText("Gap "+gapPp.toFixed(1)+"pp", fimDezX-4, (fimDezY+y90)/2+3);
   }
 
-  // Ponto atual destacado
-  ctx.fillStyle = "#006B3F";
-  ctx.beginPath(); ctx.arc(hojeX, hojeY, 4, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.beginPath(); ctx.arc(hojeX, hojeY, 2, 0, Math.PI*2); ctx.fill();
-
-  // Legenda
-  var _semBIMon = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
-  const legs = [
-    {cor:"rgba(0,107,63,.25)",dash:true,  lbl:"Planejado linear"},
-    {cor:"#006B3F",           dash:false, lbl:`Realizado (${acum.toFixed(1)}pp)`},
-    {cor:"#FF8B22",           dash:true,  lbl:`Projeção (ritmo de conclusão → ${ppDez.toFixed(1)}pp em dez/26)`},
-    {cor:_semBIMon?"#793F98":"#006B3F", dash:true, lbl:`Meta 90%${_semBIMon?" (s/ BIM)":""}: ${window._proj90Date?fmtBR(window._proj90Date):">2026"}`},
-  ];
-  let lx = PAD.l;
-  const ly = PAD.t + CH + 24;
-  legs.forEach(lg => {
-    ctx.strokeStyle=lg.cor; ctx.lineWidth=lg.dash?1.5:2.5;
-    ctx.setLineDash(lg.dash?[5,3]:[]);
-    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+20,ly); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle="#555"; ctx.font="8.5px Arial"; ctx.textAlign="left";
-    ctx.fillText(lg.lbl, lx+24, ly+3);
-    lx += ctx.measureText(lg.lbl).width + 48;
-  });
-
-  // ── Marcos interativos — guardar dados para tooltip ──
-  // Rótulo no fim do realizado (ponto hoje)
-  ctx.fillStyle="#006B3F";
-  ctx.font="bold 9px Arial"; ctx.textAlign="left";
-  ctx.fillText(`${acum.toFixed(1)}pp`, hojeX+6, hojeY-4);
-
-  // fimDez, fimDezX, fimDezY, ppDez já calculados antes da projeção
-  ctx.fillStyle="rgba(255,139,34,.9)";
-  ctx.beginPath(); ctx.arc(fimDezX, fimDezY, 4, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle="#FF8B22";
-  ctx.font="bold 9px Arial"; ctx.textAlign="right";
-  ctx.fillText(`${ppDez.toFixed(1)}pp`, fimDezX-6, fimDezY-5);
-  // Label "dez/26"
+  ctx.fillStyle="#006B3F"; ctx.beginPath(); ctx.arc(hojeX, hojeYConcl, 3.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#5FBF93"; ctx.beginPath(); ctx.arc(hojeX, hojeY, 3.5,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="rgba(255,139,34,.95)"; ctx.beginPath(); ctx.arc(fimDezX, fimDezY, 4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
+  ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4);
+  ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
+  ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12);
+  ctx.fillStyle="#FF8B22"; ctx.font="bold 9px Arial"; ctx.textAlign="right";
+  ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5);
   ctx.fillStyle="#888"; ctx.font="8px Arial"; ctx.textAlign="center";
   ctx.fillText("dez/26", fimDezX, PAD.t+CH+11);
-  // Linha vertical tracejada em dez/26
   ctx.strokeStyle="rgba(255,139,34,.3)"; ctx.lineWidth=1; ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.moveTo(fimDezX,PAD.t); ctx.lineTo(fimDezX,PAD.t+CH); ctx.stroke();
-  ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(fimDezX,PAD.t); ctx.lineTo(fimDezX,PAD.t+CH); ctx.stroke(); ctx.setLineDash([]);
 
-  // ── Marco META 90% (datas planejadas; "Simular sem BIM" antecipa grupos marcados) ──
-  if(window._proj90Date){
-    var _m90t=(window._proj90Date-inicio)/86400000/totalDias;
-    if(_m90t>=0 && _m90t<=1.0){
-      var _m90x=PAD.l+_m90t*CW, _m90cor=_semBIMon?"#793F98":"#006B3F", _y90=PAD.t+CH-0.9*CH;
-      ctx.strokeStyle=_m90cor; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
-      ctx.beginPath(); ctx.moveTo(_m90x,PAD.t); ctx.lineTo(_m90x,PAD.t+CH); ctx.stroke(); ctx.setLineDash([]);
-      ctx.fillStyle=_m90cor; ctx.beginPath(); ctx.arc(_m90x,_y90,3.5,0,Math.PI*2); ctx.fill();
-      ctx.font="bold 8px Arial"; ctx.textAlign="center";
-      ctx.fillText("🏁 "+fmtBR(window._proj90Date)+(_semBIMon?" s/BIM":""), _m90x, PAD.t-4);
-    }
-  }
+  var _semBIMon = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
+  const legs = [
+    {cor:"rgba(0,107,63,.25)", dash:true,  lbl:"Planejado linear (90% at\u00e9 dez/26)"},
+    {cor:"#006B3F",            dash:false, lbl:"Conclu\u00eddo ("+concluido.toFixed(1)+"pp)"},
+    {cor:"#5FBF93",            dash:false, lbl:"Progresso ("+progresso.toFixed(1)+"pp)"},
+    {cor:"#FF8B22",            dash:true,  lbl:"Proje\u00e7\u00e3o no ritmo de conclus\u00e3o \u2192 "+ppDez.toFixed(1)+"% em dez/26"},
+  ];
+  let lx = PAD.l; const ly = PAD.t + CH + 24;
+  legs.forEach(function(lg){
+    ctx.strokeStyle=lg.cor; ctx.lineWidth=lg.dash?1.5:2.5; ctx.setLineDash(lg.dash?[5,3]:[]);
+    ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+20,ly); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle="#555"; ctx.font="8.5px Arial"; ctx.textAlign="left";
+    ctx.fillText(lg.lbl, lx+24, ly+3);
+    lx += ctx.measureText(lg.lbl).width + 40;
+  });
+
+  var acum = progresso, _ppConclFinal = concluido;
 
   // ── Guardar pontos para hover ──
   canvas._bdData = {
     PAD, CW, CH, inicio, totalDias, acum, ppDez,
     hojeX, hojeY, fimDezX, fimDezY, ppConcl: _ppConclFinal, ppWip: acum-_ppConclFinal,
-    proj90X: window._proj90Date ? PAD.l+Math.min(1.1,(window._proj90Date-inicio)/86400000/totalDias)*CW : null,
+    proj90X: null,
   };
 
   // ── Adicionar listener de mousemove para tooltip ──
@@ -1893,13 +1796,12 @@ function renderHeatmap(){
       const gs = GRUPOS.filter(g=>g.fase===f);
       if(!gs.length){ html+=`<div class="hm-cell" style="background:#eee"></div>`; return; }
       // Converter status da área em % pela mesma lógica do calcPctGrupo — ponderado por nº de GMs
-      var _wsum=gs.reduce((s,g)=>s+gmCount(g),0)||1;
-      const med = Math.round(gs.reduce((acc,g)=>{
-        var ap = (g[a].pct>0) ? g[a].pct
-               : g[a].st==="done" ? 100
-               : g[a].st==="wip"  ? (a==="MDM" ? 50 : 75) : 0;
-        return acc+ap*gmCount(g);
-      },0)/_wsum);
+      var _gmsF=GMS.filter(function(m){return m.f===f && m.w>0;});
+      var _ws=_gmsF.reduce(function(s,m){return s+m.w;},0);
+      var med = _ws>0 ? Math.round(_gmsF.reduce(function(acc,m){
+        var ap = m[a].st==="done"?100 : m[a].st==="wip"?(a==="MDM"?50:75) : 0;
+        return acc+ap*m.w;
+      },0)/_ws) : 0;
       const {bg,fg} = hmCor(med);
       html += `<div class="hm-cell" style="background:${bg};color:${fg}" title="${f}·${areaLabels[a]}: ${med}%">${med}%</div>`;
     });
@@ -1913,8 +1815,9 @@ function renderHeatmap(){
   fases.forEach(f => {
     const gs = GRUPOS.filter(g=>g.fase===f);
     if(!gs.length){ html+=`<div class="hm-cell"></div>`; return; }
-    var _ws=gs.reduce((s,g)=>s+gmCount(g),0)||1;
-    const med = Math.round(gs.reduce((s,g)=>s+g.pct*gmCount(g),0)/_ws);
+    var _gmsF=GMS.filter(function(m){return m.f===f && m.w>0;});
+    var _ws=_gmsF.reduce(function(s,m){return s+m.w;},0);
+    const med = _ws>0 ? Math.round(_gmsF.reduce(function(s,m){return s+calcPctGrupo(m)*m.w;},0)/_ws) : 0;
     const {bg,fg} = hmCor(med);
     html += `<div class="hm-cell" style="background:${bg};color:${fg};font-size:10px" title="Fase ${f}: ${med}% concluído">${med}%</div>`;
   });
@@ -2324,7 +2227,6 @@ window.fbAplicarRemoto = function(d){
   if(d.gmcells&&typeof GMS!=="undefined"){ GMS.forEach(function(m){ AS.forEach(function(a){
     var c=d.gmcells[m.n+"__"+a]; if(!c) return;
     if(c.st!=null)m[a].st=c.st; if(c.dur!=null)m[a].dur=c.dur;
-    if(c.iniR!==undefined)m[a].iniR=c.iniR; if(c.fimR!==undefined)m[a].fimR=c.fimR;
     if(a==="MDM"&&c.ini!=null)m.MDM.ini=c.ini;
   }); }); }
   if(d.recursos){try{var rr=JSON.parse(d.recursos); if(rr&&typeof rr==="object"){ for(var fz in rr){ RECURSOS[fz]=rr[fz]; } }}catch(e){}}
@@ -2638,8 +2540,8 @@ if(window.fbPronto){
       <label class="ep-lbl">Data do rodapé</label><input class="ep-inp" type="text" id="e-rod">
     </div>
     <div class="ep-card" style="grid-column:1/-1">
-      <h3>Grupos por Fase — datas, status e %</h3>
-      <p class="ep-hint">Selecione a fase. <b>MDM</b>: digite início e fim. <b>ORC / BIM / COMP</b>: digite a <b>duração (dias)</b> — as datas são calculadas automaticamente pela predecessora + duração + <b>recursos por time na fase</b>. Status e % continuam editáveis.</p>
+      <h3>Recursos por fase</h3>
+      <p class="ep-hint">As datas, status e % dos grupos são <b>derivados dos GMs</b> — edite cada GM no Gantt. Aqui ficam apenas os recursos por fase.</p>
       <div class="ep-tabs" id="ep-tabs"></div>
       <div id="ep-fase"></div>
     </div>

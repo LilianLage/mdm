@@ -17,7 +17,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:13px}
 body{font-family:var(--fn);background:var(--bg);color:var(--tx);line-height:1.3}
-.wrap{width:min(1500px,100%);margin:8px auto;display:flex;flex-direction:column;gap:0}
+.wrap{width:100%;margin:8px auto;padding:0 10px;box-sizing:border-box;display:flex;flex-direction:column;gap:0}
 
 /* ══ HEADER ══ */
 header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;border-radius:6px 6px 0 0}
@@ -261,10 +261,11 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .g-bar.plan{opacity:.22;box-shadow:none}
 .g-bar-real{position:absolute;bottom:0;height:5px;border-radius:2px;background:#10261A;box-shadow:0 0 0 1px rgba(255,255,255,.55);z-index:6;pointer-events:none}
 .g-bar-real.over{background:#BF360C}
-.gm-caret{cursor:pointer;display:inline-flex;width:13px;justify-content:center;color:#888;transition:transform .15s;font-size:10px;margin-right:1px}
-.gm-caret:hover{color:#006B3F}
-.gm-caret.open{transform:rotate(90deg);color:#006B3F}
-.gm-caret-sp{display:inline-block;width:14px}
+.gm-caret{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1.5px solid var(--v1);border-radius:5px;background:rgba(0,107,63,.08);color:var(--v1);font-size:14px;font-weight:800;line-height:1;flex-shrink:0;margin-right:5px;user-select:none;transition:background .12s,color .12s,transform .05s}
+.gm-caret:hover{background:var(--v1);color:#fff}
+.gm-caret:active{transform:scale(.88)}
+.gm-caret.open{background:var(--v1);color:#fff;border-color:var(--v1)}
+.gm-caret-sp{display:inline-block;width:18px;margin-right:5px;flex-shrink:0}
 .gm-row{background:rgba(0,107,63,.022)}
 .gm-row .g-lbl{padding-left:20px}
 .gm-lbl .g-nome{font-size:11px;font-weight:600;color:#4a4a4a}
@@ -1361,10 +1362,19 @@ function renderGantt(){
         });
 
         var _gexp=!!GM_EXP[fk+"|"+gi];
+        var _caretHtml;
+        if(_gms.length){
+          var _cSym=_gexp?"&#8722;":"+";
+          var _cCls=_gexp?"gm-caret open":"gm-caret";
+          var _cTit=(_gexp?"Recolher":"Expandir")+" "+_gms.length+" GMs";
+          _caretHtml='<span class="'+_cCls+'" onclick="event.stopPropagation();togGmExp(\''+fk+'\','+gi+')" title="'+_cTit+'">'+_cSym+'</span>';
+        }else{
+          _caretHtml='<span class="gm-caret-sp"></span>';
+        }
         html+=`<div class="g-row">
           <div class="g-lbl" data-gnome="${g.nome.replace(/"/g,'&quot;')}" data-gfase="${(g.fase.match(/\d+/)||[0])[0]}">
             <div class="g-lbl-top">
-              ${_gms.length?`<span class="gm-caret ${_gexp?"open":""}" onclick="event.stopPropagation();togGmExp('${fk}',${gi})" title="${_gexp?"Recolher":"Expandir"} ${_gms.length} GMs">&#9656;</span>`:`<span class="gm-caret-sp"></span>`}
+              ${_caretHtml}
               <div class="g-dot" style="background:${dot}"></div>
               <span class="g-nome" title="${g.nome}">${g.nome}</span>
             </div>

@@ -192,6 +192,11 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .fase-info{display:flex;flex-direction:column;gap:1px;flex:1}
 .fase-nome{font-size:11px;font-weight:700;color:#fff}
 .fase-meta{font-size:8.5px;color:#A8D5C5}
+.fase-extra{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:0 12px;height:100%;font-size:9px;font-weight:600;color:#cfe9df}
+.fase-extra .fx-item{white-space:nowrap}
+.fase-extra .fx-sep{opacity:.35}
+.fase-extra .fx-area{white-space:nowrap}
+.tl-btn.gms-on{box-shadow:inset 0 0 0 2px var(--v2)}
 /* progress pill no header da fase */
 .fase-prog{
   display:flex;align-items:center;gap:6px;
@@ -559,7 +564,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
   <span class="tl-cnt" id="f-cnt"></span>
   <div style="display:flex;gap:4px;margin-right:4px">
-    <button class="tl-btn sec" id="tog-allf" onclick="toggleTodasFases()">⊟ Recolher todas</button>
+    <button class="tl-btn sec" id="tog-allf" onclick="togAllClick()" ondblclick="togAllDbl()" title="1 clique: recolher/expandir grupos · 2 cliques: recolher/expandir GMs">⊟ Recolher todas</button>
   </div>
   <div class="legend">
     <div class="lg"><div class="lg-sq" style="background:#006B3F"></div>MDM</div>
@@ -723,11 +728,18 @@ function buildGmAssignments(){
       ents.forEach(function(e){(e._g||[]).forEach(function(gm){done[gm.n]=1;});});
     });
     var left=all.filter(function(gm){return !done[gm.n];});
-    if(left.length){
-      var empt=entries.filter(function(e){return !e._g||!e._g.length;}).sort(function(a,b){return a.fase-b.fase;});
-      if(empt.length) empt[0]._g=(empt[0]._g||[]).concat(left);
-      else entries[entries.length-1]._g=(entries[entries.length-1]._g||[]).concat(left);
-    }
+    // Sobras (ex.: notável em branco): cada GM vai para uma entrada DA MESMA FASE do seu sprint,
+    // nunca para outra fase. Sem entrada na fase do sprint, cai na entrada vazia mais cedo (fallback).
+    left.forEach(function(gm){
+      var same=entries.filter(function(e){return e.fase===gm.sp;});
+      var target;
+      if(same.length){
+        target=same.filter(function(e){return !e._g||!e._g.length;})[0] || same[0];
+      }else{
+        target=entries.filter(function(e){return !e._g||!e._g.length;}).sort(function(a,b){return a.fase-b.fase;})[0] || entries[entries.length-1];
+      }
+      (target._g=target._g||[]).push(gm); done[gm.n]=1;
+    });
     entries.forEach(function(e){ASSIGN[e.nome+"|"+e.fase]={label:(info?info.label:e.nome),gms:e._g||[],total:(e._g||[]).length};});
   });
   return ASSIGN;
@@ -768,6 +780,27 @@ function toggleTodasFases(){
   ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"]
     .forEach(f=>{ COLLAPSED[f]=_allCollapsed; });
   document.getElementById("tog-allf").textContent=_allCollapsed?"⊞ Expandir todas":"⊟ Recolher todas";
+  renderGantt();
+}
+// ── Recolher/expandir em dois níveis: 1 clique = grupos (fases), 2 cliques = GMs ──
+var _togClickTimer=null;
+function togAllClick(){
+  if(_togClickTimer) return;            // 2º clique de um duplo: deixa o dblclick assumir
+  _togClickTimer=setTimeout(function(){ _togClickTimer=null; toggleTodasFases(); }, 240);
+}
+function togAllDbl(){
+  if(_togClickTimer){ clearTimeout(_togClickTimer); _togClickTimer=null; }
+  toggleTodosGMs();
+}
+function toggleTodosGMs(){
+  window._GM_EXP_ALL=!window._GM_EXP_ALL;
+  if(window._GM_EXP_ALL){
+    // ao abrir os GMs, garante que as fases estejam expandidas para que apareçam
+    ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"].forEach(function(f){ COLLAPSED[f]=false; });
+    _allCollapsed=false;
+    var t=document.getElementById("tog-allf"); if(t) t.textContent="⊟ Recolher todas";
+  }
+  var b=document.getElementById("tog-allf"); if(b) b.classList.toggle("gms-on", !!window._GM_EXP_ALL);
   renderGantt();
 }
 
@@ -946,8 +979,8 @@ function renderExec(){
   const k1=calcMeta1();
   const k2=CFG.kpi2;
   const k1El = document.getElementById("k1-v");
-  // Tooltip customizado: listar grupos 100% concluídos
-  const _aptos = GRUPOS.filter(g=>g.pct===100);
+  // Tooltip customizado: listar GMs 100% concluídos
+  const _aptos = GMS.filter(m=>calcPctGrupo(m)===100).slice().sort((a,b)=>b.w-a.w);
   const k1Concl = GMS.reduce((s,m)=>s + (calcPctGrupo(m)===100 ? m.w*100 : 0), 0); // concluído por GM
   document.getElementById("k1-prog").textContent  = k1.toFixed(1)+"%";
   document.getElementById("k1-concl").textContent = k1Concl.toFixed(1)+"%";
@@ -955,18 +988,18 @@ function renderExec(){
   k1El.onmouseenter = (e) => {
     const tt = document.getElementById("tt");
     const linhas = _aptos.length
-      ? _aptos.map(g=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${g.fase} · ${g.nome}</span><span style="color:#A8D5C5;white-space:nowrap">${g.pctMeta.toFixed(2)}%</span></div>`).join("")
-      : `<div style="color:#aaa">Nenhum grupo 100% concluído ainda</div>`;
+      ? _aptos.map(m=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${m.f} · ${m.nm||("GM "+m.n)}</span><span style="color:#A8D5C5;white-space:nowrap">${(m.w*100).toFixed(2)}%</span></div>`).join("")
+      : `<div style="color:#aaa">Nenhum GM 100% concluído ainda</div>`;
     const _contribGMs = GMS.filter(m=>{var p=calcPctGrupo(m);return p>0&&p<100;});
     const _ppParcial = _contribGMs.reduce((s,m)=>s+(m.w*100)*calcPctGrupo(m)/100,0);
     const _ppConcl  = k1Concl;
     tt.innerHTML = `<h4>📊 Meta 1 — ${k1.toFixed(1)}pp acumulados</h4>
       <div style="font-size:9.5px;color:#aaa;margin-bottom:6px">
         O valor da meta combina dois componentes:<br>
-        <b style="color:#A8D5C5">✅ ${_ppConcl.toFixed(1)}pp</b> de grupos 100% concluídos<br>
+        <b style="color:#A8D5C5">✅ ${_ppConcl.toFixed(1)}pp</b> de GMs 100% concluídos<br>
         <b style="color:#FFB719">⏳ ${_ppParcial.toFixed(1)}pp</b> de evolução parcial em andamento (${_contribGMs.length} GMs)
       </div>
-      ${_aptos.length ? `<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin-bottom:3px">Grupos concluídos (${_aptos.length}):</div>
+      ${_aptos.length ? `<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin-bottom:3px">GMs concluídos (${_aptos.length}):</div>
       <div style="font-size:9.5px;max-height:160px;overflow-y:auto;line-height:1.8">${linhas}</div>` : ""}
       <hr><div style="font-size:8.5px;color:#aaa">Meta: 90pp até dez/26 · Faltam ${(90-k1).toFixed(1)}pp</div>`;
     tt.style.display = "block";
@@ -1262,7 +1295,12 @@ function renderGantt(){
   Object.keys(faseMap).forEach(fk=>{
     const itens=faseMap[fk].filter(g=>{
       if(fFases.length && !fFases.includes(g.fase)) return false;
-      if(fBusca && !g.nome.toLowerCase().includes(fBusca)) return false;
+      if(fBusca){
+        var _nmHit=g.nome.toLowerCase().includes(fBusca);
+        var _gk0=gmKey(g.nome);
+        var _gmHit0=GMS.some(function(m){return m.gk===_gk0 && m.f===g.fase && (m.nm||"").toLowerCase().includes(fBusca);});
+        if(!_nmHit && !_gmHit0) return false;
+      }
       if(fSts.length){
         // grupo passa se qualquer área tem o status selecionado
         const match=fSts.some(s=>AREAS.some(a=>g[a].st===s));
@@ -1285,6 +1323,28 @@ function renderGantt(){
     const pctGM=gmF?Math.round(gmConc/gmF*100):0;
     const isCollapsed=!!COLLAPSED[fk];
 
+    // ── Agregados da fase (a partir dos GMs): janela prevista, dias e % por área ──
+    var _fgms=GMS.filter(function(m){return m.f===fk;});
+    var _fIni=null,_fFim=null,_aDone={MDM:0,ORC:0,BIM:0,COMP:0},_aTot=_fgms.length;
+    _fgms.forEach(function(m){
+      var w=gmAreaWin(m);
+      AREAS.forEach(function(a){
+        if(w[a].ini && (!_fIni || w[a].ini<_fIni)) _fIni=w[a].ini;
+        if(w[a].fim && (!_fFim || w[a].fim>_fFim)) _fFim=w[a].fim;
+        if(m[a].st==="done") _aDone[a]++;
+      });
+    });
+    var _diasPrev=(_fIni&&_fFim)?Math.max(0,Math.round((pd(_fFim)-pd(_fIni))/86400000)):0;
+    var _diasCorr=0;
+    if(_fIni){ _diasCorr=Math.round((pd(CFG.hoje)-pd(_fIni))/86400000); if(_diasCorr<0)_diasCorr=0; if(_diasPrev&&_diasCorr>_diasPrev)_diasCorr=_diasPrev; }
+    var _ddmm=function(iso){ return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)):"—"; };
+    var _rangeStr=_ddmm(_fIni)+" → "+_ddmm(_fFim);
+    var _diasStr=_diasCorr+"d atual / "+_diasPrev+"d";
+    var _areaPctStr=AREAS.map(function(a){ var p=_aTot?Math.round(_aDone[a]/_aTot*100):0; return ACFG[a].label+" "+p+"%"; }).join('<span class="fx-sep"> | </span>');
+    var _faseExtraHtml='<span class="fx-item">📅 '+_rangeStr+'</span><span class="fx-sep">·</span>'
+      +'<span class="fx-item">⏱ '+_diasStr+'</span><span class="fx-sep">·</span>'
+      +'<span class="fx-area">'+_areaPctStr+'</span>';
+
     html+=`<div class="fase-hdr" onclick="toggleFase('${fk}')" id="hdr-${fk.replace(" ","")}">
       <div class="fase-lbl">
         <span class="fase-arrow ${isCollapsed?"collapsed":""}">▼</span>
@@ -1300,7 +1360,7 @@ function renderGantt(){
           <span style="font-weight:600;opacity:.85">${gmConc}/${gmF} GMs concluídos · ${pctGM}%</span>
         </span>
       </div>
-    <div class="fase-grid"></div>
+    <div class="fase-grid"><div class="fase-extra">${_faseExtraHtml}</div></div>
     </div>`;
 
     if(!isCollapsed){
@@ -1361,7 +1421,8 @@ function renderGantt(){
           </div>`;
         });
 
-        var _gexp=!!GM_EXP[fk+"|"+gi];
+        var _gmHit=fBusca && _gms.some(function(m){return (m.nm||"").toLowerCase().includes(fBusca);});
+        var _gexp=(!!GM_EXP[fk+"|"+gi]) || !!window._GM_EXP_ALL || _gmHit;
         var _caretHtml;
         if(_gms.length){
           var _cSym=_gexp?"&#8722;":"+";
@@ -1385,7 +1446,7 @@ function renderGantt(){
           </div>
           <div class="g-subs">${subs}</div>
         </div>`;
-        if(_gexp || window._GM_EXP_ALL){ html+=gmRowsHtml(_gms,fk,hojeL); }
+        if(_gexp){ html+=gmRowsHtml(_gms,fk,hojeL); }
       });
     }
   });

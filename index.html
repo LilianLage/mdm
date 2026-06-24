@@ -288,6 +288,9 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .gm-arow label{color:#777;font-size:10px}
 .gm-arow input,.gm-arow select{font-size:11px;padding:3px 5px;border:1px solid #ccc;border-radius:4px}
 .gm-modal-ft{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid #eee}
+.mc-list{margin-top:6px;max-height:62vh;overflow-y:auto;font-size:12px;line-height:1.9;border-top:1px solid #eee;padding-top:8px;color:#333}
+.mc-list>div{padding:3px 2px;border-bottom:1px solid #f2f2f2}
+.mc-list>div>span:last-child{color:#006B3F !important;font-weight:700}
 
 /* Tooltip */
 .tt{position:fixed;background:rgba(0,35,18,.96);color:#fff;font-size:11px;padding:10px 13px;border-radius:7px;pointer-events:none;display:none;z-index:99999;max-width:320px;line-height:1.7;box-shadow:0 6px 24px rgba(0,0,0,.4)}
@@ -359,6 +362,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 }
 .exp-item:hover{background:#F0F7F0;color:var(--v1)}
 .exp-item span{font-size:14px}
+.exp-sep{height:1px;background:var(--bdr);margin:3px 0}
 
 .edit-panel{background:#fff;border:2px solid var(--v2);border-radius:8px;margin:8px auto;width:min(1500px,100%);padding:14px 18px;box-shadow:0 4px 16px rgba(0,107,63,.12);display:none;width:min(1400px,96%);margin:0 auto;padding:16px 20px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
 </style>
@@ -425,6 +429,9 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <!-- Botão exportar -->
   <div class="exp-btn" id="exp-btn" onclick="togExpMenu(event)">⋯
     <div class="exp-menu" id="exp-menu">
+      <button class="exp-item" onclick="event.stopPropagation();document.getElementById('exp-btn').classList.remove('open');toggleEdit()"><span>✏️</span> Editar dados</button>
+      <button class="exp-item" onclick="event.stopPropagation();document.getElementById('exp-btn').classList.remove('open');if(window.fbSalvar)window.fbSalvar()"><span>💾</span> Salvar dados</button>
+      <div class="exp-sep"></div>
       <button class="exp-item" onclick="exportarPDF()"><span>📄</span> Exportar PDF (com GMs)</button>
       <button class="exp-item" onclick="exportarCSV()"><span>📊</span> Exportar GMs (CSV)</button>
       <button class="exp-item" onclick="exportarJSON()"><span>📦</span> Exportar tudo (JSON)</button>
@@ -462,10 +469,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   </div>
 
   <!-- Divergências colapsável -->
-  <div class="exec-sec" id="sec-div">
+  <div class="exec-sec collapsed" id="sec-div">
     <div class="exec-sec-hdr" onclick="togExecSec('div')">
       <h3>⚠️ Divergências</h3>
-      <span class="exec-sec-arrow" id="arr-div">▲</span>
+      <span class="exec-sec-arrow" id="arr-div">▶</span>
     </div>
     <div class="exec-sec-body" id="div-list"></div>
   </div>
@@ -473,10 +480,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 
 
   <!-- Plano de Ação colapsável -->
-  <div class="exec-sec" id="sec-plano">
+  <div class="exec-sec collapsed" id="sec-plano">
     <div class="exec-sec-hdr" onclick="togExecSec('plano')">
       <h3>✅ Plano de Ação</h3>
-      <span class="exec-sec-arrow" id="arr-plano">▲</span>
+      <span class="exec-sec-arrow" id="arr-plano">▶</span>
     </div>
     <div class="exec-sec-body">
       <button class="btn-add-p" onclick="addAcao();event.stopPropagation()">+ Adicionar</button>
@@ -485,10 +492,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   </div>
 
   <!-- Notas colapsável -->
-  <div class="exec-sec" id="sec-ta">
+  <div class="exec-sec collapsed" id="sec-ta">
     <div class="exec-sec-hdr" onclick="togExecSec('ta')">
       <h3>📝 Notas</h3>
-      <span class="exec-sec-arrow" id="arr-ta">▲</span>
+      <span class="exec-sec-arrow" id="arr-ta">▶</span>
     </div>
     <div class="exec-sec-body">
       <button class="btn-add-p" onclick="addTA();event.stopPropagation()">+ Adicionar</button>
@@ -503,9 +510,9 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div style="display:flex;align-items:center;padding:5px 12px;cursor:pointer;background:rgba(0,107,63,.06);border-bottom:1px solid var(--bdr)"
        onclick="togVisuais()" id="visuais-hdr" style="user-select:none">
     <span style="font-size:9.5px;font-weight:700;color:var(--v1);flex:1">📊 Análises Visuais — Burndown · Heatmap · Velocidade</span>
-    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▲</span>
+    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▶</span>
   </div>
-  <div id="visuais-body">
+  <div id="visuais-body" style="display:none">
     <!-- Linha 1: Burndown + Heatmap lado a lado -->
     <div class="charts-wrap" id="charts-wrap">
       <div class="chart-panel">
@@ -564,7 +571,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
   <span class="tl-cnt" id="f-cnt"></span>
   <div style="display:flex;gap:4px;margin-right:4px">
-    <button class="tl-btn sec" id="tog-allf" onclick="togAllClick()" ondblclick="togAllDbl()" title="1 clique: recolher/expandir grupos · 2 cliques: recolher/expandir GMs">⊟ Recolher todas</button>
+    <button class="tl-btn sec" id="tog-allf" onclick="togAllClick()" ondblclick="togAllDbl()" title="1 clique: recolher/expandir grupos · 2 cliques: recolher/expandir GMs">⊞ Expandir todas</button>
   </div>
   <div class="legend">
     <div class="lg"><div class="lg-sq" style="background:#006B3F"></div>MDM</div>
@@ -592,7 +599,6 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 
 <div class="tt" id="tt"></div>
 <div class="tt" id="gmtt"></div>
-<button class="fab" onclick="toggleEdit()">✏️ Editar dados</button>
 
 <script>
 // ══════════════════════════════════════════════════
@@ -632,7 +638,6 @@ let GRUPOS=[
   {fase:"Fase 1",nome:"Drenagem-3",           pct:65, pctMeta:0.9011,  MDM:{ini:"2026-04-01",fim:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-08",pct:100,st:"done"},BIM:{ini:"2026-05-18",fim:"2026-06-19",pct:36, st:"wip"}, COMP:{ini:"2026-05-26",fim:"2026-06-15",pct:3,  st:"wip"}},
   {fase:"Fase 1",nome:"Tintas/Texturas-5",   pct:95, pctMeta:0.6774,  MDM:{ini:"2026-04-01",fim:"2026-04-22",pct:100,st:"done"},ORC:{ini:"2026-05-18",fim:"2026-06-03",pct:100,st:"done"},BIM:{ini:"2026-06-01",fim:"2026-06-12",pct:80, st:"wip"}, COMP:{ini:"2026-06-01",fim:"2026-06-15",pct:0,  st:"plan"}},
   // FASE 2
-  {fase:"Fase 2",nome:"Tintas/Texturas", pct:10,pctMeta:0.6774, MDM:{ini:"2026-04-01",fim:"2026-04-22",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-06-26",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-06-26",pct:0,st:"plan"}},
   {fase:"Fase 2",nome:"Pedras",          pct:10,pctMeta:1.3837, MDM:{ini:"2026-04-23",fim:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-22",fim:"2026-06-26",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-06",pct:0,st:"plan"},COMP:{ini:"2026-06-22",fim:"2026-07-06",pct:0,st:"plan"}},
   {fase:"Fase 2",nome:"Aço",             pct:10,pctMeta:2.8026, MDM:{ini:"2026-04-23",fim:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-06-29",fim:"2026-07-08",pct:0,st:"plan"},BIM:{ini:"2026-06-29",fim:"2026-07-08",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-15",pct:0,st:"plan"}},
   {fase:"Fase 2",nome:"Ardósia (Pedras)",pct:10,pctMeta:1.3837, MDM:{ini:"2026-04-23",fim:"2026-05-13",pct:10, st:"wip"},ORC:{ini:"2026-07-09",fim:"2026-07-20",pct:0,st:"plan"},BIM:{ini:"2026-06-22",fim:"2026-07-23",pct:0,st:"plan"},COMP:{ini:"2026-07-09",fim:"2026-07-23",pct:0,st:"plan"}},
@@ -773,8 +778,8 @@ const bPos=(d0,d1)=>{
 };
 
 // Estado colapso de fases
-const COLLAPSED={};
-let _allCollapsed=false;
+const COLLAPSED={"Fase 1":true,"Fase 2":true,"Fase 3":true,"Fase 4":true,"Fase 5":true,"Fase 6":true,"Fase 7":true,"Fase 8":true};
+let _allCollapsed=true;
 function toggleTodasFases(){
   _allCollapsed=!_allCollapsed;
   ["Fase 1","Fase 2","Fase 3","Fase 4","Fase 5","Fase 6","Fase 7","Fase 8"]
@@ -984,30 +989,35 @@ function renderExec(){
   const k1Concl = GMS.reduce((s,m)=>s + (calcPctGrupo(m)===100 ? m.w*100 : 0), 0); // concluído por GM
   document.getElementById("k1-prog").textContent  = k1.toFixed(1)+"%";
   document.getElementById("k1-concl").textContent = k1Concl.toFixed(1)+"%";
-  k1El.style.cursor = "help";
-  k1El.onmouseenter = (e) => {
-    const tt = document.getElementById("tt");
-    const linhas = _aptos.length
-      ? _aptos.map(m=>`<div style="display:flex;justify-content:space-between;gap:12px"><span>${m.f} · ${m.nm||("GM "+m.n)}</span><span style="color:#A8D5C5;white-space:nowrap">${(m.w*100).toFixed(2)}%</span></div>`).join("")
-      : `<div style="color:#aaa">Nenhum GM 100% concluído ainda</div>`;
-    const _contribGMs = GMS.filter(m=>{var p=calcPctGrupo(m);return p>0&&p<100;});
-    const _ppParcial = _contribGMs.reduce((s,m)=>s+(m.w*100)*calcPctGrupo(m)/100,0);
-    const _ppConcl  = k1Concl;
-    tt.innerHTML = `<h4>📊 Meta 1 — ${k1.toFixed(1)}pp acumulados</h4>
-      <div style="font-size:9.5px;color:#aaa;margin-bottom:6px">
-        O valor da meta combina dois componentes:<br>
-        <b style="color:#A8D5C5">✅ ${_ppConcl.toFixed(1)}pp</b> de GMs 100% concluídos<br>
-        <b style="color:#FFB719">⏳ ${_ppParcial.toFixed(1)}pp</b> de evolução parcial em andamento (${_contribGMs.length} GMs)
-      </div>
-      ${_aptos.length ? `<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin-bottom:3px">GMs concluídos (${_aptos.length}):</div>
-      <div style="font-size:9.5px;max-height:160px;overflow-y:auto;line-height:1.8">${linhas}</div>` : ""}
-      <hr><div style="font-size:8.5px;color:#aaa">Meta: 90pp até dez/26 · Faltam ${(90-k1).toFixed(1)}pp</div>`;
+  // HTML pré-calculado (sem template aninhado) — usado no hover (prévia) e no painel fixo (lista completa rolável)
+  var _rowOf=function(m){ return '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+m.f+' · '+(m.nm||("GM "+m.n))+'</span><span style="color:#A8D5C5;white-space:nowrap">'+(m.w*100).toFixed(2)+'%</span></div>'; };
+  var _emptyMsg='<div style="color:#aaa">Nenhum GM 100% concluído ainda</div>';
+  var _allRows=_aptos.length ? _aptos.map(_rowOf).join("") : _emptyMsg;
+  var _contribGMs=GMS.filter(function(m){var p=calcPctGrupo(m);return p>0&&p<100;});
+  var _ppParcial=_contribGMs.reduce(function(s,m){return s+(m.w*100)*calcPctGrupo(m)/100;},0);
+  var _resumoHtml='<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">O valor da meta combina dois componentes:<br><b style="color:#A8D5C5">✅ '+k1Concl.toFixed(1)+'pp</b> de GMs 100% concluídos<br><b style="color:#FFB719">⏳ '+_ppParcial.toFixed(1)+'pp</b> de evolução parcial em andamento ('+_contribGMs.length+' GMs)</div>';
+  var _PREV=8;
+  var _previewRows=_aptos.length ? _aptos.slice(0,_PREV).map(_rowOf).join("") : _emptyMsg;
+  var _maisTxt=_aptos.length>_PREV ? '<div style="font-size:9px;color:#FFB719;margin-top:4px">+ '+(_aptos.length-_PREV)+' GMs · clique no número para ver todos e rolar 🖱️</div>' : "";
+  var _previewBlock=_aptos.length ? ('<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin-bottom:3px">GMs concluídos ('+_aptos.length+'):</div><div style="font-size:9.5px;line-height:1.8">'+_previewRows+'</div>'+_maisTxt) : "";
+  var _footTxt='Meta: 90pp até dez/26 · Faltam '+(90-k1).toFixed(1)+'pp';
+  k1El.style.cursor = "pointer";
+  k1El.title = "Clique para fixar e rolar a lista completa";
+  k1El.onmouseenter = function(e){
+    var tt = document.getElementById("tt");
+    tt.innerHTML='<h4>📊 Meta 1 — '+k1.toFixed(1)+'pp acumulados</h4>'+_resumoHtml+_previewBlock+'<hr><div style="font-size:8.5px;color:#aaa">'+_footTxt+'</div>';
     tt.style.display = "block";
-    const spaceRight = window.innerWidth - (e.clientX+14);
+    var spaceRight = window.innerWidth - (e.clientX+14);
     tt.style.left = (spaceRight>340 ? e.clientX+14 : e.clientX-344) + "px";
     tt.style.top  = (e.clientY-10) + "px";
   };
-  k1El.onmouseleave = () => { document.getElementById("tt").style.display="none"; };
+  k1El.onmouseleave = function(){ document.getElementById("tt").style.display="none"; };
+  k1El.onclick = function(){
+    document.getElementById("tt").style.display="none";
+    document.getElementById("metasConclTit").textContent='Meta 1 — '+k1.toFixed(1)+'pp · GMs 100% concluídos ('+_aptos.length+')';
+    document.getElementById("metasConclBody").innerHTML=_resumoHtml+'<div class="mc-list">'+_allRows+'</div><div style="font-size:9px;color:#888;margin-top:10px">'+_footTxt+'</div>';
+    document.getElementById("metasConclOv").style.display="flex";
+  };
   const k1b=document.getElementById("k1-b");
   const ritmo=calcRitmo();
   const ratio=ritmo.ritmoNec/Math.max(ritmo.ritmoAtual,0.0001);
@@ -1174,6 +1184,7 @@ function abrirGmEdit(n){
   document.getElementById("gmEditOv").style.display="flex";
 }
 function fecharGmEdit(){var o=document.getElementById("gmEditOv");if(o)o.style.display="none";_gmEditN=null;}
+function fecharMetasConcl(){var o=document.getElementById("metasConclOv");if(o)o.style.display="none";}
 function salvarGmEdit(){
   if(_gmEditN===null) return;
   var m=GMS.find(function(x){return x.n===_gmEditN;}); if(!m){fecharGmEdit();return;}
@@ -1337,7 +1348,7 @@ function renderGantt(){
     var _diasPrev=(_fIni&&_fFim)?Math.max(0,Math.round((pd(_fFim)-pd(_fIni))/86400000)):0;
     var _diasCorr=0;
     if(_fIni){ _diasCorr=Math.round((pd(CFG.hoje)-pd(_fIni))/86400000); if(_diasCorr<0)_diasCorr=0; if(_diasPrev&&_diasCorr>_diasPrev)_diasCorr=_diasPrev; }
-    var _ddmm=function(iso){ return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)):"—"; };
+    var _ddmm=function(iso){ return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"—"; };
     var _rangeStr=_ddmm(_fIni)+" → "+_ddmm(_fFim);
     var _diasStr=_diasCorr+"d atual / "+_diasPrev+"d";
     var _areaPctStr=AREAS.map(function(a){ var p=_aTot?Math.round(_aDone[a]/_aTot*100):0; return ACFG[a].label+" "+p+"%"; }).join('<span class="fx-sep"> | </span>');
@@ -2230,7 +2241,7 @@ function _isCriticoGrupo(g){ return AREAS.some(a=>_isCriticoArea(g,a)); }
 
 
 // ══ VISUAIS TOGGLE ══
-let _visuaisAberto = true;
+let _visuaisAberto = false;
 function togVisuais(){
   _visuaisAberto = !_visuaisAberto;
   document.getElementById("visuais-body").style.display = _visuaisAberto ? "" : "none";
@@ -2403,16 +2414,6 @@ function renderTudo(){
   renderVelocidade();
 }
 window.renderTudo = renderTudo;
-
-// Botão salvar fixo
-(function(){
-  const btn = document.createElement("button");
-  btn.className = "fab";
-  btn.style.cssText = "right:180px;background:#004d2e;font-size:12px;padding:10px 16px;width:auto";
-  btn.innerHTML = "💾 Salvar";
-  btn.onclick = () => { if(window.fbSalvar) window.fbSalvar(); };
-  document.body.appendChild(btn);
-})();
 
 // ══ INIT ══
 // Aguardar Firebase carregar dados antes de renderizar
@@ -2688,6 +2689,12 @@ if(window.fbPronto){
   </div>
 </div>
 
+<div id="metasConclOv" class="gm-ov" onclick="if(event.target===this)fecharMetasConcl()">
+  <div class="gm-modal" style="width:min(560px,94vw)">
+    <div class="gm-modal-hd"><span id="metasConclTit"></span><button onclick="fecharMetasConcl()" title="Fechar">✕</button></div>
+    <div class="gm-modal-bd" id="metasConclBody"></div>
+  </div>
+</div>
 <div id="gmEditOv" class="gm-ov" onclick="if(event.target===this)fecharGmEdit()">
   <div class="gm-modal">
     <div class="gm-modal-hd"><span id="gmEditTit"></span><button onclick="fecharGmEdit()" title="Fechar">✕</button></div>

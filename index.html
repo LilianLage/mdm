@@ -102,6 +102,7 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .p-txt{flex:1;line-height:1.3}.p-txt.done{text-decoration:line-through;color:#aaa}
 .p-area{font-size:7.5px;padding:1px 5px;border-radius:8px;color:#fff;white-space:nowrap;flex-shrink:0}
 .p-del{border:none;background:none;color:#ccc;font-size:12px;cursor:pointer;padding:0 2px;flex-shrink:0}
+.p-dt{font-size:8px;border:1px solid #ddd;border-radius:3px;padding:1px 3px;color:#555;background:#fff;flex-shrink:0;width:104px;font-family:inherit}
 .p-del:hover{color:var(--warn)}
 .ta-item{display:flex;align-items:flex-start;gap:5px;font-size:9px;padding:4px 6px;border-radius:3px;background:#fff;border:1px solid #eee;line-height:1.45;cursor:pointer}
 .ta-item:hover{background:#F5FAF7}
@@ -162,7 +163,7 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .lg-sq.plan{opacity:.22;border:1px dashed #999}
 
 /* ══ GANTT ══ */
-.gantt-wrap{background:#fff;border:1px solid var(--bdr);border-top:none;border-radius:0 0 6px 6px;overflow-x:auto;overflow-y:visible;box-shadow:0 3px 12px rgba(0,107,63,.08)}
+.gantt-wrap{background:#fff;border:1px solid var(--bdr);border-top:none;border-radius:0 0 6px 6px;overflow:auto;max-height:80vh;box-shadow:0 3px 12px rgba(0,107,63,.08)}
 
 /* Cabeçalho tempo */
 .g-head{display:flex;position:sticky;top:0;z-index:30;background:var(--v1)}
@@ -236,7 +237,7 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 }
 
 /* Sub-linhas área */
-.g-subs{flex:1;display:flex;flex-direction:column;min-width:1100px}
+.g-subs{flex:1;display:flex;flex-direction:column;justify-content:flex-end;min-width:1100px}
 .g-sub{
   position:relative;
   height:var(--row-h);
@@ -291,8 +292,13 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .mc-list{margin-top:6px;max-height:62vh;overflow-y:auto;font-size:12px;line-height:1.9;border-top:1px solid #eee;padding-top:8px;color:#333}
 .mc-list>div{padding:3px 2px;border-bottom:1px solid #f2f2f2}
 .mc-list>div>span:last-child{color:#006B3F !important;font-weight:700}
-.gl-list{max-height:62vh;overflow-y:auto;font-size:12px;line-height:1.5;border-top:1px solid #eee;padding-top:6px}
-.gl-list>div{display:flex;gap:8px;align-items:baseline;padding:4px 2px;border-bottom:1px solid #f2f2f2}
+.gl-list{max-height:64vh;overflow-y:auto;font-size:12px;line-height:1.5;border-top:1px solid #eee;padding-top:6px}
+.gl-list>div{padding:7px 2px 8px;border-bottom:1px solid #f0f0f0}
+.gl-head{display:flex;gap:8px;align-items:baseline}
+.gl-nome{flex:1}
+.gl-meta{font-size:10.5px;color:#555;margin:3px 0 2px 42px}
+.gl-areas{font-size:11px;color:#333;margin-left:42px}
+.gl-dias{font-size:10px;color:#8a8a8a;margin-left:42px;margin-top:1px}
 .gl-n{color:#006B3F;font-weight:700;min-width:34px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
 
 /* Tooltip */
@@ -471,10 +477,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     </div>
   </div>
 
-  <!-- Divergências colapsável -->
+  <!-- Pontos de Atenção colapsável -->
   <div class="exec-sec collapsed" id="sec-div">
     <div class="exec-sec-hdr" onclick="togExecSec('div')">
-      <h3>⚠️ Divergências</h3>
+      <h3>⚠️ Pontos de Atenção</h3>
       <span class="exec-sec-arrow" id="arr-div">▶</span>
     </div>
     <div class="exec-sec-body" id="div-list"></div>
@@ -528,7 +534,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
             Simular sem BIM
           </label>
         </h3>
-        <canvas id="burndown-canvas" height="130"></canvas>
+        <canvas id="burndown-canvas" height="230"></canvas>
       </div>
       <div class="chart-panel">
         <h3>🟥 Heatmap — Fase × Área <span>% conclusão médio</span></h3>
@@ -543,6 +549,15 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
       <div id="velocidade-cards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
     </div>
   </div>
+</div>
+
+<!-- CAMINHO CRÍTICO -->
+<div style="border:1px solid var(--bdr);border-top:none;background:#fff">
+  <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;background:rgba(191,54,12,.06);border-bottom:1px solid var(--bdr)" onclick="togCritico()" id="critico-hdr">
+    <span style="font-size:9.5px;font-weight:700;color:#BF360C;flex:1">🎯 Caminho Crítico — o que mais empurra a meta (90% até dez/26)</span>
+    <span style="font-size:9px;color:#BF360C;font-weight:700" id="critico-arrow">▶</span>
+  </div>
+  <div id="critico-body" style="padding:10px 14px;display:none"><div id="caminho-critico"></div></div>
 </div>
 
 <!-- GANTT TOOLBAR -->
@@ -568,6 +583,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <option value="done">✅ Concluído</option>
     <option value="wip">⏳ Em andamento</option>
     <option value="plan">⚪ Previsto</option>
+  </select>
+  <span class="tl-label">Resp.:</span>
+  <select class="tl-select" id="f-resp" size="1" style="min-height:26px" onchange="renderGantt()">
+    <option value="">Todos</option>
   </select>
   <span class="tl-label">Buscar:</span>
   <input class="tl-input" type="text" id="f-busca" placeholder="ex: Argamassa" oninput="renderGantt()">
@@ -708,6 +727,8 @@ const ACFG={MDM:{label:"MDM",cor:"#006B3F"},BIM:{label:"BIM",cor:"#793F98"},ORC:
 // ══════════════════════════════════════════════════
 // GMs por GRUPO (origem: PROJETO_MDM.xlsx · MOD-REPORT)
 // Cada GM traz: n (Nº GM), nome, sp (sprint = fase no board), nt (notável: SIM/NÃO/"")
+const RESP_SEED={453:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],465:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],115:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],472:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],535:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],536:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],942:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],101:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],103:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],116:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],117:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],127:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],140:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],143:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],148:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],156:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],231:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],233:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],322:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],494:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],495:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],523:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],943:["Livia","Junior","Gabriel Veloso","Larissa Fernandes"],246:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],469:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],554:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],451:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],430:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],118:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],119:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],121:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],122:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],171:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],173:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],178:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],184:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],271:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],476:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],104:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],163:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],188:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],220:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],243:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],481:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],505:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],510:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],144:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],105:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],106:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],480:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],491:["Marco","Junior","Gabriel Veloso","Larissa Fernandes"],420:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],552:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],131:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],555:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],112:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],145:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],166:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],113:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],513:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],192:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],435:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],483:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],478:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],150:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],206:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],240:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],251:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],253:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],255:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],419:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],424:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],426:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],427:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],436:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],437:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],439:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],440:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],455:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],267:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],428:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],456:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],482:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],484:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],486:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],488:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],546:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],547:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],548:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],176:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],109:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],139:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],489:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],215:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],434:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],503:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],526:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],128:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],425:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],152:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],518:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],198:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],199:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],219:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],433:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],550:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],551:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],553:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],225:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],423:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],529:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],530:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],500:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],138:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],252:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],167:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],129:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],429:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],438:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],549:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],213:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],557:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],562:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],470:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],261:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],265:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],268:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],431:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],432:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],545:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],248:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],330:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],511:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],559:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],560:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],561:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],123:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],154:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],228:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],517:["Diego","João Gilberto","Gabriel Veloso","Larissa Fernandes"],110:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],111:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],114:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],153:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],189:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],201:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],204:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],208:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],210:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],238:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],266:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],306:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],409:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],411:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],443:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],444:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],446:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],447:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],449:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],450:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],452:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],454:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],457:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],458:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],459:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],460:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],462:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],463:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],466:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],474:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],477:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],521:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],538:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],155:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],244:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],527:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],542:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],543:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],179:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],556:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],319:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],324:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],149:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],407:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],507:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],509:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],516:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],519:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],528:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],533:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],108:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],124:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],132:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],133:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],134:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],146:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],151:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],157:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],159:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],164:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],174:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],175:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],181:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],186:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],217:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],218:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],236:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],249:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],250:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],305:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],309:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],479:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],490:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],520:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],534:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],537:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],544:["Diego","Junior","Gabriel Veloso","Larissa Fernandes"],147:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],221:["Fausto","João Gilberto","Gabriel Veloso","Larissa Fernandes"],313:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],323:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],325:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],102:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],212:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],211:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],448:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],497:["Fausto","Junior","Gabriel Veloso","Larissa Fernandes"],162:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],165:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],207:["Gabriela","Junior","Gabriel Veloso","Larissa Fernandes"],158:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],232:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"],168:["Renata","Junior","Gabriel Veloso","Larissa Fernandes"]};
+(function(){var AO=["MDM","ORC","BIM","COMP"];if(typeof GMS!=="undefined")GMS.forEach(function(m){var r=RESP_SEED[m.n];if(r)AO.forEach(function(a,i){if(m[a]&&m[a].resp===undefined)m[a].resp=r[i]||"";});});})();
 const GM_BY_GRUPO = {"acabeletrico":{"label":"Acab. Elétrico","gms":[{"n":453,"nome":"Instalação Elétrica - Quadros Elétricos","sp":1,"nt":"SIM","it":41},{"n":465,"nome":"Instalação Elétrica - Acabamento Elétrico","sp":1,"nt":"SIM","it":117}]},"argamassa":{"label":"Argamassa","gms":[{"n":115,"nome":"Argamassa","sp":1,"nt":"SIM","it":24},{"n":472,"nome":"Argamassa de Regularização","sp":1,"nt":"SIM","it":6},{"n":535,"nome":"Aditivo para Argamassa","sp":1,"nt":"NÃO","it":18},{"n":536,"nome":"Argamassa Polimérica","sp":1,"nt":"NÃO","it":4},{"n":942,"nome":"Argamassa Usinada","sp":1,"nt":"NÃO","it":18}]},"concreto":{"label":"Concreto","gms":[{"n":101,"nome":"Cimento","sp":1,"nt":"NÃO","it":9},{"n":103,"nome":"Bloco de Concreto","sp":1,"nt":"NÃO","it":366},{"n":116,"nome":"Areia","sp":1,"nt":"NÃO","it":21},{"n":117,"nome":"Pedra Britada","sp":1,"nt":"NÃO","it":31},{"n":127,"nome":"Laje Pré-Fabricada","sp":1,"nt":"NÃO","it":12},{"n":140,"nome":"Premoldado de Concreto","sp":1,"nt":"NÃO","it":85},{"n":143,"nome":"Cal","sp":1,"nt":"NÃO","it":7},{"n":148,"nome":"Aglutinante","sp":1,"nt":"NÃO","it":null},{"n":156,"nome":"Impermeabilizante","sp":1,"nt":"NÃO","it":27},{"n":231,"nome":"Estrutura Pré-Moldado de Concreto","sp":1,"nt":"NÃO","it":null},{"n":233,"nome":"Guia Pré-Moldado de Concreto","sp":1,"nt":"NÃO","it":90},{"n":322,"nome":"Solvente","sp":1,"nt":"NÃO","it":12},{"n":494,"nome":"Aditivo para Usina de Concreto","sp":1,"nt":"NÃO","it":4},{"n":495,"nome":"Fibra de Vidro - Parede","sp":1,"nt":"NÃO","it":3},{"n":523,"nome":"Muro Pré-Moldado de Concreto","sp":1,"nt":"NÃO","it":9},{"n":943,"nome":"Concreto Usinado","sp":1,"nt":"NÃO","it":167}]},"drenagem":{"label":"Drenagem","gms":[{"n":246,"nome":"Drenagem","sp":1,"nt":"NÃO","it":8},{"n":469,"nome":"Infra ETE/ETA/EBE/EEE","sp":1,"nt":"NÃO","it":22},{"n":554,"nome":"Tubo PEAD Corrugado - Drenagem","sp":1,"nt":"NÃO","it":62}]},"fioscabos":{"label":"Fios/Cabos","gms":[{"n":451,"nome":"Instalação Elétrica - Cabos Elétricos de Cobre","sp":1,"nt":"SIM","it":184}]},"metaissanit":{"label":"Metais Sanit.","gms":[{"n":430,"nome":"Instalação Hidrosanitária - Metais","sp":1,"nt":"SIM","it":138}]},"tintastexturas":{"label":"Tintas/Texturas","gms":[{"n":118,"nome":"Tinta Látex","sp":1,"nt":"SIM","it":18},{"n":119,"nome":"Tinta Acrílica","sp":1,"nt":"SIM","it":92},{"n":121,"nome":"Textura","sp":1,"nt":"SIM","it":115},{"n":122,"nome":"Grafiato","sp":1,"nt":"NÃO","it":7},{"n":171,"nome":"Material para Pintura","sp":1,"nt":"","it":46},{"n":173,"nome":"Tinta Esmalte/Tinta a Óleo","sp":1,"nt":"SIM","it":72},{"n":178,"nome":"Verniz/Resina","sp":1,"nt":"NÃO","it":12},{"n":184,"nome":"Massa Corrida","sp":1,"nt":"NÃO","it":3},{"n":271,"nome":"Ecogranito","sp":1,"nt":"NÃO","it":10},{"n":476,"nome":"Pigmento Corante","sp":1,"nt":"NÃO","it":10}]},"aco":{"label":"Aço","gms":[{"n":104,"nome":"Vergalhão","sp":2,"nt":"SIM","it":38},{"n":163,"nome":"Serralheria Aço Carbono","sp":2,"nt":"NÃO","it":154},{"n":188,"nome":"Perfil e Chapas de Aço Carbono","sp":2,"nt":"NÃO","it":61},{"n":220,"nome":"Ferragem","sp":2,"nt":"NÃO","it":33},{"n":243,"nome":"Perfil de Alumínio","sp":2,"nt":"NÃO","it":40},{"n":481,"nome":"Vergalhão Cortado e Dobrado","sp":2,"nt":"SIM","it":10},{"n":505,"nome":"Guarda-Corpo","sp":2,"nt":"NÃO","it":8},{"n":510,"nome":"Tela de Aço","sp":2,"nt":"SIM","it":24}]},"ardosiapedras":{"label":"Ardósia (Pedras)","gms":[{"n":144,"nome":"Ardósia","sp":2,"nt":"SIM","it":391}]},"esquadrias":{"label":"Esquadrias","gms":[{"n":105,"nome":"Esquadrias de Alumínio","sp":2,"nt":"SIM","it":1436},{"n":106,"nome":"Acessórios para Esquadrias de Alumínio","sp":2,"nt":"SIM","it":85},{"n":480,"nome":"PU para Esquadrias","sp":2,"nt":"NÃO","it":10},{"n":491,"nome":"Esquadrias Padrão","sp":2,"nt":"","it":null}]},"gas":{"label":"Gas","gms":[{"n":420,"nome":"Instalação Gás","sp":2,"nt":"NÃO","it":49},{"n":552,"nome":"Tubo PEAD Eletrofusão - Gás","sp":2,"nt":"NÃO","it":14}]},"granitopedras":{"label":"Granito (Pedras)","gms":[{"n":131,"nome":"Granitos","sp":2,"nt":"SIM","it":55}]},"outrosacabamentos":{"label":"Outros Acabamentos","gms":[{"n":555,"nome":"Suporte Mão Francesa","sp":2,"nt":"NÃO","it":6},{"n":155,"nome":"Graxa/Lubrificante","sp":6,"nt":"NÃO","it":14},{"n":244,"nome":"Forros e Acessórios PVC","sp":6,"nt":"NÃO","it":22},{"n":527,"nome":"Placa de Lã Rocha","sp":6,"nt":"NÃO","it":1},{"n":542,"nome":"Espaçadores Plásticos","sp":6,"nt":"NÃO","it":93},{"n":543,"nome":"Espaçadores Cerâmicos","sp":6,"nt":"NÃO","it":14},{"n":147,"nome":"Adesivo/Vedante/Cola","sp":7,"nt":"NÃO","it":54}]},"pedras":{"label":"Pedras","gms":[{"n":112,"nome":"Piso Granito","sp":2,"nt":"","it":null},{"n":145,"nome":"Acabamento de Granito","sp":2,"nt":"","it":8},{"n":166,"nome":"Pedra Decorativa","sp":2,"nt":"NÃO","it":4}]},"pisolaminado":{"label":"Piso Laminado","gms":[{"n":113,"nome":"Piso Laminado","sp":2,"nt":"SIM","it":28},{"n":513,"nome":"Piso Vinilico","sp":2,"nt":"SIM","it":9}]},"tubospex":{"label":"Tubos PEX","gms":[{"n":192,"nome":"Tubo/Conexão Multicamada Compressão","sp":2,"nt":"SIM","it":121},{"n":435,"nome":"INATIVO - MATERIAL: Instalação Hidrosanitária - PEX","sp":2,"nt":"NÃO","it":null},{"n":483,"nome":"Instalação Hidrosanitária-Dist Predial Água Fria","sp":2,"nt":"SIM","it":95}]},"acabhidro":{"label":"Acab. Hidro","gms":[{"n":478,"nome":"Instalação Hidrosanitária – Barra de Apoio","sp":3,"nt":"NÃO","it":20},{"n":176,"nome":"Cuba/Tanque Inox","sp":4,"nt":"NÃO","it":20},{"n":429,"nome":"Instalação Hidrosanitária - Acessórios Banheiros","sp":5,"nt":"NÃO","it":30},{"n":438,"nome":"Instalação Hidrosanitária - Kit Hidraulico","sp":5,"nt":"NÃO","it":57},{"n":549,"nome":"Grelha e Porta Grelha de Inox","sp":5,"nt":"NÃO","it":12}]},"hidro":{"label":"Hidro","gms":[{"n":150,"nome":"Calha/Rufo","sp":3,"nt":"NÃO","it":123},{"n":206,"nome":"INATIVO-MATERIAL: Tubo/Conexão PVC Roscável","sp":3,"nt":"","it":1},{"n":240,"nome":"INATIVO-MATERIAL: Acessórios Aquecedor","sp":3,"nt":"","it":null},{"n":251,"nome":"Shaft EPS","sp":3,"nt":"NÃO","it":31},{"n":253,"nome":"INATIVO - MATERIAL: Acessórios Hidráulicos","sp":3,"nt":"","it":8},{"n":255,"nome":"INATIVO - MMATERIAL: Tubo/Conexão CPVC","sp":3,"nt":"","it":null},{"n":419,"nome":"Instalação Hidrosanitária","sp":3,"nt":"","it":null},{"n":424,"nome":"Instalação Hidrosanitária - Caixas d'aguas","sp":3,"nt":"NÃO","it":26},{"n":426,"nome":"Instalação Hidrosanitária - Outros Acessórios","sp":3,"nt":"NÃO","it":26},{"n":427,"nome":"Instalação Hidrosanitária - Acessórios Hidráulicos","sp":3,"nt":"NÃO","it":80},{"n":436,"nome":"Instalação Hidrosanitária - Hidrometros","sp":3,"nt":"NÃO","it":39},{"n":437,"nome":"Instalação Hidrosanitária - Matrial de Irrigação","sp":3,"nt":"","it":1},{"n":439,"nome":"Instalação Hidrosanitária - Telemetria","sp":3,"nt":"NÃO","it":2},{"n":440,"nome":"Instalação Hidrosanitária - Caixas de Passagens","sp":3,"nt":"NÃO","it":68},{"n":455,"nome":"Instalação Elétrica - Grelha/Tampa/Tampão de ferro","sp":3,"nt":"NÃO","it":59}]},"tubospvc":{"label":"Tubos PVC","gms":[{"n":267,"nome":"Tubo/Conexão Eletroduto PEAD","sp":3,"nt":"NÃO","it":24},{"n":428,"nome":"Instalação Hidrosanitária - PVC","sp":3,"nt":"SIM","it":185},{"n":456,"nome":"Tubo/Conexão Eletroduto PVC","sp":3,"nt":"SIM","it":53},{"n":482,"nome":"Instalação Hidrosanitária- Rede Externa de Esgoto","sp":3,"nt":"SIM","it":134},{"n":484,"nome":"Instalação Hidrosanitária-Dist Predial de Esgoto","sp":3,"nt":"SIM","it":400},{"n":486,"nome":"INATIVO - MATERIAL: Instalação Hidrosanitária-Dist P Águas P","sp":3,"nt":"","it":null},{"n":488,"nome":"Instalação Hidrosanitária- Rede Ext Água Fria","sp":3,"nt":"","it":17},{"n":546,"nome":"Instalação Hidrosanitária - Tubos Predial PVC","sp":3,"nt":"SIM","it":29},{"n":547,"nome":"Instalação Hidrosanitária - Acessórios Predial PVC","sp":3,"nt":"","it":20},{"n":548,"nome":"Instalação Hidrosanitária - Acessórios Infra PVC","sp":3,"nt":"","it":null}]},"drywall":{"label":"Drywall","gms":[{"n":109,"nome":"Gesso","sp":4,"nt":"SIM","it":6},{"n":139,"nome":"Gesso Acartonado (Dry Wall)","sp":4,"nt":"","it":55},{"n":489,"nome":"Forros e Acessórios Gesso","sp":4,"nt":"","it":2}]},"incendio":{"label":"Incêndio","gms":[{"n":215,"nome":"Alarme de Incêndio","sp":4,"nt":"NÃO","it":45},{"n":434,"nome":"Instalação Hidrosanitária - Rede Anti incendio","sp":4,"nt":"NÃO","it":64},{"n":503,"nome":"Rede Anti incendio - Porta Corta Fogo","sp":4,"nt":"","it":18},{"n":526,"nome":"","sp":4,"nt":"NÃO","it":null}]},"loucassanit":{"label":"Louças Sanit.","gms":[{"n":128,"nome":"Louça Sanitária","sp":4,"nt":"","it":6},{"n":425,"nome":"Instalação Hidrosanitária - Louças","sp":4,"nt":"SIM","it":62}]},"mecanica":{"label":"Mecânica","gms":[{"n":152,"nome":"Domo/Exaustor","sp":4,"nt":"NÃO","it":24},{"n":518,"nome":"Churrasqueira","sp":4,"nt":"NÃO","it":39}]},"pead":{"label":"PEAD","gms":[{"n":198,"nome":"Tubo/Conexão PEAD Agua Eletrofusão","sp":4,"nt":"","it":11},{"n":199,"nome":"Tubo/Conexão PEAD Gás Eletrofusão","sp":4,"nt":"","it":21},{"n":219,"nome":"INATIVO - MATERIAL: Tubo/Conexão PEAD Esgoto","sp":4,"nt":"","it":4},{"n":433,"nome":"Instalação Hidrosanitária - PEAD","sp":4,"nt":"","it":7},{"n":550,"nome":"Conexões PEAD Eletrofusão","sp":4,"nt":"NÃO","it":99},{"n":551,"nome":"Tubo PEAD Eletrofusão - Água","sp":4,"nt":"NÃO","it":34},{"n":553,"nome":"Tubo PEAD Eletrofusão - Esgoto","sp":4,"nt":"NÃO","it":30}]},"pecasconcreto":{"label":"Peças Concreto","gms":[{"n":225,"nome":"Poste de Concreto","sp":4,"nt":"NÃO","it":69},{"n":423,"nome":"Instalação Hidrosanitária - Concreto","sp":4,"nt":"NÃO","it":48},{"n":529,"nome":"Caixas e tampas de concreto","sp":4,"nt":"NÃO","it":163},{"n":530,"nome":"Anéis e tubos de concreto","sp":4,"nt":"NÃO","it":137}]},"perfilaco":{"label":"Perfil Aço","gms":[{"n":500,"nome":"Perfil Metálico Gesso Acartonado (Dry Wall)","sp":4,"nt":"SIM","it":26}]},"portas":{"label":"Portas","gms":[{"n":138,"nome":"Fechadura/Dobradiças","sp":4,"nt":"NÃO","it":18},{"n":252,"nome":"Porta Pronta","sp":4,"nt":"SIM","it":365}]},"revceramico":{"label":"Rev. Cerâmico","gms":[{"n":167,"nome":"Rejunte","sp":4,"nt":"SIM","it":13},{"n":110,"nome":"Piso Cerâmico","sp":5,"nt":"SIM","it":41},{"n":111,"nome":"Porcelanato","sp":5,"nt":"SIM","it":174},{"n":114,"nome":"Azulejo Cerâmico","sp":5,"nt":"SIM","it":44},{"n":153,"nome":"INATIVO-MATERIAL: Espaçador","sp":5,"nt":"","it":5}]},"telhasfibroc":{"label":"Telhas Fibroc","gms":[{"n":129,"nome":"Telha de Fibrocimento","sp":4,"nt":"SIM","it":30}]},"bombas":{"label":"Bombas","gms":[{"n":213,"nome":"Motobomba","sp":5,"nt":"NÃO","it":189},{"n":557,"nome":"Motobomba/Bombas Especiais Pressurizadas","sp":5,"nt":"NÃO","it":64},{"n":562,"nome":"","sp":5,"nt":"NÃO","it":null}]},"estrutura":{"label":"ESTRUTURA","gms":[{"n":470,"nome":"Portico","sp":5,"nt":"NÃO","it":18}]},"ferrosos":{"label":"Ferrosos","gms":[{"n":261,"nome":"INATIVO-MATERIAL: Tubo/Conexão Aço Carbono Galvanizado","sp":5,"nt":"","it":14},{"n":265,"nome":"INATIVO-MATERIAL: Tubo/Conexão Ferro Fundido","sp":5,"nt":"","it":16},{"n":268,"nome":"INATIVO - MATERIAL: Eletroduto/Conexão Aço Galvanizado","sp":5,"nt":"","it":7},{"n":431,"nome":"Instalação Hidrosanitária - Cobre/Bronze","sp":5,"nt":"NÃO","it":125},{"n":432,"nome":"Inst Hidrossanitária - Galv. rede anti-incêndio","sp":5,"nt":"","it":40},{"n":545,"nome":"Instalação Hidrosanitaria - Aço/Ferro Fundido","sp":5,"nt":"NÃO","it":306}]},"forma":{"label":"FORMA","gms":[{"n":248,"nome":"Desmoltante","sp":5,"nt":"NÃO","it":6},{"n":330,"nome":"Forma de Alumínio","sp":5,"nt":"","it":null},{"n":511,"nome":"Forma de PVC","sp":5,"nt":"NÃO","it":74},{"n":559,"nome":"Forma de alumínio - Painéis","sp":5,"nt":"NÃO","it":264},{"n":560,"nome":"Forma de alumínio - Escadas","sp":5,"nt":"NÃO","it":2},{"n":561,"nome":"Forma de alumínio - Acessórios e Sistema de Segur","sp":5,"nt":"NÃO","it":228}]},"fundacao":{"label":"FUNDAÇÃO","gms":[{"n":123,"nome":"Selador/Fundo","sp":5,"nt":"NÃO","it":28},{"n":154,"nome":"Gabião","sp":5,"nt":"NÃO","it":17},{"n":228,"nome":"Estacas para Fundação","sp":5,"nt":"NÃO","it":151}]},"piscina":{"label":"Piscina","gms":[{"n":517,"nome":"Itens de piscina","sp":5,"nt":"NÃO","it":25}]},"seguranca":{"label":"Segurança","gms":[{"n":189,"nome":"EPC (Equipamentos de Proteção Coletiva)","sp":5,"nt":"NÃO","it":27}]},"eletrica":{"label":"Elétrica","gms":[{"n":201,"nome":"INATIVO - MATERIAL:  Cabo Elétrico > 10mm","sp":6,"nt":"","it":35},{"n":204,"nome":"Tubo/Conexão Eletroduto Alumínio","sp":6,"nt":"","it":18},{"n":208,"nome":"INATIVO - MATERIAL: Acabamento Elétrico","sp":6,"nt":"","it":36},{"n":210,"nome":"Quadro Elétrico","sp":6,"nt":"NÃO","it":16},{"n":238,"nome":"Energia Solar","sp":6,"nt":"NÃO","it":29},{"n":266,"nome":"INATIVO-MATERIAL: Eletrocalha/Acessórios","sp":6,"nt":"","it":69},{"n":306,"nome":"Cabo/Acessório de Rede Telefônica","sp":6,"nt":"NÃO","it":20},{"n":409,"nome":"INATIVO - MATERIAL: Rede Eletrica","sp":6,"nt":"","it":5},{"n":411,"nome":"Componentes Eletricos","sp":6,"nt":"","it":5},{"n":443,"nome":"Instalação Elétrica - Acessórios Elétricos","sp":6,"nt":"NÃO","it":83},{"n":444,"nome":"Instalação Elétrica - Eletrudos Metálicos","sp":6,"nt":"NÃO","it":150},{"n":446,"nome":"Instalação Elétrica - Informática","sp":6,"nt":"NÃO","it":7},{"n":447,"nome":"Instalação Elétrica - Rede Elétrica","sp":6,"nt":"NÃO","it":23},{"n":449,"nome":"Instalação Elétrica - Equipamentos","sp":6,"nt":"NÃO","it":23},{"n":450,"nome":"Instalação Elétrica - Automação Predial","sp":6,"nt":"NÃO","it":38},{"n":452,"nome":"Instalação Elétrica - Telefonia/Interfonia","sp":6,"nt":"NÃO","it":22},{"n":454,"nome":"Instalação Elétrica - Disjuntores","sp":6,"nt":"NÃO","it":50},{"n":457,"nome":"Instalação Elétrica - Telefonia","sp":6,"nt":"NÃO","it":1},{"n":458,"nome":"Instalação Elétrica - Quadros Medidores","sp":6,"nt":"NÃO","it":241},{"n":459,"nome":"Instalação Elétrica - Conectores e Terminais Elétr","sp":6,"nt":"NÃO","it":153},{"n":460,"nome":"Instalação Elétrica - Cabos Elétricos de Alumínio","sp":6,"nt":"NÃO","it":46},{"n":462,"nome":"Instalação Elétrica - Barramentos","sp":6,"nt":"NÃO","it":12},{"n":463,"nome":"Instalação Elétrica - Eletrocalha","sp":6,"nt":"NÃO","it":79},{"n":466,"nome":"Instalação Elétrica - Componente Elétrico","sp":6,"nt":"NÃO","it":51},{"n":474,"nome":"Instalações Elétrica - Cabos Telefonia/Interfonia","sp":6,"nt":"NÃO","it":11},{"n":477,"nome":"Instalação Elétrica - Conectores Policarbonato","sp":6,"nt":"","it":11},{"n":521,"nome":"Instalação Elétrica - Poste Padrão","sp":6,"nt":"NÃO","it":13},{"n":538,"nome":"SISTEMA SELO DIGITAL","sp":6,"nt":"NÃO","it":27}]},"pisos":{"label":"Pisos","gms":[{"n":179,"nome":"Piso Emborrachado","sp":6,"nt":"NÃO","it":37},{"n":556,"nome":"Piso Tátil de Concreto","sp":6,"nt":"NÃO","it":43},{"n":158,"nome":"Piso Premoldado de concreto","sp":8,"nt":"NÃO","it":5},{"n":232,"nome":"Piso Intertravado Pré Moldado de Concreto","sp":8,"nt":"NÃO","it":44}]},"coletoreslixo":{"label":"Coletores Lixo","gms":[{"n":319,"nome":"Embalagem/Molde","sp":7,"nt":"NÃO","it":55},{"n":324,"nome":"Coletores de Lixo","sp":7,"nt":"NÃO","it":77}]},"mobiliarios":{"label":"Mobiliários","gms":[{"n":149,"nome":"Área Social Comum","sp":7,"nt":"NÃO","it":3},{"n":407,"nome":"Eletrodoméstico/Eletrônico","sp":7,"nt":"NÃO","it":18},{"n":507,"nome":"Eletrodoméstico Produto Final","sp":7,"nt":"","it":30},{"n":509,"nome":"Móveis Produto Final","sp":7,"nt":"NÃO","it":523},{"n":516,"nome":"Academia e Esportes","sp":7,"nt":"NÃO","it":191},{"n":519,"nome":"Móveis Luggo","sp":7,"nt":"NÃO","it":146},{"n":528,"nome":"Pet Place","sp":7,"nt":"NÃO","it":5},{"n":533,"nome":"Área de Lazer - Playground","sp":7,"nt":"NÃO","it":22}]},"outros":{"label":"Outros","gms":[{"n":108,"nome":"Prego","sp":7,"nt":"NÃO","it":30},{"n":124,"nome":"Madeira","sp":7,"nt":"NÃO","it":28},{"n":132,"nome":"Madeira para Telhado","sp":7,"nt":"NÃO","it":17},{"n":133,"nome":"Parafuso/Porca/Arruela","sp":7,"nt":"NÃO","it":359},{"n":134,"nome":"Estrutura Metálica para Telhado","sp":7,"nt":"NÃO","it":35},{"n":146,"nome":"Abrasivo","sp":7,"nt":"NÃO","it":68},{"n":151,"nome":"Corda/Cabo/Corrente","sp":7,"nt":"NÃO","it":46},{"n":157,"nome":"EPS","sp":7,"nt":"NÃO","it":44},{"n":159,"nome":"Lona","sp":7,"nt":"NÃO","it":41},{"n":164,"nome":"Moldura EPS","sp":7,"nt":"NÃO","it":31},{"n":174,"nome":"Gabaritos","sp":7,"nt":"NÃO","it":25},{"n":175,"nome":"Serralheria Aluminio","sp":7,"nt":"NÃO","it":14},{"n":181,"nome":"Telas de Aço/Alambrados/Similares","sp":7,"nt":"NÃO","it":17},{"n":186,"nome":"Compensado","sp":7,"nt":"NÃO","it":18},{"n":217,"nome":"INATIVO - MATERIAL: Grelha/Tampa/Tampão de Ferro Fundido","sp":7,"nt":"NÃO","it":21},{"n":218,"nome":"Abraçadeira","sp":7,"nt":"NÃO","it":62},{"n":236,"nome":"Reservatórios Metálico","sp":7,"nt":"NÃO","it":25},{"n":249,"nome":"Manta Acustica","sp":7,"nt":"NÃO","it":3},{"n":250,"nome":"Asfalto","sp":7,"nt":"NÃO","it":9},{"n":305,"nome":"Descartáveis","sp":7,"nt":"NÃO","it":25},{"n":309,"nome":"Pilhas/Baterias","sp":7,"nt":"NÃO","it":10},{"n":479,"nome":"Telha Metálica","sp":7,"nt":"NÃO","it":24},{"n":490,"nome":"Arame","sp":7,"nt":"NÃO","it":29},{"n":520,"nome":"INATIVO - MATERIAL: Placa Fibrocimento","sp":7,"nt":"NÃO","it":null},{"n":534,"nome":"Colas, Fitas Adesivas e Itens de Reparo","sp":7,"nt":"NÃO","it":22},{"n":537,"nome":"Emulsão e Manta Asfáltica","sp":7,"nt":"NÃO","it":12},{"n":544,"nome":"Protetores Presilha","sp":7,"nt":"NÃO","it":28}]},"spda":{"label":"SPDA","gms":[{"n":221,"nome":"SPDA","sp":7,"nt":"NÃO","it":62}]},"visual":{"label":"Visual","gms":[{"n":313,"nome":"Placa de Identificação Definitiva","sp":7,"nt":"NÃO","it":314},{"n":323,"nome":"Placa de Identificação Provisória","sp":7,"nt":"NÃO","it":69},{"n":325,"nome":"INATIVO-MATERIAL: Sinalização Viária","sp":7,"nt":"NÃO","it":2}]},"blococeramico":{"label":"Bloco Cerâmico","gms":[{"n":102,"nome":"Bloco Cerâmico","sp":8,"nt":"","it":43}]},"elevador":{"label":"Elevador","gms":[{"n":212,"nome":"Elevador Social","sp":8,"nt":"NÃO","it":1168}]},"luminarias":{"label":"Luminárias","gms":[{"n":211,"nome":"INATIVO-MATERIAL: Luminária/Lâmpada","sp":8,"nt":"","it":30},{"n":448,"nome":"Instalação Elétrica - Luminárias","sp":8,"nt":"NÃO","it":255},{"n":497,"nome":"Instalação Elétrica - Luminárias Padrão","sp":8,"nt":"","it":63}]},"marmore":{"label":"Mármore","gms":[{"n":162,"nome":"Mármore Sintético","sp":8,"nt":"NÃO","it":11}]},"paisagismo":{"label":"Paisagismo","gms":[{"n":165,"nome":"Paisagismo","sp":8,"nt":"NÃO","it":794},{"n":207,"nome":"Acessório/Insumo para Paisagismo","sp":8,"nt":"NÃO","it":67}]},"vidros":{"label":"Vidros","gms":[{"n":168,"nome":"Vidro","sp":8,"nt":"NÃO","it":108}]}};
 const GM_ALIAS = {"acabamentohidro":"acabhidro","hidrosan":"hidro"};
 function gmNorm(s){return String(s).normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");}
@@ -1051,7 +1072,7 @@ function renderExec(){
 
   const divs=calcDivs();
   document.getElementById("div-list").innerHTML=divs.length===0
-    ?`<div class="d-item ok"><span>✅</span>Sem divergências detectadas</div>`
+    ?`<div class="d-item ok"><span>✅</span>Sem pontos de atenção detectados</div>`
     :divs.map(d=>`<div class="d-item ${d.cls}"><span class="d-ic">${d.ic}</span><span>${d.txt}</span></div>`).join("");
 
 
@@ -1060,6 +1081,7 @@ function renderExec(){
 }
 
 function mudarAreaAcao(i,v){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>mudarAreaAcao(i,v)))return;var _oa=PLANO[i].area||"—";PLANO[i].area=v;renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Editou",'"'+PLANO[i].txt+'" — área: '+_oa+' → '+(v||"—"));if(window.fbSalvar)window.fbSalvar();}
+function mudarDataAcao(i,v){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>mudarDataAcao(i,v)))return;var _od=PLANO[i].dt||"—";PLANO[i].dt=v||"";renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Editou",'"'+PLANO[i].txt+'" — prazo: '+_od+' → '+(v||"—"));if(window.fbSalvar)window.fbSalvar();}
 function renderPlano(){
   document.getElementById("plano-list").innerHTML=PLANO.length===0
     ?`<span style="font-size:9px;color:#aaa">Nenhuma ação.</span>`
@@ -1067,6 +1089,7 @@ function renderPlano(){
       <div class="p-item">
         <div class="p-chk ${p.done?"done":""}" onclick="togAcao(${i})">${p.done?"✓":""}</div>
         <span class="p-txt ${p.done?"done":""}" onclick="editAcao(${i})">${p.txt}</span>
+        <input type="date" class="p-dt" value="${p.dt||''}" onchange="mudarDataAcao(${i},this.value)" title="Prazo da ação">
         <select onchange="mudarAreaAcao(${i},this.value)" style="font-size:8px;border:1px solid #ddd;border-radius:3px;padding:1px 3px;background:${p.area==='MDM'?'#006B3F':p.area==='ORC'?'#FF8B22':p.area==='BIM'?'#793F98':p.area==='COMP'?'#AC41D8':'#f5f5f5'};color:${p.area?'#fff':'#888'}"><option value="" ${!p.area?'selected':''}>— Área</option><option value="MDM" ${p.area==='MDM'?'selected':''}>MDM</option><option value="ORC" ${p.area==='ORC'?'selected':''}>Orçamento</option><option value="BIM" ${p.area==='BIM'?'selected':''}>BIM</option><option value="COMP" ${p.area==='COMP'?'selected':''}>Compilador</option></select>
         <button class="p-del" onclick="delAcao(${i})">✕</button>
       </div>`).join("");
@@ -1091,7 +1114,7 @@ function addTA(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addTA))return;co
 function togAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>togAcao(i)))return;PLANO[i].done=!PLANO[i].done;renderPlano();if(window.mdmLog)mdmLog("Plano de ação",PLANO[i].done?"Concluiu":"Reabriu",'"'+PLANO[i].txt+'"');if(window.fbSalvar)window.fbSalvar();}
 function editAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>editAcao(i)))return;var _o=PLANO[i].txt;const n=prompt("Editar:",PLANO[i].txt);if(n===null)return;if(!n.trim()){delAcao(i);return;}PLANO[i].txt=n.trim();renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Editou",'"'+_o+'" → "'+n.trim()+'"');if(window.fbSalvar)window.fbSalvar();}
 function delAcao(i){if(window.mdmEnsureUser&&!window.mdmEnsureUser(()=>delAcao(i)))return;if(!confirm(`Remover?\n"${PLANO[i].txt}"`))return;var _t=PLANO[i].txt;PLANO.splice(i,1);renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Removeu",'"'+_t+'"');if(window.fbSalvar)window.fbSalvar();}
-function addAcao(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addAcao))return;const t=prompt("Descrição:");if(!t||!t.trim())return;const a=(prompt("Área (MDM/BIM/ORC/COMP/PMO):")||"MDM").toUpperCase().trim();PLANO.push({txt:t.trim(),area:a,done:false});renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Adicionou",'"'+t.trim()+'" (área '+a+')');if(window.fbSalvar)window.fbSalvar();}
+function addAcao(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addAcao))return;const t=prompt("Descrição:");if(!t||!t.trim())return;const a=(prompt("Área (MDM/BIM/ORC/COMP/PMO):")||"MDM").toUpperCase().trim();PLANO.push({txt:t.trim(),area:a,done:false,dt:""});renderPlano();if(window.mdmLog)mdmLog("Plano de ação","Adicionou",'"'+t.trim()+'" (área '+a+')');if(window.fbSalvar)window.fbSalvar();}
 
 // ══ GANTT ══
 function getSelValues(id){
@@ -1149,13 +1172,13 @@ function gmRowsHtml(gms,fk,hojeL){
       if(_fArea && a!==_fArea) return;
       var w2=win[a], p=bPos(w2.ini,w2.fim), cor=ACFG[a].cor, bg=ai%2===0?"":"rgba(0,107,63,.03)";
       subs+='<div class="g-sub" style="background:'+bg+'"><div class="today-line" style="left:'+hojeL+'%"></div>'
-        +'<div class="g-bar '+m[a].st+'" style="left:'+p.l+'%;width:'+p.w+'%;background:'+cor+'" title="'+ACFG[a].label+': '+w2.ini+' \u2192 '+w2.fim+' ('+(m[a].dur||0)+'d)">'+(parseFloat(p.w)>3?ACFG[a].label:'')+'</div></div>';
+        +'<div class="g-bar '+m[a].st+'" style="left:'+p.l+'%;width:'+p.w+'%;background:'+cor+'" title="'+ACFG[a].label+': '+w2.ini+' \u2192 '+w2.fim+' ('+(m[a].dur||0)+'d)'+(m[a].resp?(' \u00b7 Resp: '+m[a].resp):'')+'">'+(parseFloat(p.w)>3?ACFG[a].label:'')+'</div></div>';
     });
     var inativo=(m.w===0), nm=(m.n+" "+(m.nm||"")).replace(/"/g,"&quot;");
     out+='<div class="g-row gm-row'+(inativo?" gm-inativo":"")+'"><div class="g-lbl gm-lbl" onclick="abrirGmEdit('+m.n+')" title="Detalhe do GM '+m.n+' (datas/dura\u00e7\u00e3o)">'
       +'<div class="g-lbl-top"><span class="gm-bullet">\u2514</span><span class="g-nome" title="'+nm+'">'+nm+'</span></div>'
       +'<div class="g-stats">peso <b style="color:var(--v1)">'+(m.w*100).toFixed(3)+'%</b> &nbsp;\u00b7&nbsp; '+(m.it||0)+' itens'+(inativo?' &nbsp;\u00b7&nbsp; <span style="color:#999">INATIVO</span>':'')+'</div>'
-      +'<div style="padding-left:0;margin-top:1px">'+AREAS.map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+'</div>';}).join("")+'</div>'
+      +'<div style="padding-left:0;margin-top:1px">'+AREAS.map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+(m[a].resp?(' \u2014 Resp: '+m[a].resp):'')+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+(m[a].resp?' <span style="color:#b8b8b8;font-weight:400">\u00b7 '+m[a].resp+'</span>':'')+'</div>';}).join("")+'</div>'
       +'</div><div class="g-subs">'+subs+'</div></div>';
   });
   return out;
@@ -1194,9 +1217,19 @@ function abrirGmEdit(n){
       +' <label>In\u00edcio</label><input type="date" id="gm-'+a+'-ini" value="'+(w2.ini||"")+'">'
       +' <label>Fim</label><input type="date" id="gm-'+a+'-fim" value="'+(w2.fim||"")+'">'
       +' <label>Dur (d)</label><input type="number" min="0" id="gm-'+a+'-dur" value="'+(ar.dur||0)+'" style="width:52px">'
+      +' <label>Resp.</label><input type="text" id="gm-'+a+'-resp" value="'+((ar.resp||"").replace(/"/g,"&quot;"))+'" placeholder="Responsável" style="width:128px">'
       +'</div>';
   }).join("");
   document.getElementById("gmEditBody").innerHTML=body+'<div style="font-size:10px;color:#888;margin-top:8px">A <b>dura\u00e7\u00e3o</b> gera as datas (MDM dispara; ORC/BIM seguem; COMP fecha por \u00faltimo). Voc\u00ea pode editar a <b>data</b> direto \u2014 a dura\u00e7\u00e3o recalcula. O status define real \u00d7 planejado (conclu\u00eddo \u2192 reais; em andamento \u2192 in\u00edcio real; plan \u2192 planejadas). Salvar move a meta e atualiza o grupo.</div>';
+  // checkbox "Simular sem BIM" — aplica ao grupo deste GM (unidade usada pelo burndown)
+  (function(){
+    var grps=GRUPOS.filter(function(g){return gmKey(g.nome)===m.gk && g.fase===m.f;});
+    var on=grps.some(function(g){return !!g.semBIM;});
+    var h='<label style="display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 10px;border:1px solid #eee;border-radius:6px;background:#fafafa;font-size:11px;color:#444;cursor:pointer">'
+      +'<input type="checkbox" id="gm-sembim"'+(on?" checked":"")+'> '
+      +'<span><b>Simular sem BIM</b> — marca o grupo deste GM para o cenário <i>Simular sem BIM</i> do burndown (reduz o prazo final pela duração do BIM).</span></label>';
+    document.getElementById("gmEditBody").insertAdjacentHTML("beforeend",h);
+  })();
   _gmDateEd={}; _gmDurEd={};
   AREAS.forEach(function(a){ ["ini","fim","dur"].forEach(function(k){ var el=document.getElementById("gm-"+a+"-"+k); if(el) el.addEventListener("change", function(){ if(k==="dur")_gmDurEd[a]=true; else _gmDateEd[a]=true; gmLink(a, k==="dur"?"dur":k); }); }); });
   document.getElementById("gmEditOv").style.display="flex";
@@ -1214,11 +1247,38 @@ function abrirGmList(nome,fase){
     var totIt=info.gms.reduce(function(s,g){return s+(g.it||0);},0);
     var temNot=info.gms.some(function(g){return g.nt==="SIM";});
     var sub='Fase '+fase+' · '+info.total+' GM'+(info.total!==1?'s':'')+(totIt>0?(' · '+totIt+' itens'):'')+(temNot?' · ★ = notável':'');
+    var _AI=[["MDM","mdm"],["ORC","orçamento"],["BIM","bim"],["COMP","compilador"]];
+    var _hojeMs=(typeof pd==="function"?pd(CFG.hoje):new Date()).getTime();
+    function _glIc(st){return st==="done"?"✅":(st==="wip"?"⏳":"⬜");}
+    function _glBr(iso){return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"—";}
+    function _glDias(ini,fim,st){
+      if(!ini||!fim) return {est:0,real:0};
+      var est=Math.max(0,Math.round((Date.parse(fim)-Date.parse(ini))/86400000));
+      var real;
+      if(st==="done") real=est;
+      else if(st==="plan") real=0;
+      else { var t=_hojeMs,i=Date.parse(ini),f=Date.parse(fim); real=(t<=i?0:(t>=f?est:Math.round((t-i)/86400000))); }
+      real=Math.max(0,Math.min(est,real));
+      return {est:est,real:real};
+    }
     var rows=info.gms.map(function(gm){
       var star=gm.nt==="SIM"?' <span style="color:#FF8B22">★</span>':'';
       var it=gm.it!=null?(' <span style="color:#999;font-size:11px">· '+gm.it+' itens</span>'):'';
       var num=(gm.n!=null?gm.n:'–');
-      return '<div><span class="gl-n">'+num+'</span><span>'+gm.nome+star+it+'</span></div>';
+      var head='<div class="gl-head"><span class="gl-n">'+num+'</span><span class="gl-nome">'+gm.nome+star+it+'</span></div>';
+      var M=(gm.n!=null?GMS.find(function(x){return x.n===gm.n;}):null);
+      if(!M) return '<div>'+head+'</div>';
+      var win=gmAreaWin(M);
+      var inis=[],fims=[];
+      _AI.forEach(function(p){var w=win[p[0]];if(w&&w.ini)inis.push(w.ini);if(w&&w.fim)fims.push(w.fim);});
+      inis.sort(); fims.sort();
+      var range=(inis.length&&fims.length)?('📅 '+_glBr(inis[0])+' → '+_glBr(fims[fims.length-1])):'';
+      var stLine=_AI.map(function(p){return p[1]+' '+_glIc(M[p[0]].st);}).join(' · ');
+      var ddLine=_AI.map(function(p){var w=win[p[0]]||{};var d=_glDias(w.ini,w.fim,M[p[0]].st);return p[1]+' ⏱ '+d.real+'d atual / '+d.est+'d';}).join(' · ');
+      return '<div>'+head
+        +(range?'<div class="gl-meta">'+range+'</div>':'')
+        +'<div class="gl-areas">'+stLine+'</div>'
+        +'<div class="gl-dias">'+ddLine+'</div></div>';
     }).join("");
     titEl.textContent=info.label+' · '+info.total+' GM'+(info.total!==1?'s':'');
     bodyEl.innerHTML='<div style="font-size:10px;color:#888;margin-bottom:6px">'+sub+'</div><div class="gl-list">'+rows+'</div>';
@@ -1233,13 +1293,21 @@ function salvarGmEdit(){
   AREAS.forEach(function(a){
     var st=document.getElementById("gm-"+a+"-st"); if(st)m[a].st=st.value;
     var du=document.getElementById("gm-"+a+"-dur"); if(du){var v=parseInt(du.value,10);m[a].dur=(isNaN(v)||v<0)?0:v;}
+    var rs=document.getElementById("gm-"+a+"-resp"); if(rs)m[a].resp=rs.value.trim();
     var ii=document.getElementById("gm-"+a+"-ini"), ff=document.getElementById("gm-"+a+"-fim");
     if(a==="MDM"){ if(ii)m.MDM.ini=ii.value||m.MDM.ini; if(_gmDateEd[a]){ m.MDM.fim=(ff?ff.value:null)||null; } else if(_gmDurEd[a]){ m.MDM.fim=null; } }
     else { if(_gmDateEd[a]){ m[a].ini=(ii?ii.value:null)||null; m[a].fim=(ff?ff.value:null)||null; } else if(_gmDurEd[a]){ m[a].ini=null; m[a].fim=null; } }
   });
   var gmcells={};
-  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null))}; });
+  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||"")}; });
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
+  var _sb=document.getElementById("gm-sembim");
+  if(_sb){
+    var _grps=GRUPOS.filter(function(g){return gmKey(g.nome)===m.gk && g.fase===m.f;});
+    var _meta={};
+    _grps.forEach(function(g){ g.semBIM=_sb.checked; var gid=(window.gidOf?window.gidOf(g):null); if(gid)_meta[gid]={pctMeta:g.pctMeta,semBIM:!!g.semBIM}; });
+    if(Object.keys(_meta).length && window.fbSalvarParcial) window.fbSalvarParcial({meta:_meta});
+  }
   var depois=AREAS.map(function(a){return ACFG[a].label+"="+m[a].st;}).join(", ");
   if(window.mdmLog) mdmLog("GM "+m.f,"Editou GM "+m.n,(m.nm||"")+" — ["+antes+"] → ["+depois+"]");
   fecharGmEdit();
@@ -1250,6 +1318,7 @@ function renderGantt(){
   const fFases = getSelValues("f-fase");
   const fSts   = getSelValues("f-st");
   const fBusca = document.getElementById("f-busca").value.toLowerCase().trim();
+  const fResp  = (document.getElementById("f-resp")||{value:""}).value;
   const hoje   = pd(CFG.hoje);
   const hojeL  = Math.max(0,Math.min(100,(hoje-MIN_D)/86400000/TOTAL*100));
 
@@ -1357,6 +1426,11 @@ function renderGantt(){
         // grupo passa se qualquer área tem o status selecionado
         const match=fSts.some(s=>AREAS.some(a=>g[a].st===s));
         if(!match) return false;
+      }
+      if(fResp){
+        var _gkR=gmKey(g.nome);
+        var _respHit=GMS.some(function(m){return m.gk===_gkR && m.f===g.fase && AREAS.some(function(a){return (m[a]&&m[a].resp)===fResp;});});
+        if(!_respHit) return false;
       }
       return true;
     });
@@ -1474,7 +1548,8 @@ function renderGantt(){
         });
 
         var _gmHit=fBusca && _gms.some(function(m){return (m.nm||"").toLowerCase().includes(fBusca);});
-        var _gexp=(!!GM_EXP[fk+"|"+gi]) || !!window._GM_EXP_ALL || _gmHit;
+        var _respHitExp=fResp && _gms.some(function(m){return AREAS.some(function(a){return (m[a]&&m[a].resp)===fResp;});});
+        var _gexp=(!!GM_EXP[fk+"|"+gi]) || !!window._GM_EXP_ALL || _gmHit || _respHitExp;
         var _caretHtml;
         if(_gms.length){
           var _cSym=_gexp?"&#8722;":"+";
@@ -1564,6 +1639,7 @@ function limpar(){
     Array.from(el.options).forEach(o=>o.selected=false);
   });
   document.getElementById("f-busca").value="";
+  var _fr=document.getElementById("f-resp"); if(_fr)_fr.value="";
   renderGantt();
 }
 
@@ -1692,7 +1768,7 @@ function renderBurndown(){
   if(!canvas) return;
   const ctx = canvas.getContext("2d");
   const W = canvas.offsetWidth || 600;
-  const H = 140;
+  const H = 230;
   canvas.width = W * (window.devicePixelRatio||1);
   canvas.height = H * (window.devicePixelRatio||1);
   canvas.style.width = W+"px";
@@ -1711,7 +1787,9 @@ function renderBurndown(){
   ctx.clearRect(0,0,W,H);
 
   // Fundo
-  ctx.fillStyle = "#F8FAF8";
+  var bgGrad = ctx.createLinearGradient(0,PAD.t,0,PAD.t+CH);
+  bgGrad.addColorStop(0,"#FCFDFC"); bgGrad.addColorStop(1,"#EBF3EC");
+  ctx.fillStyle = bgGrad;
   ctx.fillRect(PAD.l, PAD.t, CW, CH);
 
   // Grade horizontal
@@ -1784,15 +1862,20 @@ function renderBurndown(){
   progPts.push({x:hojeX, y:_yOf(progresso)});
   const hojeY = _yOf(progresso);
 
-  ctx.fillStyle="rgba(0,107,63,.06)";
+  var fillGrad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+CH);
+  fillGrad.addColorStop(0,"rgba(95,191,147,.30)"); fillGrad.addColorStop(1,"rgba(95,191,147,.02)");
+  ctx.fillStyle=fillGrad;
   ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t+CH);
   progPts.forEach(function(pt){ctx.lineTo(pt.x,pt.y);}); ctx.lineTo(hojeX,PAD.t+CH); ctx.closePath(); ctx.fill();
 
-  ctx.strokeStyle="#5FBF93"; ctx.lineWidth=2; ctx.setLineDash([]);
+  ctx.lineJoin="round"; ctx.lineCap="round";
+  ctx.strokeStyle="#5FBF93"; ctx.lineWidth=2.5; ctx.setLineDash([]);
   ctx.beginPath(); progPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
 
-  ctx.strokeStyle="#006B3F"; ctx.lineWidth=2.5; ctx.setLineDash([]);
+  ctx.save(); ctx.shadowColor="rgba(0,107,63,.28)"; ctx.shadowBlur=5; ctx.shadowOffsetY=1.5;
+  ctx.strokeStyle="#006B3F"; ctx.lineWidth=3; ctx.setLineDash([]);
   ctx.beginPath(); concPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
+  ctx.restore();
 
   ctx.strokeStyle="rgba(191,54,12,.8)"; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
   ctx.beginPath(); ctx.moveTo(hojeX,PAD.t); ctx.lineTo(hojeX,PAD.t+CH); ctx.stroke(); ctx.setLineDash([]);
@@ -1818,9 +1901,10 @@ function renderBurndown(){
     ctx.fillText("Gap "+gapPp.toFixed(1)+"pp", fimDezX-4, (fimDezY+y90)/2+3);
   }
 
-  ctx.fillStyle="#006B3F"; ctx.beginPath(); ctx.arc(hojeX, hojeYConcl, 3.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="#5FBF93"; ctx.beginPath(); ctx.arc(hojeX, hojeY, 3.5,0,Math.PI*2); ctx.fill();
-  ctx.fillStyle="rgba(255,139,34,.95)"; ctx.beginPath(); ctx.arc(fimDezX, fimDezY, 4,0,Math.PI*2); ctx.fill();
+  function _bdDot(x,y,r,c){ctx.beginPath();ctx.arc(x,y,r+1.6,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
+  _bdDot(hojeX, hojeYConcl, 4, "#006B3F");
+  _bdDot(hojeX, hojeY, 4, "#5FBF93");
+  _bdDot(fimDezX, fimDezY, 4.5, "rgba(255,139,34,.95)");
   ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
   ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4);
   ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
@@ -2258,10 +2342,69 @@ function _isCriticoGrupo(g){ return AREAS.some(a=>_isCriticoArea(g,a)); }
 
 // ══ VISUAIS TOGGLE ══
 let _visuaisAberto = false;
+var _criticoAberto=false;
+function togCritico(){
+  _criticoAberto=!_criticoAberto;
+  document.getElementById("critico-body").style.display=_criticoAberto?"":"none";
+  document.getElementById("critico-arrow").textContent=_criticoAberto?"▲":"▶";
+}
+function renderCaminhoCritico(){
+  var el=document.getElementById("caminho-critico"); if(!el) return;
+  if(typeof recalcGmSched==="function" && !_gmSchedOk) recalcGmSched();
+  var fimMeta=pd("2026-12-31");
+  var ativos=GMS.filter(function(m){return m.w>0;});
+  var totalW=ativos.reduce(function(s,m){return s+m.w;},0)||1;
+  function _br(iso){return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"—";}
+  var rows=ativos.map(function(m){
+    var win=gmAreaWin(m);
+    var finish=win.COMP.fim||win.BIM.fim||win.MDM.fim;
+    var garg=null,gd=-1;
+    AREAS.forEach(function(a){var d=m[a].dur||0; if(d>gd){gd=d;garg=a;}});
+    return {m:m,finish:finish,fMs:pd(finish).getTime(),garg:garg,gd:gd,w:m.w,done:(calcPctGrupo(m)===100)};
+  });
+  // data planejada para concluir 90% do peso (ordena por término e acumula)
+  var byFin=rows.slice().sort(function(a,b){return a.fMs-b.fMs;});
+  var acc=0,data90=null;
+  for(var i=0;i<byFin.length;i++){acc+=byFin[i].w; if(acc>=0.9*totalW){data90=byFin[i].finish;break;}}
+  var fora=(data90 && pd(data90)>fimMeta);
+  var diasFora=data90?Math.round((pd(data90)-fimMeta)/86400000):0;
+  // GMs que mais prolongam: não concluídos, término mais tarde (peso desempata)
+  var poles=rows.filter(function(r){return !r.done;}).sort(function(a,b){return (b.fMs-a.fMs)||(b.w-a.w);}).slice(0,8);
+  var head='<div style="font-size:11px;color:#333;margin-bottom:8px;line-height:1.45">'
+    +'No cronograma atual, <b>90% do peso</b> só conclui em <b style="color:'+(fora?"#BF360C":"#006B3F")+'">'+_br(data90)+'</b>'
+    +(fora?(' <span style="color:#BF360C;font-weight:700">('+diasFora+'d além de dez/26)</span>'):' <span style="color:#006B3F;font-weight:700">(dentro da meta)</span>')
+    +'. Comprimir as etapas (gargalos) abaixo é o que antecipa a meta.</div>';
+  var lis=poles.map(function(r){
+    var cor=ACFG[r.garg]?ACFG[r.garg].cor:"#888", lbl=ACFG[r.garg]?ACFG[r.garg].label:r.garg;
+    return '<div style="display:flex;gap:8px;align-items:baseline;padding:5px 2px;border-bottom:1px solid #f2f2f2;font-size:11px">'
+      +'<span style="color:#888;min-width:84px;flex-shrink:0">termina '+_br(r.finish)+'</span>'
+      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>'+r.m.f+'</b> · '+(r.m.nm||"")+'</span>'
+      +'<span style="color:#006B3F;font-weight:700;min-width:50px;text-align:right">'+(r.w*100).toFixed(2)+'%</span>'
+      +'<span style="min-width:130px;text-align:right;flex-shrink:0">gargalo: <b style="color:'+cor+'">'+lbl+' '+r.gd+'d</b></span>'
+      +'</div>';
+  }).join("");
+  el.innerHTML=head
+    +'<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin:6px 0 2px">GMs que mais prolongam o prazo · gargalo = etapa de maior duração no GM</div>'
+    +lis;
+}
+function popularRespFiltro(){
+  var sel=document.getElementById("f-resp"); if(!sel) return;
+  var set={};
+  GMS.forEach(function(m){AREAS.forEach(function(a){var r=((m[a]&&m[a].resp)||"").trim(); if(r)set[r]=1;});});
+  var names=Object.keys(set).sort(function(a,b){return a.localeCompare(b);});
+  var cur=sel.value;
+  sel.innerHTML='<option value="">Todos</option>'+names.map(function(n){return '<option value="'+n.replace(/"/g,"&quot;")+'">'+n+'</option>';}).join("");
+  if(cur && names.indexOf(cur)>=0) sel.value=cur; else sel.value="";
+}
 function togVisuais(){
   _visuaisAberto = !_visuaisAberto;
   document.getElementById("visuais-body").style.display = _visuaisAberto ? "" : "none";
   document.getElementById("visuais-arrow").textContent = _visuaisAberto ? "▲" : "▶";
+  if(_visuaisAberto){
+    if(window.renderBurndown) renderBurndown();
+    if(window.renderHeatmap) renderHeatmap();
+    if(window.renderVelocidade) renderVelocidade();
+  }
 }
 
 
@@ -2289,17 +2432,17 @@ function exportarCSV(){
   if(typeof recalcGmSched==="function") recalcGmSched();
   var stl={plan:"Planejado",wip:"Andamento",done:"Concluido"};
   var head=["Fase","Grupo","No GM","Nome GM","Peso %","Itens","Avanco %","Concluido","Ativo",
-    "MDM Status","MDM Inicio","MDM Fim","ORC Status","ORC Inicio","ORC Fim",
-    "BIM Status","BIM Inicio","BIM Fim","COMP Status","COMP Inicio","COMP Fim"];
+    "MDM Status","MDM Inicio","MDM Fim","MDM Dur (d)","ORC Status","ORC Inicio","ORC Fim","ORC Dur (d)",
+    "BIM Status","BIM Inicio","BIM Fim","BIM Dur (d)","COMP Status","COMP Inicio","COMP Fim","COMP Dur (d)"];
   var fnum=function(f){return parseInt((String(f).match(/\d+/)||[0])[0],10);};
   var linhas=[head];
   GMS.slice().sort(function(a,b){return (fnum(a.f)-fnum(b.f))||String(a.gk).localeCompare(String(b.gk))||(a.n-b.n);}).forEach(function(m){
     var w=gmAreaWin(m), p=calcPctGrupo(m);
     linhas.push([m.f, m.g, m.n, m.nm||"", (m.w*100).toFixed(3), m.it||0, p, (p===100?"Sim":"Nao"), (m.w>0?"Sim":"Nao"),
-      stl[m.MDM.st]||m.MDM.st, w.MDM.ini, w.MDM.fim,
-      stl[m.ORC.st]||m.ORC.st, w.ORC.ini, w.ORC.fim,
-      stl[m.BIM.st]||m.BIM.st, w.BIM.ini, w.BIM.fim,
-      stl[m.COMP.st]||m.COMP.st, w.COMP.ini, w.COMP.fim]);
+      stl[m.MDM.st]||m.MDM.st, w.MDM.ini, w.MDM.fim, (m.MDM.dur||0),
+      stl[m.ORC.st]||m.ORC.st, w.ORC.ini, w.ORC.fim, (m.ORC.dur||0),
+      stl[m.BIM.st]||m.BIM.st, w.BIM.ini, w.BIM.fim, (m.BIM.dur||0),
+      stl[m.COMP.st]||m.COMP.st, w.COMP.ini, w.COMP.fim, (m.COMP.dur||0)]);
   });
   var csv=linhas.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(";");}).join("\n");
   var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
@@ -2387,6 +2530,7 @@ window.fbAplicarRemoto = function(d){
   if(d.gmcells&&typeof GMS!=="undefined"){ GMS.forEach(function(m){ AS.forEach(function(a){
     var c=d.gmcells[m.n+"__"+a]; if(!c) return;
     if(c.st!=null)m[a].st=c.st; if(c.dur!=null)m[a].dur=c.dur;
+    if(c.resp!==undefined)m[a].resp=c.resp;
     if(c.ini!==undefined){ if(a==="MDM")m.MDM.ini=c.ini; else m[a].ini=c.ini; }
     if(c.fim!==undefined){ if(a==="MDM")m.MDM.fim=c.fim; else m[a].fim=c.fim; }
   }); }); }
@@ -2423,13 +2567,16 @@ function renderTudo(){
   if(typeof recalcSchedule==="function") recalcSchedule();
   calcCPM();
   renderExec();
+  popularRespFiltro();
   renderGantt();
   renderTA();
   renderBurndown();
   renderHeatmap();
   renderVelocidade();
+  renderCaminhoCritico();
 }
 window.renderTudo = renderTudo;
+(function(){var _rt;window.addEventListener("resize",function(){clearTimeout(_rt);_rt=setTimeout(function(){if(_visuaisAberto&&window.renderBurndown)renderBurndown();},180);});})();
 
 // ══ INIT ══
 // Aguardar Firebase carregar dados antes de renderizar

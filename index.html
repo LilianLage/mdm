@@ -291,6 +291,9 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .mc-list{margin-top:6px;max-height:62vh;overflow-y:auto;font-size:12px;line-height:1.9;border-top:1px solid #eee;padding-top:8px;color:#333}
 .mc-list>div{padding:3px 2px;border-bottom:1px solid #f2f2f2}
 .mc-list>div>span:last-child{color:#006B3F !important;font-weight:700}
+.gl-list{max-height:62vh;overflow-y:auto;font-size:12px;line-height:1.5;border-top:1px solid #eee;padding-top:6px}
+.gl-list>div{display:flex;gap:8px;align-items:baseline;padding:4px 2px;border-bottom:1px solid #f2f2f2}
+.gl-n{color:#006B3F;font-weight:700;min-width:34px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
 
 /* Tooltip */
 .tt{position:fixed;background:rgba(0,35,18,.96);color:#fff;font-size:11px;padding:10px 13px;border-radius:7px;pointer-events:none;display:none;z-index:99999;max-width:320px;line-height:1.7;box-shadow:0 6px 24px rgba(0,0,0,.4)}
@@ -985,7 +988,22 @@ function renderExec(){
   const k2=CFG.kpi2;
   const k1El = document.getElementById("k1-v");
   // Tooltip customizado: listar GMs 100% concluídos
-  const _aptos = GMS.filter(m=>calcPctGrupo(m)===100).slice().sort((a,b)=>b.w-a.w);
+  // Ordem igual à do Gantt: fases em ordem · grupos na ordem do board · GMs na ordem exibida (deduplicado)
+  var _ganttPos={}, _gpi=0, _fasesOrd=[];
+  GRUPOS.forEach(function(g){ if(_fasesOrd.indexOf(g.fase)<0)_fasesOrd.push(g.fase); });
+  _fasesOrd.forEach(function(fase){
+    GRUPOS.filter(function(g){return g.fase===fase;}).forEach(function(g){
+      var gk=gmKey(g.nome);
+      GMS.filter(function(m){return m.gk===gk && m.f===fase;}).forEach(function(m){
+        if(_ganttPos[m.n]===undefined) _ganttPos[m.n]=_gpi++;
+      });
+    });
+  });
+  const _aptos = GMS.filter(m=>calcPctGrupo(m)===100).slice().sort(function(a,b){
+    var pa=(_ganttPos[a.n]===undefined?1e9:_ganttPos[a.n]);
+    var pb=(_ganttPos[b.n]===undefined?1e9:_ganttPos[b.n]);
+    return pa-pb;
+  });
   const k1Concl = GMS.reduce((s,m)=>s + (calcPctGrupo(m)===100 ? m.w*100 : 0), 0); // concluído por GM
   document.getElementById("k1-prog").textContent  = k1.toFixed(1)+"%";
   document.getElementById("k1-concl").textContent = k1Concl.toFixed(1)+"%";
@@ -1185,6 +1203,29 @@ function abrirGmEdit(n){
 }
 function fecharGmEdit(){var o=document.getElementById("gmEditOv");if(o)o.style.display="none";_gmEditN=null;}
 function fecharMetasConcl(){var o=document.getElementById("metasConclOv");if(o)o.style.display="none";}
+function abrirGmList(nome,fase){
+  var GA=buildGmAssignments();
+  var info=GA[nome+"|"+fase] || gmForNome(nome);
+  var titEl=document.getElementById("gmListTit"), bodyEl=document.getElementById("gmListBody");
+  if(!info || !info.gms || !info.gms.length){
+    titEl.textContent=(info?info.label:nome);
+    bodyEl.innerHTML='<div style="color:#888;font-size:12px">Sem GMs vinculados nesta fase.</div>';
+  }else{
+    var totIt=info.gms.reduce(function(s,g){return s+(g.it||0);},0);
+    var temNot=info.gms.some(function(g){return g.nt==="SIM";});
+    var sub='Fase '+fase+' · '+info.total+' GM'+(info.total!==1?'s':'')+(totIt>0?(' · '+totIt+' itens'):'')+(temNot?' · ★ = notável':'');
+    var rows=info.gms.map(function(gm){
+      var star=gm.nt==="SIM"?' <span style="color:#FF8B22">★</span>':'';
+      var it=gm.it!=null?(' <span style="color:#999;font-size:11px">· '+gm.it+' itens</span>'):'';
+      var num=(gm.n!=null?gm.n:'–');
+      return '<div><span class="gl-n">'+num+'</span><span>'+gm.nome+star+it+'</span></div>';
+    }).join("");
+    titEl.textContent=info.label+' · '+info.total+' GM'+(info.total!==1?'s':'');
+    bodyEl.innerHTML='<div style="font-size:10px;color:#888;margin-bottom:6px">'+sub+'</div><div class="gl-list">'+rows+'</div>';
+  }
+  document.getElementById("gmListOv").style.display="flex";
+}
+function fecharGmList(){var o=document.getElementById("gmListOv");if(o)o.style.display="none";}
 function salvarGmEdit(){
   if(_gmEditN===null) return;
   var m=GMS.find(function(x){return x.n===_gmEditN;}); if(!m){fecharGmEdit();return;}
@@ -1501,39 +1542,14 @@ function renderGantt(){
     });
   });
 
-  // ── Tooltip de GMs por grupo (hover no rótulo à esquerda) ──
-  const gmtt=document.getElementById("gmtt");
-  const GM_ASSIGN=buildGmAssignments();
-  let _gmTimer=null;
-  const _gmHide=()=>{gmtt.style.display="none";};
-  function _gmShow(e,nome,fase){
-    const info=GM_ASSIGN[nome+"|"+fase] || gmForNome(nome);
-    gmtt.classList.toggle("c2", !!(info && info.total>10));
-    if(!info){
-      gmtt.innerHTML=`<h4>${nome}</h4><div class="gmtt-sub">Sem GMs vinculados no Excel.</div>`;
-    }else{
-      const items=info.gms.map(gm=>`<div class="gmtt-it"><b>${gm.n!=null?gm.n:"–"}</b><span>${gm.nome}${gm.nt==="SIM"?' <span style="color:#FFB719">★</span>':''}${gm.it!=null?` <span style="color:#7FB89E;font-size:9px">· ${gm.it} itens</span>`:''}</span></div>`).join("")
-        || `<div class="gmtt-sub">Nenhum GM nesta fase.</div>`;
-      const totIt=info.gms.reduce((s,g)=>s+(g.it||0),0);
-      gmtt.innerHTML=`<h4>${info.label}<span class="gmtt-badge">${info.total} GM${info.total!==1?"s":""}</span></h4>
-        <div class="gmtt-sub">Fase ${fase} · ${info.total} GM${info.total!==1?"s":""}${totIt>0?` · ${totIt} itens`:''}${info.gms.some(g=>g.nt==="SIM")?' · ★ = notável':''}</div>
-        <div class="gmtt-list">${items}</div>`;
-    }
-    gmtt.style.display="block";
-    const r=gmtt.getBoundingClientRect();
-    let x=e.clientX+16, y=e.clientY-10;
-    if(x+r.width>window.innerWidth-8)  x=Math.max(8,e.clientX-r.width-12);
-    if(y+r.height>window.innerHeight-8) y=Math.max(8,window.innerHeight-r.height-8);
-    gmtt.style.left=x+"px"; gmtt.style.top=y+"px";
-  }
+  // ── Clique no grupo abre um modal com a lista de GMs (igual ao da Meta) ──
   document.querySelectorAll(".g-lbl[data-gnome]").forEach(lbl=>{
     const nome=lbl.getAttribute("data-gnome");
     const fase=lbl.getAttribute("data-gfase");
-    lbl.addEventListener("mouseenter",e=>{clearTimeout(_gmTimer);_gmShow(e,nome,fase);});
-    lbl.addEventListener("mouseleave",()=>{_gmTimer=setTimeout(_gmHide,180);});
+    lbl.style.cursor="pointer";
+    lbl.title="Clique para ver os GMs deste grupo";
+    lbl.addEventListener("click",()=>abrirGmList(nome,fase));
   });
-  gmtt.addEventListener("mouseenter",()=>clearTimeout(_gmTimer));
-  gmtt.addEventListener("mouseleave",()=>{_gmTimer=setTimeout(_gmHide,120);});
 }
 
 function toggleFase(fk){
@@ -2689,6 +2705,12 @@ if(window.fbPronto){
   </div>
 </div>
 
+<div id="gmListOv" class="gm-ov" onclick="if(event.target===this)fecharGmList()">
+  <div class="gm-modal" style="width:min(560px,94vw)">
+    <div class="gm-modal-hd"><span id="gmListTit"></span><button onclick="fecharGmList()" title="Fechar">✕</button></div>
+    <div class="gm-modal-bd" id="gmListBody"></div>
+  </div>
+</div>
 <div id="metasConclOv" class="gm-ov" onclick="if(event.target===this)fecharMetasConcl()">
   <div class="gm-modal" style="width:min(560px,94vw)">
     <div class="gm-modal-hd"><span id="metasConclTit"></span><button onclick="fecharMetasConcl()" title="Fechar">✕</button></div>

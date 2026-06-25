@@ -2440,40 +2440,101 @@ function renderCaminhoCritico(){
   var el=document.getElementById("caminho-critico"); if(!el) return;
   if(typeof recalcGmSched==="function" && !_gmSchedOk) recalcGmSched();
   var fimMeta=pd("2026-12-31");
-  var ativos=GMS.filter(function(m){return m.w>0;});
-  var totalW=ativos.reduce(function(s,m){return s+m.w;},0)||1;
-  function _br(iso){return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"—";}
-  var rows=ativos.map(function(m){
-    var win=gmAreaWin(m);
-    var finish=win.COMP.fim||win.BIM.fim||win.MDM.fim;
-    var garg=null,gd=-1;
-    AREAS.forEach(function(a){var d=m[a].dur||0; if(d>gd){gd=d;garg=a;}});
-    return {m:m,finish:finish,fMs:pd(finish).getTime(),garg:garg,gd:gd,w:m.w,done:(calcPctGrupo(m)===100)};
+  function _br(iso){return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"\u2014";}
+  function _alem(iso){return iso?Math.round((pd(iso)-fimMeta)/86400000):0;}
+  var TEAMS=["MDM","ORC","BIM","COMP"];
+  function predEndMs(m,team){ return team==="COMP"?Math.max(_msOf(m.MDM._fim),_msOf(m.ORC._fim),_msOf(m.BIM._fim)):(team==="MDM"?_msOf(m.MDM._ini):_msOf(m.MDM._fim)); }
+  // ── Estatística por time (carga × capacidade × fila) ──
+  var stats=TEAMS.map(function(team){
+    var tasks=GMS.filter(function(m){return m.w>0 && m[team] && ((m[team].dur||0)>0 || m[team].ini);});
+    var n=tasks.length;
+    var carga=tasks.reduce(function(s,m){return s+(m[team].dur||0);},0);
+    var durMed=n?carga/n:0;
+    var R=(team==="MDM")?null:_gmRecOf(team);
+    var makeMs=-Infinity; GMS.forEach(function(m){ if(m.w>0&&m[team]&&m[team]._fim){var f=_msOf(m[team]._fim); if(f>makeMs)makeMs=f;} });
+    var make=makeMs>-Infinity?_isoOf(makeMs):null;
+    var waitTot=0,waitN=0;
+    if(team!=="MDM"){ tasks.forEach(function(m){ if(m[team].ini||m[team].fim)return; var w=(_msOf(m[team]._ini)-predEndMs(m,team))/86400000; if(w>0.5){waitTot+=w;waitN++;} }); }
+    return {team:team,n:n,carga:carga,durMed:durMed,R:R,make:make,makeMs:makeMs,waitTot:waitTot,waitMed:waitN?waitTot/waitN:0,proc:R?carga/R:null};
   });
-  // data planejada para concluir 90% do peso (ordena por término e acumula)
-  var byFin=rows.slice().sort(function(a,b){return a.fMs-b.fMs;});
-  var acc=0,data90=null;
-  for(var i=0;i<byFin.length;i++){acc+=byFin[i].w; if(acc>=0.9*totalW){data90=byFin[i].finish;break;}}
-  var fora=(data90 && pd(data90)>fimMeta);
-  var diasFora=data90?Math.round((pd(data90)-fimMeta)/86400000):0;
-  // GMs que mais prolongam: não concluídos, término mais tarde (peso desempata)
-  var poles=rows.filter(function(r){return !r.done;}).sort(function(a,b){return (b.fMs-a.fMs)||(b.w-a.w);}).slice(0,8);
-  var head='<div style="font-size:11px;color:#333;margin-bottom:8px;line-height:1.45">'
-    +'No cronograma atual, <b>90% do peso</b> só conclui em <b style="color:'+(fora?"#BF360C":"#006B3F")+'">'+_br(data90)+'</b>'
-    +(fora?(' <span style="color:#BF360C;font-weight:700">('+diasFora+'d além de dez/26)</span>'):' <span style="color:#006B3F;font-weight:700">(dentro da meta)</span>')
-    +'. Comprimir as etapas (gargalos) abaixo é o que antecipa a meta.</div>';
-  var lis=poles.map(function(r){
-    var cor=ACFG[r.garg]?ACFG[r.garg].cor:"#888", lbl=ACFG[r.garg]?ACFG[r.garg].label:r.garg;
-    return '<div style="display:flex;gap:8px;align-items:baseline;padding:5px 2px;border-bottom:1px solid #f2f2f2;font-size:11px">'
-      +'<span style="color:#888;min-width:84px;flex-shrink:0">termina '+_br(r.finish)+'</span>'
-      +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>'+r.m.f+'</b> · '+(r.m.nm||"")+'</span>'
-      +'<span style="color:#006B3F;font-weight:700;min-width:50px;text-align:right">'+(r.w*100).toFixed(2)+'%</span>'
-      +'<span style="min-width:130px;text-align:right;flex-shrink:0">gargalo: <b style="color:'+cor+'">'+lbl+' '+r.gd+'d</b></span>'
-      +'</div>';
+  var byTeam={}; stats.forEach(function(s){byTeam[s.team]=s;});
+  var durGlobal=(function(){var c=0,k=0;stats.forEach(function(s){c+=s.carga;k+=s.n;});return k?c/k:1;})();
+  // gargalo = time nivelado com maior espera acumulada na fila (desempata por carga/recurso)
+  var lev=stats.filter(function(s){return s.team!=="MDM";});
+  var garg=lev.slice().sort(function(a,b){return (b.waitTot-a.waitTot)||(b.proc-a.proc);})[0];
+  var compMake=byTeam.COMP.make;
+  // ── Simulação: fim do projeto (último Compilador) ao adicionar recursos a um time ──
+  function _simProjEnd(overrideTeam,R){
+    var fim={MDM:{},ORC:{},BIM:{},COMP:{}};
+    GMS.forEach(function(m){ fim.MDM[m.n]=_msOf(m.MDM.fim||_gmAddDays(m.MDM.ini||CFG.hoje,m.MDM.dur||0)); });
+    REC_TEAMS.forEach(function(team){
+      var R2=(team===overrideTeam)?R:_gmRecOf(team);
+      var tasks=GMS.filter(function(m){return m[team]&&((m[team].dur||0)>0||m[team].ini);}).slice().sort(function(a,b){return (_gmFaseNum(a.f)-_gmFaseNum(b.f))||(a.n-b.n);});
+      var lanes=[]; for(var i=0;i<R2;i++)lanes.push(-Infinity);
+      tasks.forEach(function(m){
+        var pe=(team==="COMP")?Math.max(fim.MDM[m.n],(fim.ORC[m.n]!=null?fim.ORC[m.n]:fim.MDM[m.n]),(fim.BIM[m.n]!=null?fim.BIM[m.n]:fim.MDM[m.n])):fim.MDM[m.n];
+        var li=0; for(var k=1;k<R2;k++){if(lanes[k]<lanes[li])li=k;}
+        var start=m[team].ini?_msOf(m[team].ini):Math.max(pe,lanes[li]);
+        var end=m[team].fim?_msOf(m[team].fim):start+(m[team].dur||0)*86400000;
+        fim[team][m.n]=end; lanes[li]=end;
+      });
+      GMS.forEach(function(m){ if(fim[team][m.n]==null)fim[team][m.n]=fim.MDM[m.n]; });
+    });
+    var mx=-Infinity; GMS.forEach(function(m){ if(m.w>0){var c=fim.COMP[m.n]; if(c>mx)mx=c;} });
+    return mx;
+  }
+  var baseEnd=_simProjEnd(null,0);
+  var sim1=garg?_simProjEnd(garg.team,garg.R+1):baseEnd;
+  var sim2=garg?_simProjEnd(garg.team,garg.R+2):baseEnd;
+  function _d(ms){return Math.round((baseEnd-ms)/86400000);}
+  var gLbl=garg?(ACFG[garg.team]?ACFG[garg.team].label:garg.team):"\u2014";
+  var gCor=garg&&ACFG[garg.team]?ACFG[garg.team].cor:"#888";
+  var ratio=(garg&&durGlobal)?(garg.durMed/durGlobal):0;
+  // ── HTML ──
+  var head='<div style="font-size:11px;color:#333;margin-bottom:8px;line-height:1.5">'
+    +'O projeto (\u00faltimo Compilador) termina em <b style="color:'+(_alem(compMake)>0?"#BF360C":"#006B3F")+'">'+_br(compMake)+'</b>'
+    +(_alem(compMake)>0?(' <span style="color:#BF360C;font-weight:700">('+_alem(compMake)+'d al\u00e9m de dez/26)</span>'):'')
+    +'. O gargalo n\u00e3o \u00e9 a etapa mais longa, e sim o <b style="color:'+gCor+'">time '+gLbl+'</b>: sem capacidade para acompanhar a libera\u00e7\u00e3o dos GMs, eles se acumulam na fila esperando um recurso livre.</div>';
+  // tabela por time
+  var rows=stats.map(function(s){
+    var isG=garg&&s.team===garg.team;
+    var cor=ACFG[s.team]?ACFG[s.team].cor:"#555";
+    return '<tr style="'+(isG?'background:rgba(191,54,12,.06);':'')+'">'
+      +'<td style="padding:3px 6px;font-weight:700;color:'+cor+'">'+(ACFG[s.team]?ACFG[s.team].label:s.team)+(isG?' \u26A0\uFE0F':'')+'</td>'
+      +'<td style="text-align:right;padding:3px 6px">'+s.n+'</td>'
+      +'<td style="text-align:right;padding:3px 6px">'+s.durMed.toFixed(0)+'d</td>'
+      +'<td style="text-align:right;padding:3px 6px">'+s.carga.toFixed(0)+'d</td>'
+      +'<td style="text-align:right;padding:3px 6px">'+(s.R==null?"\u2014":s.R)+'</td>'
+      +'<td style="text-align:right;padding:3px 6px">'+(s.proc==null?"\u2014":s.proc.toFixed(0)+'d')+'</td>'
+      +'<td style="text-align:right;padding:3px 6px;font-weight:'+(isG?'700':'400')+';color:'+(s.waitMed>0?'#BF360C':'#888')+'">'+(s.team==="MDM"?"\u2014":s.waitMed.toFixed(0)+'d')+'</td>'
+      +'<td style="text-align:right;padding:3px 6px;color:'+(_alem(s.make)>0?'#BF360C':'#666')+'">'+_br(s.make)+'</td>'
+      +'</tr>';
   }).join("");
-  el.innerHTML=head
-    +'<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin:6px 0 2px">GMs que mais prolongam o prazo · gargalo = etapa de maior duração no GM</div>'
-    +lis;
+  var tabela='<table style="width:100%;border-collapse:collapse;font-size:10px;margin:2px 0 8px">'
+    +'<thead><tr style="color:#888;text-transform:uppercase;font-size:8.5px;letter-spacing:.3px;border-bottom:1px solid #e6e6e6">'
+    +'<th style="text-align:left;padding:3px 6px">Time</th><th style="text-align:right;padding:3px 6px">GMs</th><th style="text-align:right;padding:3px 6px" title="Dura\u00e7\u00e3o m\u00e9dia por GM">dur méd.</th>'
+    +'<th style="text-align:right;padding:3px 6px" title="Soma das dura\u00e7\u00f5es (dias-recurso)">carga</th><th style="text-align:right;padding:3px 6px" title="Recursos simult\u00e2neos (raias)">rec.</th>'
+    +'<th style="text-align:right;padding:3px 6px" title="Carga \u00f7 recursos = tempo m\u00ednimo de processamento">proc.</th>'
+    +'<th style="text-align:right;padding:3px 6px" title="Espera m\u00e9dia na fila por um recurso livre (ap\u00f3s a predecessora liberar)">espera</th>'
+    +'<th style="text-align:right;padding:3px 6px" title="Data em que o time conclui o \u00faltimo GM">termina</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  var diag='';
+  if(garg){
+    diag='<div style="font-size:10.5px;color:#333;background:#fafafa;border:1px solid #eee;border-radius:6px;padding:7px 9px;line-height:1.5;margin-bottom:8px">'
+      +'<b style="color:'+gCor+'">'+gLbl+'</b> \u2014 dura\u00e7\u00e3o m\u00e9dia <b>'+garg.durMed.toFixed(0)+'d/GM</b>'+(ratio>=1.3?(' (<b>'+ratio.toFixed(1)+'\u00d7</b> a m\u00e9dia geral de '+durGlobal.toFixed(0)+'d)'):'')
+      +' \u00d7 <b>'+garg.n+' GMs</b> \u00f7 <b>'+garg.R+' recurso'+(garg.R>1?'s':'')+'</b> = <b>'+garg.proc.toFixed(0)+'d</b> de processamento cont\u00ednuo. '
+      +'Em m\u00e9dia cada GM espera <b style="color:#BF360C">'+garg.waitMed.toFixed(0)+'d</b> por um recurso livre depois que a predecessora libera. Termina em <b>'+_br(garg.make)+'</b>.'
+      +'</div>';
+  }
+  var simHtml='';
+  if(garg){
+    simHtml='<div style="font-size:10.5px;color:#333;line-height:1.6">'
+      +'<span style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px">Simula\u00e7\u00e3o \u2014 fim do projeto adicionando recursos ao '+gLbl+'</span><br>'
+      +'Atual (R=<b>'+garg.R+'</b>): <b>'+_br(_isoOf(baseEnd))+'</b>'
+      +' \u00b7 +1 (R='+(garg.R+1)+'): <b style="color:#006B3F">'+_br(_isoOf(sim1))+'</b> <span style="color:#006B3F">(\u2212'+_d(sim1)+'d)</span>'
+      +' \u00b7 +2 (R='+(garg.R+2)+'): <b style="color:#006B3F">'+_br(_isoOf(sim2))+'</b> <span style="color:#006B3F">(\u2212'+_d(sim2)+'d)</span>'
+      +'</div>';
+  }
+  el.innerHTML=head+tabela+diag+simHtml;
 }
 function popularRespFiltro(){
   var sel=document.getElementById("f-resp"); if(!sel) return;

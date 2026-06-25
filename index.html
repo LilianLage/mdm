@@ -407,6 +407,15 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 .kb-toolbar{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;padding:10px 10px 2px}
 .kb-fase{font-size:9px;font-weight:800;color:#fff;background:#5a6b62;padding:2px 7px;border-radius:4px;margin:7px 0 3px;text-transform:uppercase;letter-spacing:.3px;position:sticky;top:0;z-index:2}
 .kb-grp{font-size:9px;font-weight:700;color:#666;padding:2px 4px 1px;margin:3px 0 1px;border-bottom:1px solid #eee}
+.ms{position:relative;display:inline-block}
+.ms-btn{display:inline-flex;align-items:center;gap:5px;min-height:26px;min-width:74px;font-size:10px;color:#333;background:#fff;border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;cursor:pointer;white-space:nowrap}
+.ms-btn:hover{border-color:var(--v1)}
+.ms-lbl{flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis}
+.ms-car{color:#999;font-size:8px}
+.ms-pan{display:none;position:absolute;top:calc(100% + 2px);left:0;z-index:50;background:#fff;border:1px solid var(--bdr);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.16);padding:4px;max-height:260px;overflow:auto;min-width:150px}
+.ms-pan label{display:flex;align-items:center;gap:7px;font-size:10.5px;color:#333;padding:4px 7px;border-radius:4px;cursor:pointer;white-space:nowrap}
+.ms-pan label:hover{background:rgba(0,107,63,.06)}
+.ms-pan input{cursor:pointer;margin:0}
 </style>
 
 <!-- Firebase SDK -->
@@ -609,31 +618,43 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 <!-- GANTT TOOLBAR -->
 <div class="toolbar">
   <span class="tl-label">Fase:</span>
-  <select class="tl-select" id="f-fase" multiple size="1" style="min-height:26px" onchange="renderGantt()">
-    <option value="">Todas</option>
-    <option>Fase 1</option><option>Fase 2</option><option>Fase 3</option>
-    <option>Fase 4</option><option>Fase 5</option><option>Fase 6</option>
-    <option>Fase 7</option><option>Fase 8</option>
-  </select>
+  <div class="ms" id="ms-f-fase" data-all="Todas">
+    <button type="button" class="ms-btn" onclick="msToggle('f-fase',event)"><span class="ms-lbl">Todas</span><span class="ms-car">▾</span></button>
+    <div class="ms-pan" id="msp-f-fase" onclick="event.stopPropagation()">
+      <label><input type="checkbox" value="Fase 1" onchange="msPick('f-fase')"><span>Fase 1</span></label>
+      <label><input type="checkbox" value="Fase 2" onchange="msPick('f-fase')"><span>Fase 2</span></label>
+      <label><input type="checkbox" value="Fase 3" onchange="msPick('f-fase')"><span>Fase 3</span></label>
+      <label><input type="checkbox" value="Fase 4" onchange="msPick('f-fase')"><span>Fase 4</span></label>
+      <label><input type="checkbox" value="Fase 5" onchange="msPick('f-fase')"><span>Fase 5</span></label>
+      <label><input type="checkbox" value="Fase 6" onchange="msPick('f-fase')"><span>Fase 6</span></label>
+      <label><input type="checkbox" value="Fase 7" onchange="msPick('f-fase')"><span>Fase 7</span></label>
+      <label><input type="checkbox" value="Fase 8" onchange="msPick('f-fase')"><span>Fase 8</span></label>
+    </div>
+  </div>
   <span class="tl-label">Área:</span>
-  <select class="tl-select" id="f-area" size="1" style="min-height:26px" onchange="renderGantt()">
-    <option value="">Todas</option>
-    <option value="MDM">MDM</option>
-    <option value="ORC">Orçamento</option>
-    <option value="BIM">BIM</option>
-    <option value="COMP">Compilador</option>
-  </select>
+  <div class="ms" id="ms-f-area" data-all="Todas">
+    <button type="button" class="ms-btn" onclick="msToggle('f-area',event)"><span class="ms-lbl">Todas</span><span class="ms-car">▾</span></button>
+    <div class="ms-pan" id="msp-f-area" onclick="event.stopPropagation()">
+      <label><input type="checkbox" value="MDM" onchange="msPick('f-area')"><span>MDM</span></label>
+      <label><input type="checkbox" value="ORC" onchange="msPick('f-area')"><span>Orçamento</span></label>
+      <label><input type="checkbox" value="BIM" onchange="msPick('f-area')"><span>BIM</span></label>
+      <label><input type="checkbox" value="COMP" onchange="msPick('f-area')"><span>Compilador</span></label>
+    </div>
+  </div>
   <span class="tl-label">Status:</span>
-  <select class="tl-select" id="f-st" multiple size="1" style="min-height:26px" onchange="renderGantt()">
-    <option value="">Todos</option>
-    <option value="done">✅ Concluído</option>
-    <option value="wip">⏳ Em andamento</option>
-    <option value="plan">⚪ Previsto</option>
-  </select>
+  <div class="ms" id="ms-f-st" data-all="Todos">
+    <button type="button" class="ms-btn" onclick="msToggle('f-st',event)"><span class="ms-lbl">Todos</span><span class="ms-car">▾</span></button>
+    <div class="ms-pan" id="msp-f-st" onclick="event.stopPropagation()">
+      <label><input type="checkbox" value="done" onchange="msPick('f-st')"><span>✅ Concluído</span></label>
+      <label><input type="checkbox" value="wip" onchange="msPick('f-st')"><span>⏳ Em andamento</span></label>
+      <label><input type="checkbox" value="plan" onchange="msPick('f-st')"><span>⚪ Previsto</span></label>
+    </div>
+  </div>
   <span class="tl-label">Resp.:</span>
-  <select class="tl-select" id="f-resp" size="1" style="min-height:26px" onchange="renderGantt()">
-    <option value="">Todos</option>
-  </select>
+  <div class="ms" id="ms-f-resp" data-all="Todos">
+    <button type="button" class="ms-btn" onclick="msToggle('f-resp',event)"><span class="ms-lbl">Todos</span><span class="ms-car">▾</span></button>
+    <div class="ms-pan" id="msp-f-resp" onclick="event.stopPropagation()"></div>
+  </div>
   <span class="tl-label">Buscar:</span>
   <input class="tl-input" type="text" id="f-busca" placeholder="ex: Argamassa" oninput="renderGantt()">
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
@@ -1238,11 +1259,11 @@ function gmAreaWin(m){
   return {MDM:{ini:m.MDM._ini,fim:m.MDM._fim},ORC:{ini:m.ORC._ini,fim:m.ORC._fim},BIM:{ini:m.BIM._ini,fim:m.BIM._fim},COMP:{ini:m.COMP._ini,fim:m.COMP._fim}};
 }
 function gmRowsHtml(gms,fk,hojeL){
-  var _fArea=(document.getElementById("f-area")||{value:""}).value, out="";
+  var _fAreas=msValues("f-area"), out="";
   gms.forEach(function(m){
     var win=gmAreaWin(m), subs="";
     AREAS.forEach(function(a,ai){
-      if(_fArea && a!==_fArea) return;
+      if(_fAreas.length && _fAreas.indexOf(a)<0) return;
       var w2=win[a], p=bPos(w2.ini,w2.fim), cor=ACFG[a].cor, bg=ai%2===0?"":"rgba(0,107,63,.03)";
       subs+='<div class="g-sub" style="background:'+bg+'"><div class="today-line" style="left:'+hojeL+'%"></div>'
         +'<div class="g-bar '+m[a].st+'" style="left:'+p.l+'%;width:'+p.w+'%;background:'+cor+'" title="'+ACFG[a].label+': '+w2.ini+' \u2192 '+w2.fim+' ('+(m[a].dur||0)+'d)'+(m[a].resp?(' \u00b7 Resp: '+m[a].resp):'')+'">'+(parseFloat(p.w)>3?ACFG[a].label:'')+'</div></div>';
@@ -1388,10 +1409,10 @@ function salvarGmEdit(){
   if(window.renderTudo) renderTudo(); else { if(window.renderExec)renderExec(); if(window.renderGantt)renderGantt(); }
 }
 function renderGantt(){
-  const fFases = getSelValues("f-fase");
-  const fSts   = getSelValues("f-st");
+  const fFases = msValues("f-fase");
+  const fSts   = msValues("f-st");
   const fBusca = document.getElementById("f-busca").value.toLowerCase().trim();
-  const fResp  = (document.getElementById("f-resp")||{value:""}).value;
+  const fResps = msValues("f-resp");
   const hoje   = pd(CFG.hoje);
   const hojeL  = Math.max(0,Math.min(100,(hoje-MIN_D)/86400000/TOTAL*100));
 
@@ -1500,9 +1521,9 @@ function renderGantt(){
         const match=fSts.some(s=>AREAS.some(a=>g[a].st===s));
         if(!match) return false;
       }
-      if(fResp){
+      if(fResps.length){
         var _gkR=gmKey(g.nome);
-        var _respHit=GMS.some(function(m){return m.gk===_gkR && m.f===g.fase && AREAS.some(function(a){return (m[a]&&m[a].resp)===fResp;});});
+        var _respHit=GMS.some(function(m){return m.gk===_gkR && m.f===g.fase && AREAS.some(function(a){return fResps.indexOf(m[a]&&m[a].resp)>=0;});});
         if(!_respHit) return false;
       }
       return true;
@@ -1593,9 +1614,9 @@ function renderGantt(){
         const dot=g.pct===100?"#006B3F":g.pct>0?"#FF8B22":"#ccc";
         // Sub-linhas por área
         let subs="";
-        var _fArea=(document.getElementById("f-area")||{value:""}).value;
+        var _fAreas=msValues("f-area");
         AREAS.forEach((a,ai)=>{
-          if(_fArea && a!==_fArea) return;
+          if(_fAreas.length && _fAreas.indexOf(a)<0) return;
           const b=g[a];
           const {l,w}=bPos(b.ini,b.fim);
           const cor=ACFG[a].cor;
@@ -1621,7 +1642,7 @@ function renderGantt(){
         });
 
         var _gmHit=fBusca && _gms.some(function(m){return (m.nm||"").toLowerCase().includes(fBusca);});
-        var _respHitExp=fResp && _gms.some(function(m){return AREAS.some(function(a){return (m[a]&&m[a].resp)===fResp;});});
+        var _respHitExp=fResps.length && _gms.some(function(m){return AREAS.some(function(a){return fResps.indexOf(m[a]&&m[a].resp)>=0;});});
         var _gexp=(!!GM_EXP[fk+"|"+gi]) || !!window._GM_EXP_ALL || _gmHit || _respHitExp;
         var _caretHtml;
         if(_gms.length){
@@ -1706,13 +1727,8 @@ function toggleFase(fk){
 }
 
 function limpar(){
-  // Limpar seleções múltiplas
-  ["f-fase","f-st"].forEach(id=>{
-    const el=document.getElementById(id);
-    Array.from(el.options).forEach(o=>o.selected=false);
-  });
+  ["f-fase","f-area","f-st","f-resp"].forEach(function(id){ msClear(id); });
   document.getElementById("f-busca").value="";
-  var _fr=document.getElementById("f-resp"); if(_fr)_fr.value="";
   renderGantt();
 }
 
@@ -1974,8 +1990,21 @@ function renderBurndown(){
   const fimDezX = PAD.l + fimDezT*CW;
   const _diasPass = Math.max(1,(hoje-inicio)/86400000);
   const _ritmoConcl = concluido/_diasPass;
+  // Teto pela área-gargalo: um GM só fica apto (Meta 1) quando TODAS as áreas concluem,
+  // então a projeção da Meta 1 não pode passar da projeção do time mais lento.
+  var _projArea=null;
+  if(!_bdArea){
+    var _diasR=Math.max(0,(fimDez-hoje)/86400000);
+    ["MDM","ORC","BIM","COMP"].forEach(function(a){
+      var cX=0; GMS.forEach(function(m){ if(m.w>0 && m[a].st==="done") cX+=m.w*100; });
+      var rX=cX/_diasPass;
+      var pX=Math.min(100, cX + (rX>0?rX*_diasR:0));
+      if(_projArea===null || pX<_projArea) _projArea=pX;
+    });
+  }
   let ppDez = concluido;
   if(_ritmoConcl>0){ ppDez = Math.min(100, concluido + _ritmoConcl*((fimDez-hoje)/86400000)); }
+  if(_projArea!==null) ppDez = Math.min(ppDez, _projArea);
   const fimDezY = _yOf(ppDez);
   ctx.strokeStyle="#FF8B22"; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
   ctx.beginPath(); ctx.moveTo(hojeX, hojeYConcl); ctx.lineTo(fimDezX, fimDezY); ctx.stroke(); ctx.setLineDash([]);
@@ -2442,6 +2471,8 @@ function renderCaminhoCritico(){
   var fimMeta=pd("2026-12-31");
   function _br(iso){return iso?(iso.slice(8,10)+"/"+iso.slice(5,7)+"/"+iso.slice(2,4)):"\u2014";}
   function _alem(iso){return iso?Math.round((pd(iso)-fimMeta)/86400000):0;}
+  function _q(t){return ' <span class="kpi-q">?<span class="kpi-tip">'+t+'</span></span>';}
+  var SLA_MDM=19;
   var TEAMS=["MDM","ORC","BIM","COMP"];
   function predEndMs(m,team){ return team==="COMP"?Math.max(_msOf(m.MDM._fim),_msOf(m.ORC._fim),_msOf(m.BIM._fim)):(team==="MDM"?_msOf(m.MDM._ini):_msOf(m.MDM._fim)); }
   // ── Estatística por time (carga × capacidade × fila) ──
@@ -2512,11 +2543,11 @@ function renderCaminhoCritico(){
   }).join("");
   var tabela='<table style="width:100%;border-collapse:collapse;font-size:10px;margin:2px 0 8px">'
     +'<thead><tr style="color:#888;text-transform:uppercase;font-size:8.5px;letter-spacing:.3px;border-bottom:1px solid #e6e6e6">'
-    +'<th style="text-align:left;padding:3px 6px">Time</th><th style="text-align:right;padding:3px 6px">GMs</th><th style="text-align:right;padding:3px 6px" title="Dura\u00e7\u00e3o m\u00e9dia por GM">dur méd.</th>'
-    +'<th style="text-align:right;padding:3px 6px" title="Soma das dura\u00e7\u00f5es (dias-recurso)">carga</th><th style="text-align:right;padding:3px 6px" title="Recursos simult\u00e2neos (raias)">rec.</th>'
-    +'<th style="text-align:right;padding:3px 6px" title="Carga \u00f7 recursos = tempo m\u00ednimo de processamento">proc.</th>'
-    +'<th style="text-align:right;padding:3px 6px" title="Espera m\u00e9dia na fila por um recurso livre (ap\u00f3s a predecessora liberar)">espera</th>'
-    +'<th style="text-align:right;padding:3px 6px" title="Data em que o time conclui o \u00faltimo GM">termina</th></tr></thead><tbody>'+rows+'</tbody></table>';
+    +'<th style="text-align:left;padding:3px 6px">Time</th><th style="text-align:right;padding:3px 6px">GMs</th><th style="text-align:right;padding:3px 6px">dur méd.'+_q("Dura\u00e7\u00e3o m\u00e9dia planejada por GM nessa etapa.")+'</th>'
+    +'<th style="text-align:right;padding:3px 6px">carga'+_q("Soma das dura\u00e7\u00f5es de todos os GMs do time \u2014 total de dias de trabalho da etapa.")+'</th><th style="text-align:right;padding:3px 6px">rec.'+_q("Recursos simult\u00e2neos do time: quantas raias processam GMs em paralelo.")+'</th>'
+    +'<th style="text-align:right;padding:3px 6px">proc.'+_q("Tempo m\u00ednimo de processamento = carga \u00f7 recursos (dias trabalhando a pleno).")+'</th>'
+    +'<th style="text-align:right;padding:3px 6px">espera'+_q("Espera m\u00e9dia na fila: quanto cada GM aguarda por um recurso livre depois que a predecessora libera. Alta = gargalo.")+'</th>'
+    +'<th style="text-align:right;padding:3px 6px">termina'+_q("Data em que o time conclui o \u00faltimo GM, no n\u00edvel de recursos atual.")+'</th></tr></thead><tbody>'+rows+'</tbody></table>';
   var diag='';
   if(garg){
     diag='<div style="font-size:10.5px;color:#333;background:#fafafa;border:1px solid #eee;border-radius:6px;padding:7px 9px;line-height:1.5;margin-bottom:8px">'
@@ -2534,16 +2565,54 @@ function renderCaminhoCritico(){
       +' \u00b7 +2 (R='+(garg.R+2)+'): <b style="color:#006B3F">'+_br(_isoOf(sim2))+'</b> <span style="color:#006B3F">(\u2212'+_d(sim2)+'d)</span>'
       +'</div>';
   }
-  el.innerHTML=head+tabela+diag+simHtml;
+  // ── Atraso de MDM: grupos fora do SLA (19d por grupo) ──
+  var grp={};
+  GMS.filter(function(m){return m.w>0;}).forEach(function(m){
+    var key=m.f+"||"+(m.g||m.gk);
+    if(!grp[key]) grp[key]={nome:(m.g||m.gk),fase:m.f,ini:null,fim:null,started:false,wip:false,done:true};
+    var G=grp[key];
+    if(m.MDM.st!=="plan") G.started=true;
+    if(m.MDM.st==="wip") G.wip=true;
+    if(m.MDM.st!=="done") G.done=false;
+    var mi=m.MDM._ini;
+    if(mi && (G.ini===null||mi<G.ini)) G.ini=mi;
+    var endIso=(m.MDM.st==="done")?m.MDM._fim:(m.MDM.st==="wip"?CFG.hoje:m.MDM._fim);
+    if(endIso && (G.fim===null||endIso>G.fim)) G.fim=endIso;
+  });
+  var breaches=[];
+  Object.keys(grp).forEach(function(k){
+    var G=grp[k]; if(!G.started||!G.ini||!G.fim) return;
+    var dias=Math.round((pd(G.fim)-pd(G.ini))/86400000);
+    if(dias>SLA_MDM) breaches.push({nome:G.nome,fase:G.fase,dias:dias,wip:G.wip,done:G.done});
+  });
+  breaches.sort(function(a,b){return b.dias-a.dias;});
+  var slaHtml="";
+  if(breaches.length){
+    var blis=breaches.slice(0,12).map(function(b){
+      return '<div style="display:flex;gap:8px;align-items:baseline;padding:4px 2px;border-bottom:1px solid #f2f2f2;font-size:11px">'
+        +'<span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><b>'+b.fase+'</b> \u00b7 '+b.nome+(b.wip?' <span style="color:#FF8B22;font-size:9px">(em curso)</span>':(b.done?'':' <span style="color:#999;font-size:9px">(parcial)</span>'))+'</span>'
+        +'<span style="font-weight:700;color:#BF360C;min-width:54px;text-align:right">'+b.dias+'d</span>'
+        +'<span style="color:#999;min-width:54px;text-align:right">+'+(b.dias-SLA_MDM)+'d</span></div>';
+    }).join("");
+    slaHtml='<div style="margin-top:10px;padding-top:8px;border-top:1px dashed #e0e0e0">'
+      +'<div style="font-size:11px;color:#333;margin-bottom:6px;line-height:1.5">\u23F1\uFE0F <b>Atraso de MDM \u2014 grupos fora do SLA</b> (meta: <b>'+SLA_MDM+'d por grupo</b>). O MDM \u00e9 o gatilho e n\u00e3o \u00e9 nivelado por recurso, mas grupo que estoura o SLA atrasa toda a cadeia \u2014 por isso tamb\u00e9m \u00e9 caminho cr\u00edtico. <b style="color:#BF360C">'+breaches.length+'</b> grupo(s) acima de '+SLA_MDM+'d.</div>'
+      +'<div style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">grupo \u00b7 realizado (1\u00ba in\u00edcio \u2192 \u00faltimo fim do MDM) \u00b7 excedente sobre o SLA</div>'
+      +blis+'</div>';
+  }
+  el.innerHTML=head+tabela+diag+simHtml+slaHtml;
 }
+function msToggle(id,e){ if(e)e.stopPropagation(); var p=document.getElementById("msp-"+id); if(!p)return; var open=(p.style.display==="block"); document.querySelectorAll(".ms-pan").forEach(function(x){x.style.display="none";}); p.style.display=open?"none":"block"; }
+function msValues(id){ var p=document.getElementById("msp-"+id); if(!p)return []; return Array.prototype.slice.call(p.querySelectorAll("input:checked")).map(function(i){return i.value;}); }
+function msSync(id){ var c=document.getElementById("ms-"+id); if(!c)return; var vals=msValues(id); var lbl=c.querySelector(".ms-lbl"); if(lbl) lbl.textContent = vals.length===0 ? (c.getAttribute("data-all")||"Todas") : (vals.length===1?vals[0]:vals.length+" selec."); }
+function msPick(id){ msSync(id); if(id.indexOf("f-")===0 && window.renderGantt) renderGantt(); }
+function msClear(id){ var p=document.getElementById("msp-"+id); if(p){ Array.prototype.slice.call(p.querySelectorAll("input:checked")).forEach(function(i){i.checked=false;}); } msSync(id); }
+function msPopulate(id,opts){ var p=document.getElementById("msp-"+id); if(!p)return; var cur=msValues(id); p.innerHTML=opts.map(function(o){var ov=String(o).replace(/"/g,"&quot;");return '<label><input type="checkbox" value="'+ov+'"'+(cur.indexOf(o)>=0?" checked":"")+' onchange="msPick(\''+id+'\')"><span>'+o+'</span></label>';}).join(""); msSync(id); }
+document.addEventListener("click",function(){ document.querySelectorAll(".ms-pan").forEach(function(x){x.style.display="none";}); });
 function popularRespFiltro(){
-  var sel=document.getElementById("f-resp"); if(!sel) return;
   var set={};
   GMS.forEach(function(m){AREAS.forEach(function(a){var r=((m[a]&&m[a].resp)||"").trim(); if(r)set[r]=1;});});
   var names=Object.keys(set).sort(function(a,b){return a.localeCompare(b);});
-  var cur=sel.value;
-  sel.innerHTML='<option value="">Todos</option>'+names.map(function(n){return '<option value="'+n.replace(/"/g,"&quot;")+'">'+n+'</option>';}).join("");
-  if(cur && names.indexOf(cur)>=0) sel.value=cur; else sel.value="";
+  if(document.getElementById("msp-f-resp")) msPopulate("f-resp",names);
 }
 // ════ KANBAN — gestão diária ════
 var _view="gantt";

@@ -1662,7 +1662,7 @@ function renderGantt(){
             </div>
             <div class="g-stats">conclusão <b>${g.pct}%</b> &nbsp;|&nbsp; meta <b style="color:var(--v1)">${g.pctMeta.toFixed(2)}%</b>${_gms.length?` &nbsp;|&nbsp; <span style="opacity:.7">${_gms.length} GMs</span>`:""}</div>
             <div style="padding-left:0;margin-top:1px">
-              ${AREAS.map(a=>`<div style="height:20px;display:flex;align-items:center;padding-left:2px;font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}</div>`).join("")}
+              ${AREAS.map(a=>`<div style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}${g[a].st==="done"?" ✅":""}</div>`).join("")}
             </div>
           </div>
           <div class="g-subs">${subs}</div>

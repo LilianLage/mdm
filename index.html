@@ -1183,6 +1183,25 @@ function renderExec(){
     });
     return H;
   };
+  var _grpByDate=function(items){
+    if(!items.length) return '<div style="color:#aaa">Nenhum GM em maturação</div>';
+    var byF={}, fOrder=[];
+    items.forEach(function(o){ var m=o.m; if(!byF[m.f]){byF[m.f]={o:[],g:{}}; fOrder.push(m.f);} var fb=byF[m.f]; if(!fb.g[m.g]){fb.g[m.g]=[]; fb.o.push(m.g);} fb.g[m.g].push(o); });
+    var H="";
+    fOrder.forEach(function(f){
+      var fb=byF[f], fC=0, fpp=0; fb.o.forEach(function(gn){ fb.g[gn].forEach(function(o){fC++; fpp+=o.m.w*100;}); });
+      H+='<details open style="margin-bottom:2px"><summary style="cursor:pointer;font-weight:700;color:#FFB719;padding:3px 0">'+f+' <span style="color:#888;font-weight:400">\u2014 '+fC+' GMs \u00b7 '+fpp.toFixed(2)+'pp</span></summary>';
+      fb.o.forEach(function(gn){
+        var arr=fb.g[gn], gpp=arr.reduce(function(s,o){return s+o.m.w*100;},0);
+        arr.sort(function(a,b){return (a.d?a.d.getTime():0)-(b.d?b.d.getTime():0);});
+        H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#e8cf93;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span></summary><div style="margin-left:14px">';
+        arr.forEach(function(o){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+(o.m.nm||("GM "+o.m.n))+'</span><span style="color:#aaa;white-space:nowrap">conta em '+(o.d?fmtBR(o.d):"\u2014")+'</span></div>'; });
+        H+='</div></details>';
+      });
+      H+='</details>';
+    });
+    return H;
+  };
   var _contribGMs=GMS.filter(function(m){var p=calcPctGrupo(m);return p>0&&p<100;});
   var _ppParcial=_contribGMs.reduce(function(s,m){return s+(m.w*100)*calcPctGrupo(m)/100;},0);
   var _resumoHtml='<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">O valor da meta combina dois componentes:<br><b style="color:#A8D5C5">✅ '+k1Concl.toFixed(1)+'pp</b> de GMs 100% concluídos ('+_aptos.length+' GMs)<br><b style="color:#FFB719">⏳ '+_ppParcial.toFixed(1)+'pp</b> de evolução parcial em andamento ('+_contribGMs.length+' GMs)</div>';
@@ -1211,12 +1230,17 @@ function renderExec(){
   var k2El=document.getElementById("k2-item");
   if(k2El){
     var _m2Resumo='<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">Regra automática: <b>2 meses</b> após um GM concluir <b>todas as áreas</b> (MDM, Orçamento, BIM, Compilador), ele passa a contar para a Meta 2.<br><b style="color:#A8D5C5">✅ '+k2.toFixed(1)+'pp</b> já utilizados ('+_m2Atg.length+' GMs)<br><b style="color:#FFB719">⏳ '+(_k2Prev-k2).toFixed(1)+'pp</b> em maturação ('+_m2Mat.length+' GMs)</div>';
-    var _m2MatHtml = _m2Mat.length ? ('<div style="font-size:9px;font-weight:700;color:#FFB719;margin:8px 0 3px">Em maturação (concluídos, aguardando 2 meses):</div>'+_m2Mat.slice().sort(function(a,b){return (a.d?a.d.getTime():0)-(b.d?b.d.getTime():0);}).map(function(o){ return '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+o.m.f+' · '+(o.m.nm||("GM "+o.m.n))+'</span><span style="color:#aaa;white-space:nowrap">conta em '+(o.d?fmtBR(o.d):"—")+'</span></div>'; }).join("")) : "";
+    var _m2MatHtml = _m2Mat.length ? ('<div style="font-size:9px;font-weight:700;color:#FFB719;margin:12px 0 3px">Em maturação (concluídos, aguardando 2 meses):</div><div class="mc-list">'+_grpByDate(_m2Mat)+'</div>') : "";
+    var _m2Nota = '<div style="font-size:9px;color:#7a6a3a;background:#FFF8E6;border:1px solid #F0E2BE;border-radius:5px;padding:7px 9px;margin-bottom:8px">📌 A Meta 2 é calculada pela data em que cada GM concluiu <b>todas as áreas</b> mais 2 meses. Se algum GM aparecer na lista ou na data errada, ajuste a <b>data de conclusão</b> do GM para a data efetivamente realizada \u2014 a meta se recalcula automaticamente.</div>';
     k2El.style.cursor="pointer";
     k2El.title="Clique para ver a regra e a lista de GMs";
     k2El.onclick=function(){
       document.getElementById("metasConclTit").textContent='Meta 2 — '+k2.toFixed(1)+'pp · GMs utilizados em orçamentos ('+_m2Atg.length+')';
-      document.getElementById("metasConclBody").innerHTML=_m2Resumo+'<div class="mc-list">'+(_m2Atg.length?_aptosGrouped(_m2Atg):'<div style="color:#aaa">Nenhum GM atingiu a Meta 2 ainda</div>')+'</div>'+_m2MatHtml+'<div style="font-size:9px;color:#888;margin-top:10px">Meta: 25pp até dez/26 · Projeção com os já concluídos: '+_k2Prev.toFixed(1)+'pp</div>';
+      document.getElementById("metasConclBody").innerHTML=_m2Resumo+_m2Nota
+        +'<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin:4px 0 3px">Já utilizados (atingiram a Meta 2):</div>'
+        +'<div class="mc-list">'+(_m2Atg.length?_aptosGrouped(_m2Atg):'<div style="color:#aaa">Nenhum GM atingiu a Meta 2 ainda</div>')+'</div>'
+        +_m2MatHtml
+        +'<div style="font-size:9px;color:#888;margin-top:10px">Meta: 25pp até dez/26 · Projeção com os já concluídos: '+_k2Prev.toFixed(1)+'pp</div>';
       document.getElementById("metasConclOv").style.display="flex";
     };
   }

@@ -1134,7 +1134,7 @@ function renderExec(){
   function _m2Fim(m){ var w=gmAreaWin(m); var mx=0; AREAS.forEach(function(a){ var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f; }); return mx?new Date(mx):null; }
   function _m2Matura(m){ var f=_m2Fim(m); if(!f) return null; return new Date(f.getFullYear(), f.getMonth()+2, f.getDate()); }
   var _hojeMs2=pd(CFG.hoje).getTime();
-  var _m2Done = GMS.filter(function(m){ return m.w>0 && calcPctGrupo(m)===100; });
+  var _m2Done = GMS.filter(function(m){ return m.w>0 && AREAS.every(function(a){return m[a].st==="done";}); }); // todas as 4 áreas concluídas (não só COMP)
   var _m2Atg=[], _m2Mat=[];
   _m2Done.forEach(function(m){ var d=_m2Matura(m); if(d && d.getTime()<=_hojeMs2) _m2Atg.push(m); else _m2Mat.push({m:m,d:d}); });
   _m2Atg.sort(function(a,b){ return (a.f<b.f?-1:a.f>b.f?1:(a.g<b.g?-1:a.g>b.g?1:a.n-b.n)); });

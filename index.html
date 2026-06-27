@@ -2185,9 +2185,10 @@ function renderBurndown(){
         var acc=0; evC.forEach(function(e){ if(e.data.getTime()<=dEnd) acc+=e.pp; });
         val=acc; cor="#006B3F";
       } else {
-        val = concluido + (_ritmoConcl>0 ? _ritmoConcl*((dEnd-hoje.getTime())/86400000) : 0);
-        if(_projArea!==null) val=Math.min(val,_projArea);
-        val=Math.min(100,val); cor="rgba(255,139,34,.95)";
+        // Sobre a MESMA reta de projeção (ritmo constante hoje→dez): interpola
+        // linearmente entre o concluído de hoje e ppDez (incremento mensal constante).
+        var _fr=(dEnd-hoje.getTime())/Math.max(1,(fimDez.getTime()-hoje.getTime()));
+        val = concluido + (ppDez - concluido)*_fr; cor="rgba(255,139,34,.95)";
       }
       var y=_yOf(val);
       _bdDot(x,y,2.6,cor);

@@ -561,9 +561,9 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div style="display:flex;align-items:center;padding:5px 12px;cursor:pointer;background:rgba(0,107,63,.06);border-bottom:1px solid var(--bdr)"
        onclick="togVisuais()" id="visuais-hdr" style="user-select:none">
     <span style="font-size:9.5px;font-weight:700;color:var(--v1);flex:1">📊 Análises Visuais — Burndown · Heatmap · Velocidade</span>
-    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▶</span>
+    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▲</span>
   </div>
-  <div id="visuais-body" style="display:none">
+  <div id="visuais-body" style="display:block">
     <!-- Linha 1: Burndown + Heatmap lado a lado -->
     <div class="charts-wrap" id="charts-wrap">
       <div class="chart-panel">
@@ -2446,6 +2446,30 @@ function renderVelocidade(){
     }
     var _aguardHtml = aguardando.length > 0 ? '<div style="color:#aaa;font-style:italic">'+aguardando.length+' GMs aguardam liberação do predecessor</div>' : "";
 
+    // GMs que a predecessora deve liberar nos próximos 20 dias (expansível, igual aos liberados)
+    var _prevHtml = "";
+    if(a !== "MDM" && aguardando.length > 0){
+      var _lim20 = new Date(hoje.getTime() + 20*86400000);
+      var _libPrev = function(m){
+        var win = gmAreaWin(m);
+        if(a === "COMP"){
+          var ds = [win.MDM.fim, win.ORC.fim, win.BIM.fim].filter(Boolean).map(function(s){ return pd(s).getTime(); });
+          return ds.length ? new Date(Math.max.apply(null, ds)) : null;
+        }
+        return win.MDM.fim ? pd(win.MDM.fim) : null; // ORC/BIM ← MDM
+      };
+      var _prev20 = aguardando.map(function(m){ return {m:m, d:_libPrev(m)}; })
+        .filter(function(o){ return o.d && o.d >= hoje && o.d <= _lim20; })
+        .sort(function(x,y){ return x.d - y.d; });
+      if(_prev20.length > 0){
+        var _prevRows = _prev20.map(function(o){
+          var m = o.m, _lbl = m.f+' · '+m.n+(m.nm?(' '+m.nm):'');
+          return '<div style="display:flex;justify-content:space-between"><span>'+_lbl+'</span><span style="color:#aaa">prev. '+fmtBR(o.d)+'</span></div>';
+        }).join("");
+        _prevHtml = '<details style="margin-top:2px"><summary style="color:#7B5E00;font-style:italic;cursor:pointer">⏳ '+_prev20.length+' GMs que a predecessora deve liberar em 20 dias (ver todos)</summary><div style="margin-top:3px;padding-left:2px;border-left:2px solid #F0E6C8">'+_prevRows+'</div></details>';
+      }
+    }
+
     html += `<div style="border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;background:#fff;border-left:4px solid ${cor}">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <span style="font-size:10px;font-weight:700;color:${cor};flex:1">${label}</span>
@@ -2472,6 +2496,7 @@ function renderVelocidade(){
       <div style="font-size:8px;color:#888;border-top:1px solid #eee;padding-top:4px">
         ${_proxRows}
         ${_restHtml}
+        ${_prevHtml}
         ${_aguardHtml}
       </div>
     </div>`;
@@ -2625,7 +2650,7 @@ function _isCriticoGrupo(g){ return AREAS.some(a=>_isCriticoArea(g,a)); }
 
 
 // ══ VISUAIS TOGGLE ══
-let _visuaisAberto = false;
+let _visuaisAberto = true;
 var _criticoAberto=false;
 function togCritico(){
   _criticoAberto=!_criticoAberto;

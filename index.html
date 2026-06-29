@@ -2810,7 +2810,6 @@ function popularRespFiltro(){
 var _view="gantt";
 var KB_COLS=[
   {k:"backlog", t:"Backlog",      c:"#607D8B"},
-  {k:"sel",     t:"Selecionadas", c:"#455A64"},
   {k:"mdm",     t:"MDM",          c:"#006B3F"},
   {k:"orc",     t:"Orçamento",    c:"#FF8B22"},
   {k:"bim",     t:"BIM",          c:"#793F98"},
@@ -2829,25 +2828,37 @@ function kbCols(m){
     if(cols.length) return cols;
   }
   if(md==="wip") return [["mdm","MDM"]];
-  return [[ m.MDM.sel?"sel":"backlog", "MDM" ]];
+  return [["backlog", "MDM"]];
 }
 function kbCard(m,area,col){
   var cor=ACFG[area].cor, lbl=ACFG[area].label, resp=(m[area].resp||"");
   var st=m[area].st, stTxt=(st==="done"?"✅ concluído":st==="wip"?"⏳ em andamento":"⚪ a iniciar");
   var stCor=(st==="done"?"#2E7D32":st==="wip"?"#FF8B22":"#999");
+
+  // Prazo estimado pelo time da coluna atual + sinalização (atrasado / próximos 20 dias)
+  var _win=gmAreaWin(m), _fim=(_win[area]&&_win[area].fim)?_win[area].fim:null;
+  var _hoje=pd(CFG.hoje);
+  var _late=(st!=="done" && _fim && pd(_fim)<_hoje);
+  var _soon=(!_late && st!=="done" && _fim && pd(_fim)>=_hoje && pd(_fim)<=new Date(_hoje.getTime()+20*86400000));
+  var _cardBg=_late?"#FFEEEE":(_soon?"#FFF8E1":"#fff");
+  var _prazoCor=_late?"#BF360C":(_soon?"#7B5E00":"#888");
+  var _prazoTxt=(_fim && st!=="done")
+    ? '<div class="kc-prazo" style="font-size:8.5px;font-weight:600;color:'+_prazoCor+';margin-top:2px">\uD83D\uDCC5 prazo '+lbl+': '+fmtBR(pd(_fim))+(_late?' \u00b7 atrasado':(_soon?' \u00b7 \u2264 20 dias':''))+'</div>'
+    : "";
+
   var btns="";
-  if(col==="backlog") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSel('+m.n+',true)">→ Selecionar</button>';
-  else if(col==="sel") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button><button class="kc-btn sec" title="Voltar ao backlog" onclick="event.stopPropagation();kbSel('+m.n+',false)">↩</button>';
+  if(col==="backlog") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button>';
   else if(col==="mdm"||col==="orc"||col==="bim"||col==="comp"){
     if(st==="plan") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'wip\')">▶ Iniciar</button>';
     else if(st==="wip") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'done\')">✓ Concluir</button>';
   }
   var nome=(m.nm||"").replace(/^MATERIAL: |^SERVI\u00c7O ESPECIALIZADO: /,"");
-  return '<div class="kb-card" draggable="true" data-n="'+m.n+'" ondragstart="kbDragStart(event,'+m.n+',\''+area+'\',\''+col+'\')" onclick="abrirGmEdit('+m.n+')" style="border-left-color:'+cor+'" title="Clique para editar o GM '+m.n+'">'
+  return '<div class="kb-card" draggable="true" data-n="'+m.n+'" ondragstart="kbDragStart(event,'+m.n+',\''+area+'\',\''+col+'\')" onclick="abrirGmEdit('+m.n+')" style="border-left-color:'+cor+';background:'+_cardBg+'" title="Clique para editar o GM '+m.n+'">'
     +'<div class="kc-nm">'+m.n+' · '+nome+'</div>'
     +'<div class="kc-meta"><span class="kc-badge" style="background:'+cor+'">'+lbl+'</span>'
     +'<span class="kc-st" style="color:'+stCor+'">'+stTxt+'</span>'
     +'<span style="flex:1"></span><span style="font-size:8px;color:#aaa">'+m.f+'</span></div>'
+    +_prazoTxt
     +(resp?'<div class="kc-resp">\uD83D\uDC64 '+resp+'</div>':'')
     +(btns?'<div class="kc-btns">'+btns+'</div>':'')
     +'</div>';

@@ -969,6 +969,55 @@ function togExecSec(id){
 // ══ CÁLCULOS AUTOMÁTICOS ══
 function calcMeta1(){ return GMS.reduce((s,m)=>s + (m.w*100)*calcPctGrupo(m)/100, 0); } // Etapa 1: meta somada por GM
 
+// ── Curva de apuração das metas (resultado final → % de apuração) ──
+function metaApuracao(v, lo, hi){
+  if(v < lo) return 0;
+  if(v > hi) return 120;
+  return 50 + (v - lo)/(hi - lo)*50; // linear de 50% a 100% entre lo e hi
+}
+function metaCurvaHtml(opts){
+  var lo=opts.lo, hi=opts.hi, xmax=opts.xmax||100, v=(opts.valor==null?null:opts.valor), cor=opts.cor||"#006B3F";
+  var ap=(v==null?null:metaApuracao(v,lo,hi));
+  var W=300,H=160,padL=36,padR=14,padT=14,padB=28;
+  var pw=W-padL-padR, ph=H-padT-padB;
+  var X=function(rx){ return (padL+Math.max(0,Math.min(xmax,rx))/xmax*pw).toFixed(1); };
+  var Y=function(ry){ return (padT+ph-Math.max(0,Math.min(120,ry))/120*ph).toFixed(1); };
+  var svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" style="max-width:320px;display:block">';
+  [0,50,100,120].forEach(function(gy){
+    svg+='<line x1="'+padL+'" y1="'+Y(gy)+'" x2="'+(W-padR)+'" y2="'+Y(gy)+'" stroke="#eee" stroke-width="1"/>'
+       +'<text x="'+(padL-4)+'" y="'+(parseFloat(Y(gy))+3)+'" text-anchor="end" font-size="8" fill="#aaa">'+gy+'%</text>';
+  });
+  [0,lo,hi,xmax].forEach(function(gx){
+    svg+='<text x="'+X(gx)+'" y="'+(H-padB+13)+'" text-anchor="middle" font-size="8" fill="#888">'+gx+'%</text>';
+  });
+  // degrau: 0..lo => 0% | salto p/50% | lo..hi linear 50→100% | salto p/120% | hi..xmax => 120%
+  var path='M '+X(0)+' '+Y(0)+' L '+X(lo)+' '+Y(0)
+          +' M '+X(lo)+' '+Y(50)+' L '+X(hi)+' '+Y(100)
+          +' M '+X(hi)+' '+Y(120)+' L '+X(xmax)+' '+Y(120);
+  svg+='<path d="'+path+'" fill="none" stroke="'+cor+'" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>'
+     +'<line x1="'+X(lo)+'" y1="'+Y(0)+'" x2="'+X(lo)+'" y2="'+Y(50)+'" stroke="'+cor+'" stroke-width="1.3" stroke-dasharray="3 2" opacity=".5"/>'
+     +'<line x1="'+X(hi)+'" y1="'+Y(100)+'" x2="'+X(hi)+'" y2="'+Y(120)+'" stroke="'+cor+'" stroke-width="1.3" stroke-dasharray="3 2" opacity=".5"/>';
+  if(v!=null){
+    var mx=X(v), my=Y(ap);
+    svg+='<line x1="'+mx+'" y1="'+padT+'" x2="'+mx+'" y2="'+(H-padB)+'" stroke="#BF360C" stroke-width="1" stroke-dasharray="2 2"/>'
+       +'<circle cx="'+mx+'" cy="'+my+'" r="3.5" fill="#BF360C"/>';
+  }
+  svg+='<text x="'+padL+'" y="9" font-size="8" fill="#bbb">apuração</text>'
+     +'<text x="'+(W-padR)+'" y="'+(H-2)+'" text-anchor="end" font-size="8" fill="#bbb">resultado final</text>';
+  svg+='</svg>';
+  var bands='<div style="font-size:9.5px;line-height:1.75;color:#555;margin-top:5px">'
+    +'<div>&lt; '+lo+'% &rarr; <b>0%</b></div>'
+    +'<div>'+lo+'% a '+hi+'% &rarr; <b>linear de 50% a 100%</b></div>'
+    +'<div>&gt; '+hi+'% &rarr; <b>120%</b></div>'
+    +'</div>';
+  var atual = (v==null) ? "" :
+    '<div style="font-size:10px;margin-top:6px;padding:6px 8px;background:#F5FAF5;border:1px solid #E2EFE8;border-radius:5px">'
+    +'Resultado atual: <b style="color:'+cor+'">'+v.toFixed(1)+'%</b> &rarr; apuração estimada: <b style="color:#BF360C">'+ap.toFixed(0)+'%</b></div>';
+  return '<div style="margin:12px 0 4px;border-top:1px solid #eee;padding-top:8px">'
+    +'<div style="font-size:9px;font-weight:700;color:'+cor+';text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">📐 Curva de apuração</div>'
+    +svg+bands+atual+'</div>';
+}
+
 // Ritmo necessário: precisa de 90% até 31/12/26
 // Dias restantes para o fim do ano
 function calcRitmo(){
@@ -1224,7 +1273,7 @@ function renderExec(){
   k1El.onclick = function(){
     document.getElementById("tt").style.display="none";
     document.getElementById("metasConclTit").textContent='Meta 1 — '+k1.toFixed(1)+'pp · GMs 100% concluídos ('+_aptos.length+')';
-    document.getElementById("metasConclBody").innerHTML=_resumoHtml+'<div class="mc-list">'+_aptosGrouped(_aptos)+'</div><div style="font-size:9px;color:#888;margin-top:10px">'+_footTxt+'</div>';
+    document.getElementById("metasConclBody").innerHTML=_resumoHtml+metaCurvaHtml({lo:55,hi:90,xmax:100,valor:k1,cor:"#006B3F"})+'<div class="mc-list">'+_aptosGrouped(_aptos)+'</div><div style="font-size:9px;color:#888;margin-top:10px">'+_footTxt+'</div>';
     document.getElementById("metasConclOv").style.display="flex";
   };
   var k2El=document.getElementById("k2-item");
@@ -1236,7 +1285,7 @@ function renderExec(){
     k2El.title="Clique para ver a regra e a lista de GMs";
     k2El.onclick=function(){
       document.getElementById("metasConclTit").textContent='Meta 2 — '+k2.toFixed(1)+'pp · GMs utilizados em orçamentos ('+_m2Atg.length+')';
-      document.getElementById("metasConclBody").innerHTML=_m2Resumo+_m2Nota
+      document.getElementById("metasConclBody").innerHTML=_m2Resumo+metaCurvaHtml({lo:5,hi:25,xmax:30,valor:k2,cor:"#FF8B22"})+_m2Nota
         +'<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin:4px 0 3px">Já utilizados (atingiram a Meta 2):</div>'
         +'<div class="mc-list">'+(_m2Atg.length?_aptosGrouped(_m2Atg):'<div style="color:#aaa">Nenhum GM atingiu a Meta 2 ainda</div>')+'</div>'
         +_m2MatHtml
@@ -2843,7 +2892,7 @@ function kbCard(m,area,col){
   var _cardBg=_late?"#FFEEEE":(_soon?"#FFF8E1":"#fff");
   var _prazoCor=_late?"#BF360C":(_soon?"#7B5E00":"#888");
   var _prazoTxt=(_fim && st!=="done")
-    ? '<div class="kc-prazo" style="font-size:8.5px;font-weight:600;color:'+_prazoCor+';margin-top:2px">\uD83D\uDCC5 prazo '+lbl+': '+fmtBR(pd(_fim))+(_late?' \u00b7 atrasado':(_soon?' \u00b7 \u2264 20 dias':''))+'</div>'
+    ? '<div class="kc-prazo" style="font-size:8.5px;font-weight:600;color:'+_prazoCor+';margin-top:2px">\uD83D\uDCC5 prazo '+lbl+': '+fmtBR(pd(_fim))+'</div>'
     : "";
 
   var btns="";
@@ -2916,9 +2965,9 @@ function renderKanban(){
   GMS.slice().forEach(function(m){
     kbCols(m).forEach(function(pr){ if(pass(m,pr[1])) buckets[pr[0]].push({m:m,area:pr[1]}); });
   });
-  function winIni(m,area){var w=gmAreaWin(m); return (w[area]&&w[area].ini)||"9999-99-99";}
+  function winFim(m,area){var w=gmAreaWin(m); return (w[area]&&w[area].fim)||"9999-99-99";}
   Object.keys(buckets).forEach(function(k){
-    buckets[k].sort(function(a,b){ var ia=winIni(a.m,a.area), ib=winIni(b.m,b.area); return ia<ib?-1:ia>ib?1:(a.m.n-b.m.n); });
+    buckets[k].sort(function(a,b){ var fa=winFim(a.m,a.area), fb=winFim(b.m,b.area); return fa<fb?-1:fa>fb?1:(a.m.n-b.m.n); });
   });
   function flat(items,col){ return items.map(function(it){return kbCard(it.m,it.area,col);}).join(""); }
   function grouped(items,col){
@@ -2937,7 +2986,7 @@ function renderKanban(){
   var totalVis=0;
   board.innerHTML=KB_COLS.map(function(c){
     var items=buckets[c.k]; totalVis+=items.length;
-    var body=grouped(items,c.k);
+    var body=flat(items,c.k);
     return '<div class="kb-col" data-col="'+c.k+'" ondragover="kbOver(event,this)" ondragleave="this.classList.remove(\'drop\')" ondrop="kbDrop(event,\''+c.k+'\',this)">'
       +'<div class="kb-col-hd" style="background:'+c.c+'">'+c.t+'<span style="background:rgba(255,255,255,.28);border-radius:8px;padding:0 6px;font-size:9px">'+items.length+'</span></div>'
       +'<div class="kb-col-bd">'+(body||'<div style="font-size:9px;color:#bbb;text-align:center;padding:8px 0">\u2014</div>')+'</div></div>';

@@ -2615,7 +2615,22 @@ function renderHeatmap(){
 
   el.style.gridTemplateColumns = `90px repeat(${fases.length},1fr)`;
   el.innerHTML = html;
+  _alinharHeatmapTopo();
 }
+
+// Centraliza verticalmente a grade do heatmap em relação ao canvas do burndown,
+// empurrando a grade para baixo com margin-top calculado via medição real.
+function _alinharHeatmapTopo(){
+  var cv=document.getElementById("burndown-canvas"), hm=document.getElementById("heatmap-grid");
+  if(!cv||!hm||!hm.parentElement) return;
+  if(!cv.offsetParent||!hm.offsetParent) return; // painel oculto (Análises Visuais recolhidas)
+  var wrap=hm.parentElement; // .hm-wrap
+  wrap.style.marginTop="0px";
+  var rc=cv.getBoundingClientRect(), rw=wrap.getBoundingClientRect();
+  var d=Math.round((rc.top+rc.height/2) - (rw.top+rw.height/2)); // diferença entre os centros verticais
+  wrap.style.marginTop=(d>0?d:0)+"px";
+}
+window.addEventListener("resize", function(){ _alinharHeatmapTopo(); });
 
 // ══════════════════════════════════════════════════════════════
 // VELOCIDADE — grupos/semana necessários por área

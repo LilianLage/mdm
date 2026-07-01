@@ -2107,6 +2107,9 @@ function renderBurndown(){
   const PAD = {t:20, r:16, b:58, l:42};
   const CW = W - PAD.l - PAD.r;
   const CH = H - PAD.t - PAD.b;
+  // Pontos de rótulos numéricos desenhados (para o tooltip de hover destacar o número sob o mouse,
+  // já que várias linhas podem sobrepor seus rótulos no mesmo lugar).
+  var _numPts = [];
 
   const inicio = pd("2026-04-01");
   const fimMeta = pd("2026-12-31");
@@ -2185,6 +2188,7 @@ function renderBurndown(){
         var val=90*frac, x=_xOf(d.getTime()), y=PAD.t+CH-(val/100)*CH;
         ctx.fillStyle="rgba(0,107,63,.55)"; ctx.font="7px Arial"; ctx.textAlign="center";
         ctx.fillText(val.toFixed(0)+"%", x, y-4);
+        _numPts.push({x:x, y:y-4, txt:val.toFixed(0)+"%", cor:"#006B3F", src:"Planejado linear"});
       }
       d=new Date(d.getFullYear(), d.getMonth()+2, 0);
     }
@@ -2291,13 +2295,16 @@ function renderBurndown(){
   function _bdDot(x,y,r,c){ctx.beginPath();ctx.arc(x,y,r+1.6,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
   if(BD_VIS.concl){ _bdDot(hojeX, hojeYConcl, 4, "#006B3F");
     ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
-    ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12); }
+    ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12);
+    _numPts.push({x:hojeX+6, y:hojeYConcl+12, txt:concluido.toFixed(1)+"pp concl.", cor:"#006B3F", src:"Conclu\u00eddo"}); }
   if(BD_VIS.prog){ _bdDot(hojeX, hojeY, 4, "#5FBF93");
     ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
-    ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4); }
+    ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4);
+    _numPts.push({x:hojeX+6, y:hojeY-4, txt:progresso.toFixed(1)+"pp", cor:"#5FBF93", src:"Progresso"}); }
   if(BD_VIS.proj){ _bdDot(fimDezX, fimDezY, 4.5, "rgba(255,139,34,.95)");
     ctx.fillStyle="#FF8B22"; ctx.font="bold 9px Arial"; ctx.textAlign="right";
-    ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5); }
+    ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5);
+    _numPts.push({x:fimDezX-6, y:fimDezY-5, txt:ppDez.toFixed(1)+"%", cor:"#FF8B22", src:"Proje\u00e7\u00e3o no ritmo (dez/26)"}); }
   ctx.fillStyle="#888"; ctx.font="8px Arial"; ctx.textAlign="center";
   ctx.fillText("dez/26", fimDezX, PAD.t+CH+11);
   ctx.strokeStyle="rgba(255,139,34,.3)"; ctx.lineWidth=1; ctx.setLineDash([3,3]);
@@ -2325,15 +2332,17 @@ function renderBurndown(){
       _bdDot(x,y,2.6,cor);
       ctx.fillStyle=cor; ctx.font="7px Arial"; ctx.textAlign="center";
       ctx.fillText(val.toFixed(0)+"%", x, y-6);
+      _numPts.push({x:x, y:y-6, txt:val.toFixed(0)+"%", cor:cor, src:_isPast?"Conclu\u00eddo (realizado)":"Proje\u00e7\u00e3o no ritmo"});
     });
   })();
 
   // Rótulos de valor por mês sobre uma curva (ev ordenado por data). Igual ao planejado/projeção.
-  function _mLabels(ev, color, dy){
+  function _mLabels(ev, color, dy, src){
     var d=new Date(2026,3,30);
     while(d.getTime()<=fimChart.getTime()){
       var acc=0; for(var i=0;i<ev.length;i++){ if(ev[i].d.getTime()<=d.getTime()) acc+=ev[i].pp; else break; }
-      if(acc>0.5){ var x=_xOf(d.getTime()), y=_yOf(acc); ctx.fillStyle=color; ctx.font="7px Arial"; ctx.textAlign="center"; ctx.fillText(acc.toFixed(0)+"%", x, y+dy); }
+      if(acc>0.5){ var x=_xOf(d.getTime()), y=_yOf(acc); ctx.fillStyle=color; ctx.font="7px Arial"; ctx.textAlign="center"; ctx.fillText(acc.toFixed(0)+"%", x, y+dy);
+        _numPts.push({x:x, y:y+dy, txt:acc.toFixed(0)+"%", cor:color, src:src||""}); }
       d=new Date(d.getFullYear(), d.getMonth()+2, 0);
     }
   }
@@ -2351,8 +2360,9 @@ function renderBurndown(){
     if(BD_VIS.forecast){
       ctx.save(); ctx.strokeStyle="#4A148C"; ctx.lineWidth=1.8; ctx.setLineDash([2,2]); ctx.lineJoin="round"; ctx.lineCap="round";
       ctx.beginPath(); pts.forEach(function(p,i){ i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }); ctx.stroke(); ctx.restore();
-      _mLabels(ev, "#4A148C", -4);
-      if(_fcData.x90!==null){ ctx.fillStyle="#4A148C"; ctx.font="bold 7px Arial"; ctx.textAlign="center"; ctx.fillText("90% "+fmtBR(_fcData.dt90).slice(0,5), _fcData.x90, _yOf(90)-12); }
+      _mLabels(ev, "#4A148C", -4, "Forecast (cronograma)");
+      if(_fcData.x90!==null){ ctx.fillStyle="#4A148C"; ctx.font="bold 7px Arial"; ctx.textAlign="center"; ctx.fillText("90% "+fmtBR(_fcData.dt90).slice(0,5), _fcData.x90, _yOf(90)-12);
+        _numPts.push({x:_fcData.x90, y:_yOf(90)-12, txt:"90% "+fmtBR(_fcData.dt90).slice(0,5), cor:"#4A148C", src:"Forecast \u2014 90%"}); }
     }
   })();
 
@@ -2369,7 +2379,7 @@ function renderBurndown(){
     if(BD_VIS.base){
       ctx.save(); ctx.strokeStyle="#8A8A8A"; ctx.lineWidth=1.7; ctx.setLineDash([]); ctx.lineJoin="round"; ctx.lineCap="round";
       ctx.beginPath(); pts.forEach(function(p,i){ i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }); ctx.stroke(); ctx.restore();
-      _mLabels(ev, "#8A8A8A", 10);
+      _mLabels(ev, "#8A8A8A", 10, "Linha de base");
     }
   })();
 
@@ -2413,6 +2423,7 @@ function renderBurndown(){
   var acum = progresso, _ppConclFinal = concluido;
 
   // ── Guardar pontos para hover ──
+  canvas._bdNumPts = _numPts;
   canvas._bdData = {
     PAD, CW, CH, inicio, totalDias, acum, ppDez,
     hojeX, hojeY, fimDezX, fimDezY, ppConcl: _ppConclFinal, ppWip: acum-_ppConclFinal,
@@ -2431,13 +2442,21 @@ function renderBurndown(){
     const near = (px,py,r=20*DPR) => Math.hypot(mx-px*DPR,my-py*DPR)<r;
     const tt = document.getElementById("tt");
 
-    // Hover na legenda → mostra o número (código) da cor da linha, útil quando linhas se sobrepõem
-    var _csx=(e.clientX-rect.left), _csy=(e.clientY-rect.top), _lhit=null;
-    (canvas._bdLegRects||[]).forEach(function(r){ if(_csx>=r.x && _csx<=r.x+r.w && _csy>=r.y && _csy<=r.y+r.h) _lhit=r; });
-    if(_lhit){
+    // Hover sobre um número/rótulo do gráfico → mostra a qual linha ele pertence e o valor exato.
+    // Útil quando rótulos de linhas diferentes ficam sobrepostos no mesmo ponto.
+    var _numHits=[];
+    (canvas._bdNumPts||[]).forEach(function(p){ if(near(p.x,p.y,7*DPR)) _numHits.push(p); });
+    if(_numHits.length){
       tt.style.display="block";
-      tt.style.left=(e.clientX+12)+"px"; tt.style.top=(e.clientY-42)+"px";
-      tt.innerHTML='<h4>🎨 Cor da linha</h4><div style="font-size:11px;display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;display:inline-block;background:'+_lhit.cor+';border:1px solid #fff"></span><b style="color:#fff">'+_lhit.cor+'</b></div>';
+      const _spaceR = window.innerWidth-(e.clientX+12);
+      tt.style.left=(_spaceR>260?e.clientX+12:e.clientX-264)+"px";
+      tt.style.top=(e.clientY-16-_numHits.length*16)+"px";
+      tt.innerHTML='<h4>\uD83D\uDD22 '+(_numHits.length>1?"Números sobrepostos aqui":"Número")+'</h4>'
+        +_numHits.map(function(p){
+          return '<div style="font-size:11px;display:flex;align-items:center;gap:6px;margin:2px 0">'
+            +'<span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:'+p.cor+';flex-shrink:0"></span>'
+            +'<b style="color:#fff">'+p.txt+'</b><span style="color:#aaa;font-size:9.5px">'+p.src+'</span></div>';
+        }).join("");
       return;
     }
 

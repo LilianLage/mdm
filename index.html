@@ -61,8 +61,8 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 }
 .exec-sec-hdr:hover{background:rgba(0,107,63,.09)}
 .exec-sec-hdr h3{font-size:9px;font-weight:700;color:var(--v1);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;overflow:hidden;flex:1}
-.exec-sec-arrow{font-size:9px;color:var(--v1);flex-shrink:0;transition:transform .2s}
-.exec-sec.collapsed .exec-sec-arrow{transform:rotate(-90deg)}
+.exec-sec-arrow{font-size:12px;font-weight:800;color:var(--v1);flex-shrink:0;transition:transform .2s;width:12px;text-align:center}
+.exec-sec.collapsed .exec-sec-arrow{transform:none}
 .exec-sec-body{padding:4px 8px;display:flex;flex-direction:column;gap:3px;overflow-y:auto;overflow-x:hidden;flex:1}
 .exec-sec.collapsed .exec-sec-body{display:none}
 .exec-sec.collapsed .exec-sec-hdr h3{
@@ -188,8 +188,8 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
   padding:5px 8px;display:flex;align-items:center;gap:6px;
   border-right:2px solid rgba(255,255,255,.15);flex-shrink:0;
 }
-.fase-arrow{font-size:9px;color:#A8D5C5;transition:transform .2s;flex-shrink:0}
-.fase-arrow.collapsed{transform:rotate(-90deg)}
+.fase-arrow{font-size:12px;font-weight:800;color:#A8D5C5;transition:transform .2s;flex-shrink:0;width:14px;text-align:center}
+.fase-arrow.collapsed{transform:none}
 .fase-info{display:flex;flex-direction:column;gap:1px;flex:1}
 .fase-nome{font-size:11px;font-weight:700;color:#fff}
 .fase-meta{font-size:8.5px;color:#A8D5C5}
@@ -272,6 +272,11 @@ header{background:var(--v1);padding:8px 16px;display:flex;align-items:center;gap
 .gm-caret:active{transform:scale(.88)}
 .gm-caret.open{background:var(--v1);color:#fff;border-color:var(--v1)}
 .gm-caret-sp{display:inline-block;width:18px;margin-right:5px;flex-shrink:0}
+/* Setinhas de expandir seções em <details> viram + (expandir) / − (recolher) */
+details>summary{list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"+ ";font-weight:800;display:inline-block;width:11px}
+details[open]>summary::before{content:"\2212 "}
 .gm-row{background:rgba(0,107,63,.022)}
 .gm-row .g-lbl{padding-left:20px}
 .gm-lbl .g-nome{font-size:11px;font-weight:600;color:#4a4a4a}
@@ -523,7 +528,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div class="exec-sec collapsed" id="sec-div">
     <div class="exec-sec-hdr" onclick="togExecSec('div')">
       <h3>⚠️ Pontos de Atenção</h3>
-      <span class="exec-sec-arrow" id="arr-div">▶</span>
+      <span class="exec-sec-arrow" id="arr-div">+</span>
     </div>
     <div class="exec-sec-body" id="div-list"></div>
   </div>
@@ -534,7 +539,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div class="exec-sec collapsed" id="sec-plano">
     <div class="exec-sec-hdr" onclick="togExecSec('plano')">
       <h3>✅ Plano de Ação</h3>
-      <span class="exec-sec-arrow" id="arr-plano">▶</span>
+      <span class="exec-sec-arrow" id="arr-plano">+</span>
     </div>
     <div class="exec-sec-body">
       <button class="btn-add-p" onclick="addAcao();event.stopPropagation()">+ Adicionar</button>
@@ -546,7 +551,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div class="exec-sec collapsed" id="sec-ta">
     <div class="exec-sec-hdr" onclick="togExecSec('ta')">
       <h3>📝 Notas</h3>
-      <span class="exec-sec-arrow" id="arr-ta">▶</span>
+      <span class="exec-sec-arrow" id="arr-ta">+</span>
     </div>
     <div class="exec-sec-body">
       <button class="btn-add-p" onclick="addTA();event.stopPropagation()">+ Adicionar</button>
@@ -561,7 +566,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div style="display:flex;align-items:center;padding:5px 12px;cursor:pointer;background:rgba(0,107,63,.06);border-bottom:1px solid var(--bdr)"
        onclick="togVisuais()" id="visuais-hdr" style="user-select:none">
     <span style="font-size:9.5px;font-weight:700;color:var(--v1);flex:1">📊 Análises Visuais — Burndown · Heatmap · Velocidade</span>
-    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">▲</span>
+    <span style="font-size:9px;color:var(--v1);font-weight:700" id="visuais-arrow">−</span>
   </div>
   <div id="visuais-body" style="display:block">
     <!-- Linha 1: Burndown + Heatmap lado a lado -->
@@ -576,6 +581,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
             <option value="BIM">BIM</option>
             <option value="COMP">Compilador</option>
           </select>
+          <label title="Alternar entre ver só 2026 (padrão) ou o período completo 2026–2027" style="font-size:8px;font-weight:600;color:#666;display:inline-flex;align-items:center;gap:4px;cursor:pointer;padding:1px 7px;border:1px solid #e0e0e0;border-radius:10px;background:#fafafa;user-select:none"><input type="checkbox" id="bd-full" onchange="renderBurndown()" style="margin:0">Período completo (26–27)</label>
           <span style="font-size:9px;font-weight:400;color:#888">pp acumulados × tempo · planejado vs realizado</span>
           <label id="bd-sembim-lbl" title="Simular cenário sem o prazo do BIM" style="font-size:8px;font-weight:500;color:#aaa;display:inline-flex;align-items:center;gap:5px;cursor:pointer;margin-left:auto;padding:2px 9px;border:1px solid #e6e6e6;border-radius:11px;background:#fafafa;user-select:none;transition:all .15s">
             <input type="checkbox" id="bd-sembim" onchange="renderGantt();renderBurndown();_bdSemBimChip()" style="position:absolute;opacity:0;width:0;height:0">
@@ -604,7 +610,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 <div style="border:1px solid var(--bdr);border-top:none;background:#fff">
   <div style="display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;background:rgba(191,54,12,.06);border-bottom:1px solid var(--bdr)" onclick="togCritico()" id="critico-hdr">
     <span style="font-size:9.5px;font-weight:700;color:#BF360C;flex:1">🎯 Caminho Crítico — o que mais empurra a meta (90% até dez/26)</span>
-    <span style="font-size:9px;color:#BF360C;font-weight:700" id="critico-arrow">▶</span>
+    <span style="font-size:9px;color:#BF360C;font-weight:700" id="critico-arrow">+</span>
   </div>
   <div id="critico-body" style="padding:10px 14px;display:none"><div id="caminho-critico"></div></div>
 </div>
@@ -677,6 +683,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   </div>
   <span class="tl-label">Buscar:</span>
   <input class="tl-input" type="text" id="f-busca" placeholder="ex: Argamassa" oninput="renderGantt()">
+  <span class="tl-label" title="Mostra GMs que começam nesta data ou depois (considera as áreas filtradas)">Início ≥:</span>
+  <input class="tl-input" type="date" id="f-ini" style="width:128px" onchange="renderGantt()" title="Mostra GMs que começam nesta data ou depois (acumula com o filtro de área)">
+  <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera as áreas filtradas)">Fim ≤:</span>
+  <input class="tl-input" type="date" id="f-fim" style="width:128px" onchange="renderGantt()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
   <span class="tl-cnt" id="f-cnt"></span>
   <div style="display:flex;gap:4px;margin-right:4px">
@@ -720,6 +730,10 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <select class="tl-select" id="kf-resp" style="min-height:26px" onchange="renderKanban()"><option value="">Todos</option></select>
     <span class="tl-label">Buscar:</span>
     <input class="tl-input" id="kf-busca" type="text" placeholder="nº, GM ou grupo" oninput="renderKanban()">
+    <span class="tl-label" title="Mostra GMs que começam nesta data ou depois (considera a área filtrada)">Início ≥:</span>
+    <input class="tl-input" id="kf-ini" type="date" style="width:128px" onchange="renderKanban()" title="Mostra GMs que começam nesta data ou depois (acumula com o filtro de área)">
+    <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera a área filtrada)">Fim ≤:</span>
+    <input class="tl-input" id="kf-fim" type="date" style="width:128px" onchange="renderKanban()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
     <label style="font-size:10px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="kf-late" onchange="renderKanban()"> Só atrasados</label>
     <button class="tl-btn sec" onclick="kbLimpar()">✕ Limpar</button>
     <span class="tl-cnt" id="kb-cnt"></span>
@@ -833,6 +847,10 @@ let GRUPOS=[
 
 // ══ CAMADA GM (Etapa 1): 233 GMs · peso=AVANÇO(planilha) · durações=V9 (frente Grupo×Sprint) ══
 const GMS = [{"n":453,"nm":"Instalação Elétrica - Quadros Elétricos","g":"Acab. Elétrico","gk":"acabeletrico","f":"Fase 1","w":0.002822,"it":41,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-01","dur":83,"st":"done","fim":"2026-06-23"},"ORC":{"dur":5,"st":"wip"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":7,"st":"plan"}},{"n":465,"nm":"Instalação Elétrica - Acabamento Elétrico","g":"Acab. Elétrico","gk":"acabeletrico","f":"Fase 1","w":0.007337,"it":117,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-01","dur":29,"st":"wip","fim":"2026-04-30"},"ORC":{"dur":5,"st":"wip"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":7,"st":"plan"}},{"n":115,"nm":"Argamassa","g":"Argamassa","gk":"argamassa","f":"Fase 1","w":0.001568,"it":24,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"done","fim":"2026-06-10"},"ORC":{"dur":56,"st":"done"},"BIM":{"dur":0,"st":"done"},"COMP":{"dur":1,"st":"done"}},{"n":472,"nm":"Argamassa de Regularização","g":"Argamassa","gk":"argamassa","f":"Fase 1","w":0.000376,"it":6,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"done","fim":"2026-06-10"},"ORC":{"dur":56,"st":"done"},"BIM":{"dur":0,"st":"done"},"COMP":{"dur":1,"st":"done"}},{"n":535,"nm":"Aditivo para Argamassa","g":"Argamassa","gk":"argamassa","f":"Fase 1","w":0.001129,"it":18,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"done","fim":"2026-06-10"},"ORC":{"dur":56,"st":"done"},"BIM":{"dur":0,"st":"done"},"COMP":{"dur":1,"st":"done"}},{"n":536,"nm":"Argamassa Polimérica","g":"Argamassa","gk":"argamassa","f":"Fase 1","w":0.000251,"it":4,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"done","fim":"2026-06-10"},"ORC":{"dur":56,"st":"done"},"BIM":{"dur":0,"st":"done"},"COMP":{"dur":1,"st":"done"}},{"n":942,"nm":"Argamassa Usinada","g":"Argamassa","gk":"argamassa","f":"Fase 1","w":0.001129,"it":18,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"done","fim":"2026-06-10"},"ORC":{"dur":56,"st":"done"},"BIM":{"dur":0,"st":"done"},"COMP":{"dur":1,"st":"done"}},{"n":101,"nm":"Cimento","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000753,"it":9,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":103,"nm":"Bloco de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.023015,"it":366,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":116,"nm":"Areia","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.00138,"it":21,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":117,"nm":"Pedra Britada","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.002258,"it":31,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":127,"nm":"Laje Pré-Fabricada","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000753,"it":12,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":140,"nm":"Premoldado de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.006522,"it":85,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":143,"nm":"Cal","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000564,"it":7,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":148,"nm":"Aglutinante","g":"Concreto","gk":"concreto","f":"Fase 1","w":0,"it":null,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":1,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":156,"nm":"Impermeabilizante","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.002007,"it":27,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":231,"nm":"Estrutura Pré-Moldado de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0,"it":null,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":2,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":233,"nm":"Guia Pré-Moldado de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.005832,"it":90,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":1,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":322,"nm":"Solvente","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000753,"it":12,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":494,"nm":"Aditivo para Usina de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000251,"it":4,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":495,"nm":"Fibra de Vidro - Parede","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000188,"it":3,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":523,"nm":"Muro Pré-Moldado de Concreto","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.000564,"it":9,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":943,"nm":"Concreto Usinado","g":"Concreto","gk":"concreto","f":"Fase 1","w":0.013169,"it":167,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-04-01","dur":70,"st":"wip","fim":"2026-06-10"},"ORC":{"dur":54,"st":"wip"},"BIM":{"dur":15,"st":"done"},"COMP":{"dur":37,"st":"wip"}},{"n":246,"nm":"Drenagem","g":"Drenagem","gk":"drenagem","f":"Fase 1","w":0.00069,"it":8,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":15,"st":"done"},"BIM":{"dur":24,"st":"wip"},"COMP":{"dur":14,"st":"wip"}},{"n":469,"nm":"Infra ETE/ETA/EBE/EEE","g":"Drenagem","gk":"drenagem","f":"Fase 1","w":0.001505,"it":22,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":15,"st":"done"},"BIM":{"dur":24,"st":"wip"},"COMP":{"dur":14,"st":"wip"}},{"n":554,"nm":"Tubo PEAD Corrugado - Drenagem","g":"Drenagem","gk":"drenagem","f":"Fase 1","w":0.003888,"it":62,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":15,"st":"done"},"BIM":{"dur":24,"st":"wip"},"COMP":{"dur":14,"st":"wip"}},{"n":451,"nm":"Instalação Elétrica - Cabos Elétricos de Cobre","g":"Fios/Cabos","gk":"fioscabos","f":"Fase 1","w":0.012166,"it":184,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-01","dur":83,"st":"done","fim":"2026-06-23"},"ORC":{"dur":5,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":430,"nm":"Instalação Hidrosanitária - Metais","g":"Metais Sanit.","gk":"metaissanit","f":"Fase 1","w":0.00878,"it":138,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-01","dur":23,"st":"done","fim":"2026-04-24"},"ORC":{"dur":5,"st":"done"},"BIM":{"dur":1,"st":"done"},"COMP":{"dur":5,"st":"done"}},{"n":118,"nm":"Tinta Látex","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.001129,"it":18,"nt":"SIM","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":119,"nm":"Tinta Acrílica","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.006083,"it":92,"nt":"SIM","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":121,"nm":"Textura","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.006773,"it":115,"nt":"SIM","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":122,"nm":"Grafiato","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.000439,"it":7,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":171,"nm":"Material para Pintura","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0,"it":46,"nt":"","ag":"N","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":173,"nm":"Tinta Esmalte/Tinta a Óleo","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.004264,"it":72,"nt":"SIM","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":178,"nm":"Verniz/Resina","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.000815,"it":12,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":184,"nm":"Massa Corrida","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.000188,"it":3,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-01","dur":6,"st":"done","fim":"2026-04-07"},"ORC":{"dur":5,"st":"done"},"BIM":{"dur":0,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":271,"nm":"Ecogranito","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.000627,"it":10,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":476,"nm":"Pigmento Corante","g":"Tintas/Texturas","gk":"tintastexturas","f":"Fase 1","w":0.000627,"it":10,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-01","dur":40,"st":"done","fim":"2026-05-11"},"ORC":{"dur":13,"st":"done"},"BIM":{"dur":9,"st":"wip"},"COMP":{"dur":0,"st":"plan"}},{"n":104,"nm":"Vergalhão","g":"Aço","gk":"aco","f":"Fase 2","w":0.002508,"it":38,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":163,"nm":"Serralheria Aço Carbono","g":"Aço","gk":"aco","f":"Fase 2","w":0.011288,"it":154,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":188,"nm":"Perfil e Chapas de Aço Carbono","g":"Aço","gk":"aco","f":"Fase 2","w":0.004578,"it":61,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":220,"nm":"Ferragem","g":"Aço","gk":"aco","f":"Fase 2","w":0.002132,"it":33,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":243,"nm":"Perfil de Alumínio","g":"Aço","gk":"aco","f":"Fase 2","w":0.002571,"it":40,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":481,"nm":"Vergalhão Cortado e Dobrado","g":"Aço","gk":"aco","f":"Fase 2","w":0.000627,"it":10,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":505,"nm":"Guarda-Corpo","g":"Aço","gk":"aco","f":"Fase 2","w":0,"it":8,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":0,"st":"wip","fim":"2026-04-23"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":510,"nm":"Tela de Aço","g":"Aço","gk":"aco","f":"Fase 2","w":0.001505,"it":24,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":144,"nm":"Ardósia","g":"Ardósia (Pedras)","gk":"ardosiapedras","f":"Fase 2","w":0.02452,"it":391,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":24,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":105,"nm":"Esquadrias de Alumínio","g":"Esquadrias","gk":"esquadrias","f":"Fase 2","w":0.092186,"it":1436,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":30,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":106,"nm":"Acessórios para Esquadrias de Alumínio","g":"Esquadrias","gk":"esquadrias","f":"Fase 2","w":0.005832,"it":85,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":480,"nm":"PU para Esquadrias","g":"Esquadrias","gk":"esquadrias","f":"Fase 2","w":0.000627,"it":10,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":491,"nm":"Esquadrias Padrão","g":"Esquadrias","gk":"esquadrias","f":"Fase 2","w":0,"it":null,"nt":"","ag":"0","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":30,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":420,"nm":"Instalação Gás","g":"Gas","gk":"gas","f":"Fase 2","w":0.003386,"it":49,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":552,"nm":"Tubo PEAD Eletrofusão - Gás","g":"Gas","gk":"gas","f":"Fase 2","w":0.000878,"it":14,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":131,"nm":"Granitos","g":"Granito (Pedras)","gk":"granitopedras","f":"Fase 2","w":0.003512,"it":55,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":11,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":555,"nm":"Suporte Mão Francesa","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 2","w":0.000376,"it":6,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":61,"st":"done","fim":"2026-06-23"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":155,"nm":"Graxa/Lubrificante","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 6","w":0.000878,"it":14,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":13,"st":"plan","fim":"2026-05-06"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":244,"nm":"Forros e Acessórios PVC","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 6","w":0.002195,"it":22,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":13,"st":"plan","fim":"2026-05-06"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":527,"nm":"Placa de Lã Rocha","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 6","w":6.3e-05,"it":1,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-04-23","dur":13,"st":"plan","fim":"2026-05-06"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":542,"nm":"Espaçadores Plásticos","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 6","w":0.005832,"it":93,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":13,"st":"plan","fim":"2026-05-06"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":543,"nm":"Espaçadores Cerâmicos","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 6","w":0.000878,"it":14,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":13,"st":"plan","fim":"2026-05-06"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":147,"nm":"Adesivo/Vedante/Cola","g":"Outros Acabamentos","gk":"outrosacabamentos","f":"Fase 7","w":0.003763,"it":54,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":29,"st":"plan","fim":"2026-05-22"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":112,"nm":"Piso Granito","g":"Pedras","gk":"pedras","f":"Fase 2","w":0,"it":null,"nt":"","ag":"S","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":11,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":145,"nm":"Acabamento de Granito","g":"Pedras","gk":"pedras","f":"Fase 2","w":0,"it":8,"nt":"","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":11,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":166,"nm":"Pedra Decorativa","g":"Pedras","gk":"pedras","f":"Fase 2","w":0.000376,"it":4,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":11,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":113,"nm":"Piso Laminado","g":"Piso Laminado","gk":"pisolaminado","f":"Fase 2","w":0.001819,"it":28,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":513,"nm":"Piso Vinilico","g":"Piso Laminado","gk":"pisolaminado","f":"Fase 2","w":0.000564,"it":9,"nt":"SIM","ag":"S","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":192,"nm":"Tubo/Conexão Multicamada Compressão","g":"Tubos PEX","gk":"tubospex","f":"Fase 2","w":0.007588,"it":121,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":6,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":435,"nm":"INATIVO - MATERIAL: Instalação Hidrosanitária - PEX","g":"Tubos PEX","gk":"tubospex","f":"Fase 2","w":0,"it":null,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-04-23","dur":0,"st":"wip","fim":"2026-04-23"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":483,"nm":"Instalação Hidrosanitária-Dist Predial Água Fria","g":"Tubos PEX","gk":"tubospex","f":"Fase 2","w":0.005958,"it":95,"nt":"SIM","ag":"N","MDM":{"ini":"2026-04-23","dur":6,"st":"wip","fim":"2026-04-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":6,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":478,"nm":"Instalação Hidrosanitária – Barra de Apoio","g":"Acab. Hidro","gk":"acabhidro","f":"Fase 3","w":0.001254,"it":20,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":176,"nm":"Cuba/Tanque Inox","g":"Acab. Hidro","gk":"acabhidro","f":"Fase 4","w":0.001442,"it":20,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-08","dur":18,"st":"plan","fim":"2026-06-26"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":429,"nm":"Instalação Hidrosanitária - Acessórios Banheiros","g":"Acab. Hidro","gk":"acabhidro","f":"Fase 5","w":0.002007,"it":30,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-08","dur":19,"st":"plan","fim":"2026-06-27"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":438,"nm":"Instalação Hidrosanitária - Kit Hidraulico","g":"Acab. Hidro","gk":"acabhidro","f":"Fase 5","w":0.003575,"it":57,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-08","dur":19,"st":"plan","fim":"2026-06-27"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":549,"nm":"Grelha e Porta Grelha de Inox","g":"Acab. Hidro","gk":"acabhidro","f":"Fase 5","w":0.000753,"it":12,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-08","dur":19,"st":"plan","fim":"2026-06-27"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":150,"nm":"Calha/Rufo","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.008215,"it":123,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":206,"nm":"INATIVO-MATERIAL: Tubo/Conexão PVC Roscável","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":1,"nt":"","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":240,"nm":"INATIVO-MATERIAL: Acessórios Aquecedor","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":null,"nt":"","ag":"0","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":251,"nm":"Shaft EPS","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.001944,"it":31,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":253,"nm":"INATIVO - MATERIAL: Acessórios Hidráulicos","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":8,"nt":"","ag":"S","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":255,"nm":"INATIVO - MMATERIAL: Tubo/Conexão CPVC","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":null,"nt":"","ag":"S","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":419,"nm":"Instalação Hidrosanitária","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":null,"nt":"","ag":"0","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":424,"nm":"Instalação Hidrosanitária - Caixas d'aguas","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.001756,"it":26,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":426,"nm":"Instalação Hidrosanitária - Outros Acessórios","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.001631,"it":26,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":427,"nm":"Instalação Hidrosanitária - Acessórios Hidráulicos","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.00533,"it":80,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":436,"nm":"Instalação Hidrosanitária - Hidrometros","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.002508,"it":39,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":437,"nm":"Instalação Hidrosanitária - Matrial de Irrigação","g":"Hidro","gk":"hidro","f":"Fase 3","w":0,"it":1,"nt":"","ag":"S","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":439,"nm":"Instalação Hidrosanitária - Telemetria","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.000125,"it":2,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":440,"nm":"Instalação Hidrosanitária - Caixas de Passagens","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.004264,"it":68,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":455,"nm":"Instalação Elétrica - Grelha/Tampa/Tampão de ferro","g":"Hidro","gk":"hidro","f":"Fase 3","w":0.003763,"it":59,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-12","dur":13,"st":"plan","fim":"2026-06-25"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":18,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":267,"nm":"Tubo/Conexão Eletroduto PEAD","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.001944,"it":24,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":428,"nm":"Instalação Hidrosanitária - PVC","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.011915,"it":185,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":456,"nm":"Tubo/Conexão Eletroduto PVC","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.003324,"it":53,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":482,"nm":"Instalação Hidrosanitária- Rede Externa de Esgoto","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.008403,"it":134,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":484,"nm":"Instalação Hidrosanitária-Dist Predial de Esgoto","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.025273,"it":400,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":486,"nm":"INATIVO - MATERIAL: Instalação Hidrosanitária-Dist P Águas P","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0,"it":null,"nt":"","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":488,"nm":"Instalação Hidrosanitária- Rede Ext Água Fria","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0,"it":17,"nt":"","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":546,"nm":"Instalação Hidrosanitária - Tubos Predial PVC","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0.001819,"it":29,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":547,"nm":"Instalação Hidrosanitária - Acessórios Predial PVC","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0,"it":20,"nt":"","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":548,"nm":"Instalação Hidrosanitária - Acessórios Infra PVC","g":"Tubos PVC","gk":"tubospvc","f":"Fase 3","w":0,"it":null,"nt":"","ag":"N","MDM":{"ini":"2026-06-08","dur":13,"st":"plan","fim":"2026-06-21"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":109,"nm":"Gesso","g":"Drywall","gk":"drywall","f":"Fase 4","w":0.000376,"it":6,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":139,"nm":"Gesso Acartonado (Dry Wall)","g":"Drywall","gk":"drywall","f":"Fase 4","w":0,"it":55,"nt":"","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":489,"nm":"Forros e Acessórios Gesso","g":"Drywall","gk":"drywall","f":"Fase 4","w":0,"it":2,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":215,"nm":"Alarme de Incêndio","g":"Incêndio","gk":"incendio","f":"Fase 4","w":0.002947,"it":45,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":434,"nm":"Instalação Hidrosanitária - Rede Anti incendio","g":"Incêndio","gk":"incendio","f":"Fase 4","w":0.004264,"it":64,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":503,"nm":"Rede Anti incendio - Porta Corta Fogo","g":"Incêndio","gk":"incendio","f":"Fase 4","w":0,"it":18,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":526,"nm":"","g":"Incêndio","gk":"incendio","f":"Fase 4","w":0,"it":null,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":128,"nm":"Louça Sanitária","g":"Louças Sanit.","gk":"loucassanit","f":"Fase 4","w":0,"it":6,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":425,"nm":"Instalação Hidrosanitária - Louças","g":"Louças Sanit.","gk":"loucassanit","f":"Fase 4","w":0.003888,"it":62,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":152,"nm":"Domo/Exaustor","g":"Mecânica","gk":"mecanica","f":"Fase 4","w":0.001568,"it":24,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":518,"nm":"Churrasqueira","g":"Mecânica","gk":"mecanica","f":"Fase 4","w":0.002446,"it":39,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":198,"nm":"Tubo/Conexão PEAD Agua Eletrofusão","g":"PEAD","gk":"pead","f":"Fase 4","w":0,"it":11,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":199,"nm":"Tubo/Conexão PEAD Gás Eletrofusão","g":"PEAD","gk":"pead","f":"Fase 4","w":0,"it":21,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":219,"nm":"INATIVO - MATERIAL: Tubo/Conexão PEAD Esgoto","g":"PEAD","gk":"pead","f":"Fase 4","w":0,"it":4,"nt":"","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":433,"nm":"Instalação Hidrosanitária - PEAD","g":"PEAD","gk":"pead","f":"Fase 4","w":0,"it":7,"nt":"","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":550,"nm":"Conexões PEAD Eletrofusão","g":"PEAD","gk":"pead","f":"Fase 4","w":0.006208,"it":99,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":551,"nm":"Tubo PEAD Eletrofusão - Água","g":"PEAD","gk":"pead","f":"Fase 4","w":0.002132,"it":34,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":553,"nm":"Tubo PEAD Eletrofusão - Esgoto","g":"PEAD","gk":"pead","f":"Fase 4","w":0.001881,"it":30,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":225,"nm":"Poste de Concreto","g":"Peças Concreto","gk":"pecasconcreto","f":"Fase 4","w":0.005017,"it":69,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":423,"nm":"Instalação Hidrosanitária - Concreto","g":"Peças Concreto","gk":"pecasconcreto","f":"Fase 4","w":0,"it":48,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":529,"nm":"Caixas e tampas de concreto","g":"Peças Concreto","gk":"pecasconcreto","f":"Fase 4","w":0.010222,"it":163,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":530,"nm":"Anéis e tubos de concreto","g":"Peças Concreto","gk":"pecasconcreto","f":"Fase 4","w":0.008591,"it":137,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":500,"nm":"Perfil Metálico Gesso Acartonado (Dry Wall)","g":"Perfil Aço","gk":"perfilaco","f":"Fase 4","w":0.001631,"it":26,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":138,"nm":"Fechadura/Dobradiças","g":"Portas","gk":"portas","f":"Fase 4","w":0.001505,"it":18,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":252,"nm":"Porta Pronta","g":"Portas","gk":"portas","f":"Fase 4","w":0.022952,"it":365,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":167,"nm":"Rejunte","g":"Rev. Cerâmico","gk":"revceramico","f":"Fase 4","w":0.000815,"it":13,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":110,"nm":"Piso Cerâmico","g":"Rev. Cerâmico","gk":"revceramico","f":"Fase 5","w":0.002634,"it":41,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":19,"st":"plan","fim":"2026-07-05"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":111,"nm":"Porcelanato","g":"Rev. Cerâmico","gk":"revceramico","f":"Fase 5","w":0.011163,"it":174,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":19,"st":"plan","fim":"2026-07-05"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":114,"nm":"Azulejo Cerâmico","g":"Rev. Cerâmico","gk":"revceramico","f":"Fase 5","w":0.002885,"it":44,"nt":"SIM","ag":"S","MDM":{"ini":"2026-06-16","dur":19,"st":"plan","fim":"2026-07-05"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":153,"nm":"INATIVO-MATERIAL: Espaçador","g":"Rev. Cerâmico","gk":"revceramico","f":"Fase 5","w":0,"it":5,"nt":"","ag":"0","MDM":{"ini":"2026-06-16","dur":19,"st":"plan","fim":"2026-07-05"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":129,"nm":"Telha de Fibrocimento","g":"Telhas Fibroc","gk":"telhasfibroc","f":"Fase 4","w":0.001944,"it":30,"nt":"SIM","ag":"N","MDM":{"ini":"2026-06-16","dur":18,"st":"plan","fim":"2026-07-04"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":2,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":213,"nm":"Motobomba","g":"Bombas","gk":"bombas","f":"Fase 5","w":0.012229,"it":189,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":7,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":557,"nm":"Motobomba/Bombas Especiais Pressurizadas","g":"Bombas","gk":"bombas","f":"Fase 5","w":0.004014,"it":64,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":4,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":562,"nm":"","g":"Bombas","gk":"bombas","f":"Fase 5","w":0,"it":null,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":470,"nm":"Portico","g":"ESTRUTURA","gk":"estrutura","f":"Fase 5","w":0.001129,"it":18,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":261,"nm":"INATIVO-MATERIAL: Tubo/Conexão Aço Carbono Galvanizado","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0,"it":14,"nt":"","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":265,"nm":"INATIVO-MATERIAL: Tubo/Conexão Ferro Fundido","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0,"it":16,"nt":"","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":268,"nm":"INATIVO - MATERIAL: Eletroduto/Conexão Aço Galvanizado","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0,"it":7,"nt":"","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":431,"nm":"Instalação Hidrosanitária - Cobre/Bronze","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0.007839,"it":125,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":432,"nm":"Inst Hidrossanitária - Galv. rede anti-incêndio","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0,"it":40,"nt":"","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":545,"nm":"Instalação Hidrosanitaria - Aço/Ferro Fundido","g":"Ferrosos","gk":"ferrosos","f":"Fase 5","w":0.019127,"it":306,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":15,"st":"plan"},"COMP":{"dur":2,"st":"plan"}},{"n":248,"nm":"Desmoltante","g":"FORMA","gk":"forma","f":"Fase 5","w":0.000376,"it":6,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":330,"nm":"Forma de Alumínio","g":"FORMA","gk":"forma","f":"Fase 5","w":0,"it":null,"nt":"","ag":"0","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":511,"nm":"Forma de PVC","g":"FORMA","gk":"forma","f":"Fase 5","w":0.004641,"it":74,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":559,"nm":"Forma de alumínio - Painéis","g":"FORMA","gk":"forma","f":"Fase 5","w":0.016556,"it":264,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":560,"nm":"Forma de alumínio - Escadas","g":"FORMA","gk":"forma","f":"Fase 5","w":0.000125,"it":2,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":561,"nm":"Forma de alumínio - Acessórios e Sistema de Segur","g":"FORMA","gk":"forma","f":"Fase 5","w":0.014298,"it":228,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":13,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":123,"nm":"Selador/Fundo","g":"FUNDAÇÃO","gk":"fundacao","f":"Fase 5","w":0.001944,"it":28,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":154,"nm":"Gabião","g":"FUNDAÇÃO","gk":"fundacao","f":"Fase 5","w":0.001129,"it":17,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":228,"nm":"Estacas para Fundação","g":"FUNDAÇÃO","gk":"fundacao","f":"Fase 5","w":0.009469,"it":151,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":517,"nm":"Itens de piscina","g":"Piscina","gk":"piscina","f":"Fase 5","w":0.001568,"it":25,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":189,"nm":"EPC (Equipamentos de Proteção Coletiva)","g":"Segurança","gk":"seguranca","f":"Fase 5","w":0.001881,"it":27,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-01","dur":19,"st":"plan","fim":"2026-07-20"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":2,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":201,"nm":"INATIVO - MATERIAL:  Cabo Elétrico > 10mm","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":35,"nt":"","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":204,"nm":"Tubo/Conexão Eletroduto Alumínio","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":18,"nt":"","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":208,"nm":"INATIVO - MATERIAL: Acabamento Elétrico","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":36,"nt":"","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":210,"nm":"Quadro Elétrico","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001066,"it":16,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":238,"nm":"Energia Solar","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001944,"it":29,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":266,"nm":"INATIVO-MATERIAL: Eletrocalha/Acessórios","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":69,"nt":"","ag":"S","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":306,"nm":"Cabo/Acessório de Rede Telefônica","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001254,"it":20,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":409,"nm":"INATIVO - MATERIAL: Rede Eletrica","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":5,"nt":"","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":411,"nm":"Componentes Eletricos","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":5,"nt":"","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":443,"nm":"Instalação Elétrica - Acessórios Elétricos","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.00533,"it":83,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":444,"nm":"Instalação Elétrica - Eletrudos Metálicos","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.009407,"it":150,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":446,"nm":"Instalação Elétrica - Informática","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.000439,"it":7,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":447,"nm":"Instalação Elétrica - Rede Elétrica","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001631,"it":23,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":449,"nm":"Instalação Elétrica - Equipamentos","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001442,"it":23,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":450,"nm":"Instalação Elétrica - Automação Predial","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.002383,"it":38,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":452,"nm":"Instalação Elétrica - Telefonia/Interfonia","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.00138,"it":22,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":454,"nm":"Instalação Elétrica - Disjuntores","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.003136,"it":50,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":457,"nm":"Instalação Elétrica - Telefonia","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":6.3e-05,"it":1,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":458,"nm":"Instalação Elétrica - Quadros Medidores","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.015114,"it":241,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":459,"nm":"Instalação Elétrica - Conectores e Terminais Elétr","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.012417,"it":153,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":460,"nm":"Instalação Elétrica - Cabos Elétricos de Alumínio","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.003073,"it":46,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":462,"nm":"Instalação Elétrica - Barramentos","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.000753,"it":12,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":463,"nm":"Instalação Elétrica - Eletrocalha","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.004954,"it":79,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":466,"nm":"Instalação Elétrica - Componente Elétrico","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.003198,"it":51,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":474,"nm":"Instalações Elétrica - Cabos Telefonia/Interfonia","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.000753,"it":11,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":477,"nm":"Instalação Elétrica - Conectores Policarbonato","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0,"it":11,"nt":"","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":521,"nm":"Instalação Elétrica - Poste Padrão","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.000815,"it":13,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":538,"nm":"SISTEMA SELO DIGITAL","g":"Elétrica","gk":"eletrica","f":"Fase 6","w":0.001693,"it":27,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":51,"st":"plan"},"COMP":{"dur":3,"st":"plan"}},{"n":179,"nm":"Piso Emborrachado","g":"Pisos","gk":"pisos","f":"Fase 6","w":0.002446,"it":37,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":556,"nm":"Piso Tátil de Concreto","g":"Pisos","gk":"pisos","f":"Fase 6","w":0.002697,"it":43,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-16","dur":13,"st":"plan","fim":"2026-07-29"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":158,"nm":"Piso Premoldado de concreto","g":"Pisos","gk":"pisos","f":"Fase 8","w":0.000314,"it":5,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-16","dur":38,"st":"plan","fim":"2026-08-23"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":232,"nm":"Piso Intertravado Pré Moldado de Concreto","g":"Pisos","gk":"pisos","f":"Fase 8","w":0.002759,"it":44,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-07-16","dur":38,"st":"plan","fim":"2026-08-23"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":4,"st":"plan"},"COMP":{"dur":0,"st":"plan"}},{"n":319,"nm":"Embalagem/Molde","g":"Coletores Lixo","gk":"coletoreslixo","f":"Fase 7","w":0.004014,"it":55,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":324,"nm":"Coletores de Lixo","g":"Coletores Lixo","gk":"coletoreslixo","f":"Fase 7","w":0.005581,"it":77,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":149,"nm":"Área Social Comum","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.006647,"it":3,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":407,"nm":"Eletrodoméstico/Eletrônico","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.002634,"it":18,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":507,"nm":"Eletrodoméstico Produto Final","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0,"it":30,"nt":"","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":509,"nm":"Móveis Produto Final","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.032798,"it":523,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":516,"nm":"Academia e Esportes","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.011978,"it":191,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":519,"nm":"Móveis Luggo","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.009156,"it":146,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":528,"nm":"Pet Place","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.000314,"it":5,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":533,"nm":"Área de Lazer - Playground","g":"Mobiliários","gk":"mobiliarios","f":"Fase 7","w":0.00138,"it":22,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":29,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":108,"nm":"Prego","g":"Outros","gk":"outros","f":"Fase 7","w":0.001881,"it":30,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":124,"nm":"Madeira","g":"Outros","gk":"outros","f":"Fase 7","w":0.002822,"it":28,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":132,"nm":"Madeira para Telhado","g":"Outros","gk":"outros","f":"Fase 7","w":0.001129,"it":17,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":133,"nm":"Parafuso/Porca/Arruela","g":"Outros","gk":"outros","f":"Fase 7","w":0.024269,"it":359,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":134,"nm":"Estrutura Metálica para Telhado","g":"Outros","gk":"outros","f":"Fase 7","w":0.00232,"it":35,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":146,"nm":"Abrasivo","g":"Outros","gk":"outros","f":"Fase 7","w":0.004264,"it":68,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":151,"nm":"Corda/Cabo/Corrente","g":"Outros","gk":"outros","f":"Fase 7","w":0.003136,"it":46,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":157,"nm":"EPS","g":"Outros","gk":"outros","f":"Fase 7","w":0.002759,"it":44,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":159,"nm":"Lona","g":"Outros","gk":"outros","f":"Fase 7","w":0.002571,"it":41,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":164,"nm":"Moldura EPS","g":"Outros","gk":"outros","f":"Fase 7","w":0.001944,"it":31,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":174,"nm":"Gabaritos","g":"Outros","gk":"outros","f":"Fase 7","w":0.001568,"it":25,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":175,"nm":"Serralheria Aluminio","g":"Outros","gk":"outros","f":"Fase 7","w":0.001003,"it":14,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":181,"nm":"Telas de Aço/Alambrados/Similares","g":"Outros","gk":"outros","f":"Fase 7","w":0.001631,"it":17,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":186,"nm":"Compensado","g":"Outros","gk":"outros","f":"Fase 7","w":0.001129,"it":18,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":217,"nm":"INATIVO - MATERIAL: Grelha/Tampa/Tampão de Ferro Fundido","g":"Outros","gk":"outros","f":"Fase 7","w":0.00138,"it":21,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":218,"nm":"Abraçadeira","g":"Outros","gk":"outros","f":"Fase 7","w":0.004014,"it":62,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":236,"nm":"Reservatórios Metálico","g":"Outros","gk":"outros","f":"Fase 7","w":0.002007,"it":25,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":249,"nm":"Manta Acustica","g":"Outros","gk":"outros","f":"Fase 7","w":0.000188,"it":3,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":250,"nm":"Asfalto","g":"Outros","gk":"outros","f":"Fase 7","w":0.00069,"it":9,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":305,"nm":"Descartáveis","g":"Outros","gk":"outros","f":"Fase 7","w":0.002069,"it":25,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":309,"nm":"Pilhas/Baterias","g":"Outros","gk":"outros","f":"Fase 7","w":0.001066,"it":10,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":479,"nm":"Telha Metálica","g":"Outros","gk":"outros","f":"Fase 7","w":0.001505,"it":24,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":490,"nm":"Arame","g":"Outros","gk":"outros","f":"Fase 7","w":0.001944,"it":29,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":520,"nm":"INATIVO - MATERIAL: Placa Fibrocimento","g":"Outros","gk":"outros","f":"Fase 7","w":0,"it":null,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":534,"nm":"Colas, Fitas Adesivas e Itens de Reparo","g":"Outros","gk":"outros","f":"Fase 7","w":0.00138,"it":22,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":537,"nm":"Emulsão e Manta Asfáltica","g":"Outros","gk":"outros","f":"Fase 7","w":0.000753,"it":12,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":544,"nm":"Protetores Presilha","g":"Outros","gk":"outros","f":"Fase 7","w":0.001756,"it":28,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":221,"nm":"SPDA","g":"SPDA","gk":"spda","f":"Fase 7","w":0.004014,"it":62,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":313,"nm":"Placa de Identificação Definitiva","g":"Visual","gk":"visual","f":"Fase 7","w":0.021134,"it":314,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":323,"nm":"Placa de Identificação Provisória","g":"Visual","gk":"visual","f":"Fase 7","w":0.004829,"it":69,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":325,"nm":"INATIVO-MATERIAL: Sinalização Viária","g":"Visual","gk":"visual","f":"Fase 7","w":0.000439,"it":2,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-11","dur":29,"st":"plan","fim":"2026-09-09"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":102,"nm":"Bloco Cerâmico","g":"Bloco Cerâmico","gk":"blococeramico","f":"Fase 8","w":0,"it":43,"nt":"","ag":"S","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":7,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":212,"nm":"Elevador Social","g":"Elevador","gk":"elevador","f":"Fase 8","w":0.073247,"it":1168,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":3,"st":"plan"},"BIM":{"dur":3,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":211,"nm":"INATIVO-MATERIAL: Luminária/Lâmpada","g":"Luminárias","gk":"luminarias","f":"Fase 8","w":0,"it":30,"nt":"","ag":"0","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":448,"nm":"Instalação Elétrica - Luminárias","g":"Luminárias","gk":"luminarias","f":"Fase 8","w":0.017058,"it":255,"nt":"NÃO","ag":"S","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":497,"nm":"Instalação Elétrica - Luminárias Padrão","g":"Luminárias","gk":"luminarias","f":"Fase 8","w":0,"it":63,"nt":"","ag":"N","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":1,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":162,"nm":"Mármore Sintético","g":"Mármore","gk":"marmore","f":"Fase 8","w":0,"it":11,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":5,"st":"plan"},"COMP":{"dur":5,"st":"plan"}},{"n":165,"nm":"Paisagismo","g":"Paisagismo","gk":"paisagismo","f":"Fase 8","w":0.051863,"it":794,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":2,"st":"plan"},"BIM":{"dur":32,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":207,"nm":"Acessório/Insumo para Paisagismo","g":"Paisagismo","gk":"paisagismo","f":"Fase 8","w":0.004515,"it":67,"nt":"NÃO","ag":"0","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":32,"st":"plan"},"COMP":{"dur":1,"st":"plan"}},{"n":168,"nm":"Vidro","g":"Vidros","gk":"vidros","f":"Fase 8","w":0.007086,"it":108,"nt":"NÃO","ag":"N","MDM":{"ini":"2026-08-26","dur":38,"st":"plan","fim":"2026-10-03"},"ORC":{"dur":1,"st":"plan"},"BIM":{"dur":0,"st":"plan"},"COMP":{"dur":0,"st":"plan"}}];
+// P02.2 — Linha de base (V9): data de conclusão planejada por GM (frente COMP do cronograma), projeto conclui 12/03/27 (coluna Linha de Base do V9).
+const BASELINE_CONCL = {"101":"2026-04-30","102":"2026-09-02","103":"2026-04-30","104":"2026-10-15","105":"2026-10-23","106":"2026-10-23","108":"2027-02-19","109":"2026-07-13","110":"2026-09-02","111":"2026-09-02","112":"2026-07-24","113":"2026-10-30","114":"2026-09-02","115":"2026-04-30","116":"2026-04-30","117":"2026-04-30","118":"2026-06-15","119":"2026-06-15","121":"2026-06-15","122":"2026-06-15","123":"2026-11-17","124":"2027-02-19","127":"2026-04-30","128":"2026-08-28","129":"2026-06-02","131":"2026-10-30","132":"2027-02-19","133":"2027-02-19","134":"2027-02-19","138":"2026-11-05","139":"2026-07-13","140":"2026-04-30","143":"2026-04-30","144":"2026-09-11","145":"2026-07-24","146":"2027-02-19","147":"2027-03-11","148":"2026-04-30","149":"2027-03-09","150":"2027-02-18","151":"2027-02-19","152":"2026-10-30","153":"2026-09-02","154":"2026-11-17","155":"2027-03-11","156":"2026-04-30","157":"2027-02-19","158":"2027-03-12","159":"2027-02-19","162":"2026-09-08","163":"2026-10-15","164":"2027-02-19","165":"2027-03-10","166":"2026-07-24","167":"2026-09-02","168":"2027-03-08","171":"2026-06-15","173":"2026-06-15","174":"2027-02-19","175":"2027-02-19","176":"2027-03-02","178":"2026-06-15","179":"2027-03-12","181":"2027-02-19","184":"2026-06-11","186":"2027-02-19","188":"2026-10-15","189":"2027-02-23","192":"2026-07-03","198":"2026-11-18","199":"2026-11-18","201":"2027-01-22","204":"2027-01-22","206":"2027-02-18","207":"2027-03-10","208":"2027-01-22","210":"2027-01-22","211":"2027-03-04","212":"2027-03-03","213":"2026-11-12","215":"2026-10-29","217":"2027-02-19","218":"2027-02-19","219":"2026-11-18","220":"2026-10-15","221":"2027-03-05","225":"2026-11-19","228":"2026-11-17","231":"2026-04-30","232":"2027-03-12","233":"2026-04-30","236":"2027-02-19","238":"2027-01-22","240":"2027-02-18","243":"2026-10-15","244":"2027-03-11","246":"2026-05-04","248":"2026-11-16","249":"2027-02-19","250":"2027-02-19","251":"2027-02-18","252":"2026-11-05","253":"2027-02-18","255":"2027-02-18","261":"2026-11-13","265":"2026-11-13","266":"2027-01-22","267":"2026-11-17","268":"2026-11-13","271":"2026-06-15","305":"2027-02-19","306":"2027-01-22","309":"2027-02-19","313":"2027-03-08","319":"2026-11-26","322":"2026-04-30","323":"2027-03-08","324":"2026-11-26","325":"2027-03-08","330":"2026-11-16","407":"2027-03-09","409":"2027-01-22","411":"2027-01-22","419":"2027-02-18","420":"2026-06-29","423":"2026-11-19","424":"2027-02-18","425":"2026-08-28","426":"2027-02-18","427":"2027-02-18","428":"2026-11-17","429":"2027-03-02","430":"2026-05-19","431":"2026-11-13","432":"2026-11-13","433":"2026-11-18","434":"2026-10-29","435":"2026-07-03","436":"2027-02-18","437":"2027-02-18","438":"2027-03-02","439":"2027-02-18","440":"2027-02-18","443":"2027-01-22","444":"2027-01-22","446":"2027-01-22","447":"2027-01-22","448":"2027-03-04","449":"2027-01-22","450":"2027-01-22","451":"2026-04-30","452":"2027-01-22","453":"2026-04-30","454":"2027-01-22","455":"2027-02-18","456":"2026-11-17","457":"2027-01-22","458":"2027-01-22","459":"2027-01-22","460":"2027-01-22","462":"2027-01-22","463":"2027-01-22","465":"2026-04-30","466":"2027-01-22","469":"2026-05-04","470":"2026-11-13","472":"2026-04-30","474":"2027-01-22","476":"2026-06-15","477":"2027-01-22","478":"2027-03-02","479":"2027-02-19","480":"2026-10-23","481":"2026-10-15","482":"2026-11-17","483":"2026-07-03","484":"2026-11-17","486":"2026-11-17","488":"2026-11-17","489":"2026-07-13","490":"2027-02-19","491":"2026-10-23","494":"2026-04-30","495":"2026-04-30","497":"2027-03-04","500":"2026-08-17","503":"2026-10-29","505":"2026-10-15","507":"2027-03-09","509":"2027-03-09","510":"2026-10-15","511":"2026-11-16","513":"2026-10-30","516":"2027-03-09","517":"2027-02-22","518":"2026-10-30","519":"2027-03-09","520":"2027-02-19","521":"2027-01-22","523":"2026-04-30","526":"2026-10-29","527":"2027-03-11","528":"2027-03-09","529":"2026-11-19","530":"2026-11-19","533":"2027-03-09","534":"2027-02-19","535":"2026-04-30","536":"2026-04-30","537":"2027-02-19","538":"2027-01-22","542":"2027-03-11","543":"2027-03-11","544":"2027-02-19","545":"2026-11-13","546":"2026-11-17","547":"2026-11-17","548":"2026-11-17","549":"2027-03-02","550":"2026-11-18","551":"2026-11-18","552":"2026-06-29","553":"2026-11-18","554":"2026-05-04","555":"2026-08-26","556":"2027-03-12","557":"2026-11-12","559":"2026-11-16","560":"2026-11-16","561":"2026-11-16","562":"2026-11-12","942":"2026-04-30","943":"2026-04-30"};
+// P02.4 — datas de linha de base POR ÁREA (para adequar linha de base ao filtro de área do burndown).
+const BASELINE_AREA = {"101":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"102":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"103":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"104":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":null},"105":{"MDM":"2026-09-28","ORC":"2026-10-16","BIM":"2026-11-03","COMP":"2026-10-23"},"106":{"MDM":"2026-09-28","ORC":"2026-10-16","BIM":null,"COMP":null},"108":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"109":{"MDM":"2026-07-13","ORC":"2026-07-13","BIM":"2026-07-13","COMP":"2026-07-13"},"110":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"111":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"112":{"MDM":"2026-07-10","ORC":"2026-07-17","BIM":"2026-07-27","COMP":null},"113":{"MDM":"2026-06-19","ORC":"2026-10-23","BIM":"2026-11-24","COMP":"2026-10-30"},"114":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"115":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":null,"COMP":"2026-04-30"},"116":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"117":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"118":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"119":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"121":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"122":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"123":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"124":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"127":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"128":{"MDM":"2026-08-28","ORC":"2026-08-28","BIM":"2026-08-28","COMP":"2026-08-28"},"129":{"MDM":"2026-06-02","ORC":"2026-06-02","BIM":"2026-06-02","COMP":"2026-06-02"},"131":{"MDM":"2026-07-27","ORC":"2026-10-23","BIM":"2026-11-18","COMP":"2026-10-30"},"132":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"133":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"134":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"138":{"MDM":"2026-11-05","ORC":"2026-11-05","BIM":"2026-11-05","COMP":"2026-11-05"},"139":{"MDM":"2026-07-13","ORC":"2026-07-13","BIM":"2026-07-13","COMP":"2026-07-13"},"140":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"143":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"144":{"MDM":"2026-06-19","ORC":"2026-10-20","BIM":"2026-09-04","COMP":null},"145":{"MDM":"2026-07-10","ORC":"2026-07-17","BIM":"2026-07-27","COMP":"2026-07-24"},"146":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"147":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"148":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"149":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"150":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"151":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"152":{"MDM":"2026-10-30","ORC":"2026-10-30","BIM":"2026-10-30","COMP":"2026-10-30"},"153":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"154":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"155":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"156":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"157":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"158":{"MDM":"2027-03-12","ORC":"2027-03-12","BIM":"2027-03-12","COMP":"2027-03-12"},"159":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"162":{"MDM":"2026-09-08","ORC":"2026-09-08","BIM":"2026-09-08","COMP":"2026-09-08"},"163":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":null},"164":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"165":{"MDM":"2027-03-10","ORC":"2027-03-10","BIM":"2027-03-10","COMP":"2027-03-10"},"166":{"MDM":"2026-07-10","ORC":"2026-07-17","BIM":"2026-07-27","COMP":null},"167":{"MDM":"2026-09-02","ORC":"2026-09-02","BIM":"2026-09-02","COMP":"2026-09-02"},"168":{"MDM":"2027-03-08","ORC":"2027-03-08","BIM":"2027-03-08","COMP":"2027-03-08"},"171":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"173":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"174":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"175":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"176":{"MDM":"2027-03-02","ORC":"2027-03-02","BIM":"2027-03-02","COMP":"2027-03-02"},"178":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"179":{"MDM":"2027-03-12","ORC":"2027-03-12","BIM":"2027-03-12","COMP":"2027-03-12"},"181":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"184":{"MDM":"2026-06-19","ORC":"2026-06-26","BIM":null,"COMP":null},"186":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"188":{"MDM":"2026-09-25","ORC":"2026-10-02","BIM":null,"COMP":null},"189":{"MDM":"2027-02-23","ORC":"2027-02-23","BIM":"2027-02-23","COMP":"2027-02-23"},"192":{"MDM":"2026-06-19","ORC":"2026-06-26","BIM":"2026-07-07","COMP":null},"198":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"199":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"201":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"204":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"206":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"207":{"MDM":"2027-03-10","ORC":"2027-03-10","BIM":"2027-03-10","COMP":"2027-03-10"},"208":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"210":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"211":{"MDM":"2027-03-04","ORC":"2027-03-04","BIM":"2027-03-04","COMP":"2027-03-04"},"212":{"MDM":"2027-03-03","ORC":"2027-03-03","BIM":"2027-03-03","COMP":"2027-03-03"},"213":{"MDM":"2026-11-12","ORC":"2026-11-12","BIM":"2026-11-12","COMP":"2026-11-12"},"215":{"MDM":"2026-10-29","ORC":"2026-10-29","BIM":"2026-10-29","COMP":"2026-10-29"},"217":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"218":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"219":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"220":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":null},"221":{"MDM":"2027-03-05","ORC":"2027-03-05","BIM":"2027-03-05","COMP":"2027-03-05"},"225":{"MDM":"2026-11-19","ORC":"2026-11-19","BIM":"2026-11-19","COMP":"2026-11-19"},"228":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"231":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"232":{"MDM":"2027-03-12","ORC":"2027-03-12","BIM":"2027-03-12","COMP":"2027-03-12"},"233":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"236":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"238":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"240":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"243":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":null},"244":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"246":{"MDM":"2026-04-24","ORC":"2026-05-04","BIM":"2026-05-05","COMP":"2026-05-04"},"248":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"249":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"250":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"251":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"252":{"MDM":"2026-11-05","ORC":"2026-11-05","BIM":"2026-11-05","COMP":"2026-11-05"},"253":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"255":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"261":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"265":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"266":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"267":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"268":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"271":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"305":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"306":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"309":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"313":{"MDM":"2027-03-08","ORC":"2027-03-08","BIM":"2027-03-08","COMP":"2027-03-08"},"319":{"MDM":"2026-11-26","ORC":"2026-11-26","BIM":"2026-11-26","COMP":"2026-11-26"},"322":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"323":{"MDM":"2027-03-08","ORC":"2027-03-08","BIM":"2027-03-08","COMP":"2027-03-08"},"324":{"MDM":"2026-11-26","ORC":"2026-11-26","BIM":"2026-11-26","COMP":"2026-11-26"},"325":{"MDM":"2027-03-08","ORC":"2027-03-08","BIM":"2027-03-08","COMP":"2027-03-08"},"330":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"407":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"409":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"411":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"419":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"420":{"MDM":"2026-06-19","ORC":"2026-06-26","BIM":"2026-06-24","COMP":null},"423":{"MDM":"2026-11-19","ORC":"2026-11-19","BIM":"2026-11-19","COMP":"2026-11-19"},"424":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"425":{"MDM":"2026-08-28","ORC":"2026-08-28","BIM":"2026-08-28","COMP":"2026-08-28"},"426":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"427":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"428":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"429":{"MDM":"2027-03-02","ORC":"2027-03-02","BIM":"2027-03-02","COMP":"2027-03-02"},"430":{"MDM":"2026-05-13","ORC":"2026-05-19","BIM":"2026-03-05","COMP":"2026-05-19"},"431":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"432":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"433":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"434":{"MDM":"2026-10-29","ORC":"2026-10-29","BIM":"2026-10-29","COMP":"2026-10-29"},"435":{"MDM":null,"ORC":null,"BIM":null,"COMP":null},"436":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"437":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"438":{"MDM":"2027-03-02","ORC":"2027-03-02","BIM":"2027-03-02","COMP":"2027-03-02"},"439":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"440":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"443":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"444":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"446":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"447":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"448":{"MDM":"2027-03-04","ORC":"2027-03-04","BIM":"2027-03-04","COMP":"2027-03-04"},"449":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"450":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"451":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":"2026-04-30","COMP":"2026-04-30"},"452":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"453":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":"2026-05-05","COMP":"2026-04-30"},"454":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"455":{"MDM":"2027-02-18","ORC":"2027-02-18","BIM":"2027-02-18","COMP":"2027-02-18"},"456":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"457":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"458":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"459":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"460":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"462":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"463":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"465":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":"2026-05-05","COMP":"2026-04-30"},"466":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"469":{"MDM":"2026-04-24","ORC":"2026-05-04","BIM":"2026-05-05","COMP":"2026-05-04"},"470":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"472":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":null,"COMP":"2026-04-30"},"474":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"476":{"MDM":"2026-05-12","ORC":"2026-05-19","BIM":"2026-05-29","COMP":null},"477":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"478":{"MDM":"2027-03-02","ORC":"2027-03-02","BIM":"2027-03-02","COMP":"2027-03-02"},"479":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"480":{"MDM":"2026-09-28","ORC":"2026-10-16","BIM":null,"COMP":null},"481":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":null},"482":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"483":{"MDM":"2026-06-19","ORC":"2026-06-26","BIM":"2026-07-15","COMP":"2026-07-03"},"484":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"486":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"488":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"489":{"MDM":"2026-07-13","ORC":"2026-07-13","BIM":"2026-07-13","COMP":"2026-07-13"},"490":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"491":{"MDM":"2026-06-19","ORC":"2026-10-16","BIM":"2026-11-03","COMP":"2026-09-25"},"494":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"495":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"497":{"MDM":"2027-03-04","ORC":"2027-03-04","BIM":"2027-03-04","COMP":"2027-03-04"},"500":{"MDM":"2026-08-17","ORC":"2026-08-17","BIM":"2026-08-17","COMP":"2026-08-17"},"503":{"MDM":"2026-10-29","ORC":"2026-10-29","BIM":"2026-10-29","COMP":"2026-10-29"},"505":{"MDM":null,"ORC":null,"BIM":null,"COMP":null},"507":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"509":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"510":{"MDM":"2026-09-25","ORC":"2026-10-07","BIM":null,"COMP":"2026-10-15"},"511":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"513":{"MDM":"2026-06-19","ORC":"2026-10-23","BIM":"2026-11-27","COMP":null},"516":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"517":{"MDM":"2027-02-22","ORC":"2027-02-22","BIM":"2027-02-22","COMP":"2027-02-22"},"518":{"MDM":"2026-10-30","ORC":"2026-10-30","BIM":"2026-10-30","COMP":"2026-10-30"},"519":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"520":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"521":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"523":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"},"526":{"MDM":"2026-10-29","ORC":"2026-10-29","BIM":"2026-10-29","COMP":"2026-10-29"},"527":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"528":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"529":{"MDM":"2026-11-19","ORC":"2026-11-19","BIM":"2026-11-19","COMP":"2026-11-19"},"530":{"MDM":"2026-11-19","ORC":"2026-11-19","BIM":"2026-11-19","COMP":"2026-11-19"},"533":{"MDM":"2027-03-09","ORC":"2027-03-09","BIM":"2027-03-09","COMP":"2027-03-09"},"534":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"535":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":null,"COMP":"2026-04-30"},"536":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":null,"COMP":"2026-04-30"},"537":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"538":{"MDM":"2027-01-22","ORC":"2027-01-22","BIM":"2027-01-22","COMP":"2027-01-22"},"542":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"543":{"MDM":"2027-03-11","ORC":"2027-03-11","BIM":"2027-03-11","COMP":"2027-03-11"},"544":{"MDM":"2027-02-19","ORC":"2027-02-19","BIM":"2027-02-19","COMP":"2027-02-19"},"545":{"MDM":"2026-11-13","ORC":"2026-11-13","BIM":"2026-11-13","COMP":"2026-11-13"},"546":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"547":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"548":{"MDM":"2026-11-17","ORC":"2026-11-17","BIM":"2026-11-17","COMP":"2026-11-17"},"549":{"MDM":"2027-03-02","ORC":"2027-03-02","BIM":"2027-03-02","COMP":"2027-03-02"},"550":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"551":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"552":{"MDM":"2026-06-19","ORC":"2026-06-26","BIM":"2026-06-29","COMP":null},"553":{"MDM":"2026-11-18","ORC":"2026-11-18","BIM":"2026-11-18","COMP":"2026-11-18"},"554":{"MDM":"2026-04-24","ORC":"2026-05-04","BIM":"2026-05-05","COMP":"2026-05-04"},"555":{"MDM":"2026-06-19","ORC":"2026-10-23","BIM":null,"COMP":null},"556":{"MDM":"2027-03-12","ORC":"2027-03-12","BIM":"2027-03-12","COMP":"2027-03-12"},"557":{"MDM":"2026-11-12","ORC":"2026-11-12","BIM":"2026-11-12","COMP":"2026-11-12"},"559":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"560":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"561":{"MDM":"2026-11-16","ORC":"2026-11-16","BIM":"2026-11-16","COMP":"2026-11-16"},"562":{"MDM":"2026-11-12","ORC":"2026-11-12","BIM":"2026-11-12","COMP":"2026-11-12"},"942":{"MDM":"2026-04-23","ORC":"2026-04-30","BIM":null,"COMP":"2026-04-30"},"943":{"MDM":"2026-05-28","ORC":"2026-05-26","BIM":"2026-05-15","COMP":"2026-04-30"}};
 // avanço do GM usa a mesma régua calcPctGrupo(m). Meta passa a somar peso×avanço por GM.
 
 
@@ -963,7 +981,7 @@ function togExecSec(id){
   const sec=document.getElementById("sec-"+id);
   const arr=document.getElementById("arr-"+id);
   const collapsed=sec.classList.toggle("collapsed");
-  if(arr) arr.textContent=collapsed?"▶":"▲";
+  if(arr) arr.textContent=collapsed?"+":"\u2212";
 }
 
 // ══ CÁLCULOS AUTOMÁTICOS ══
@@ -1224,7 +1242,7 @@ function renderExec(){
       H+='<details open style="margin-bottom:2px"><summary style="cursor:pointer;font-weight:700;color:#A8D5C5;padding:3px 0">'+f+' <span style="color:#888;font-weight:400">\u2014 '+fC+' GMs \u00b7 '+fpp.toFixed(2)+'pp</span></summary>';
       fb.o.forEach(function(gn){
         var arr=fb.g[gn], gpp=arr.reduce(function(s,m){return s+m.w*100;},0);
-        H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#cfe9df;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span></summary><div style="margin-left:14px">';
+        H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#cfe9df;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span>'+_agGrpHtml(arr)+'</summary><div style="margin-left:14px">';
         arr.forEach(function(m){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+m.n+(m.nm?(" "+m.nm):"")+'</span><span style="color:#A8D5C5;white-space:nowrap">'+(m.w*100).toFixed(2)+'%</span></div>'; });
         H+='</div></details>';
       });
@@ -1243,7 +1261,7 @@ function renderExec(){
       fb.o.forEach(function(gn){
         var arr=fb.g[gn], gpp=arr.reduce(function(s,o){return s+o.m.w*100;},0);
         arr.sort(function(a,b){return (a.d?a.d.getTime():0)-(b.d?b.d.getTime():0);});
-        H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#e8cf93;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span></summary><div style="margin-left:14px">';
+        H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#e8cf93;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span>'+_agGrpHtml(arr.map(function(o){return o.m;}))+'</summary><div style="margin-left:14px">';
         arr.forEach(function(o){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+o.m.n+(o.m.nm?(" "+o.m.nm):"")+'</span><span style="color:#aaa;white-space:nowrap">conta em '+(o.d?fmtBR(o.d):"\u2014")+'</span></div>'; });
         H+='</div></details>';
       });
@@ -1322,7 +1340,7 @@ function renderPlano(){
   document.getElementById("plano-list").innerHTML=PLANO.length===0
     ?`<span style="font-size:9px;color:#aaa">Nenhuma ação.</span>`
     :PLANO.map((p,i)=>`
-      <div class="p-item">
+      <div class="p-item" data-gm="${p.gm||''}">
         <div class="p-chk ${p.done?"done":""}" onclick="togAcao(${i})">${p.done?"✓":""}</div>
         <span class="p-txt ${p.done?"done":""}" onclick="editAcao(${i})">${p.txt}</span>
         <input type="date" class="p-dt" value="${p.dt||''}" onchange="mudarDataAcao(${i},this.value)" title="Prazo da ação">
@@ -1356,6 +1374,26 @@ function addAcao(){if(window.mdmEnsureUser&&!window.mdmEnsureUser(addAcao))retur
 function getSelValues(id){
   const el=document.getElementById(id);
   return Array.from(el.selectedOptions).map(o=>o.value).filter(v=>v!=="");
+}
+// P01.2 — filtro por data de início (≥) e de fim (≤), acumulando com o filtro de área:
+//   · com todas as áreas (ou nenhuma selecionada): início = menor início e fim = maior fim entre TODAS;
+//   · com áreas filtradas (ex.: só Compilador): olha apenas as datas das áreas filtradas.
+function _filtroDatas(){
+  var iE=document.getElementById("f-ini"), fE=document.getElementById("f-fim");
+  return { ini:(iE&&iE.value)||"", fim:(fE&&fE.value)||"" };
+}
+function _gmDateOk(m, areasSel, fIni, fFim){
+  if(!fIni && !fFim) return true;
+  var S=(areasSel&&areasSel.length)?areasSel:AREAS;
+  var w=gmAreaWin(m), gi=null, gf=null;
+  S.forEach(function(a){
+    var wi=w[a]&&w[a].ini, wf=w[a]&&w[a].fim;
+    if(wi&&(!gi||wi<gi)) gi=wi;
+    if(wf&&(!gf||wf>gf)) gf=wf;
+  });
+  if(fIni && (!gi || gi < fIni)) return false; // começa antes da data de início filtrada
+  if(fFim && (!gf || gf > fFim)) return false; // termina depois da data de fim filtrada
+  return true;
 }
 
 var GM_EXP={};
@@ -1419,12 +1457,14 @@ function gmAreaWin(m){
 function gmRowsHtml(gms,fk,hojeL){
   var _fAreas=msValues("f-area"), out="";
   var _fAgs=msValues("f-ag"), _fDurs=msValues("f-dur");
+  var _fd=_filtroDatas();
   var _bq=(document.getElementById("f-busca")||{value:""}).value.trim();
   var _bqNum=(_bq!=="" && /^[0-9]+$/.test(_bq));
   gms.forEach(function(m){
     if(_bqNum && String(m.n).indexOf(_bq)<0) return;
     if(_fAgs.length && _fAgs.indexOf(agOf(m))<0) return;
     if(_fDurs.length && _fDurs.indexOf(_durBucket(_gmDurVal(m,_fAreas)))<0) return;
+    if(!_gmDateOk(m,_fAreas,_fd.ini,_fd.fim)) return; // P01.2
     var win=gmAreaWin(m), subs="";
     AREAS.forEach(function(a,ai){
       if(_fAreas.length && _fAreas.indexOf(a)<0) return;
@@ -1436,7 +1476,7 @@ function gmRowsHtml(gms,fk,hojeL){
     out+='<div class="g-row gm-row'+(inativo?" gm-inativo":"")+'"><div class="g-lbl gm-lbl" onclick="abrirGmEdit('+m.n+')" title="Detalhe do GM '+m.n+' (datas/dura\u00e7\u00e3o)">'
       +'<div class="g-lbl-top"><span class="gm-bullet">\u2514</span><span class="g-nome" title="'+nm+'">'+nm+'</span></div>'
       +'<div class="g-stats">peso <b style="color:var(--v1)">'+(m.w*100).toFixed(3)+'%</b> &nbsp;\u00b7&nbsp; '+(m.it||0)+' itens'+(inativo?' &nbsp;\u00b7&nbsp; <span style="color:#999">INATIVO</span>':'')+'</div>'+'<div class="g-stats" style="padding-left:11px"><span style="color:'+ntCor(ntOf(m))+'">'+ntLabel(ntOf(m))+'</span> &nbsp;\u00b7&nbsp; <span style="color:'+agCor(agOf(m))+'">'+agLabel(agOf(m))+'</span></div>'
-      +'<div style="padding-left:0;margin-top:1px">'+AREAS.map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";var _pe=(m[a]&&m[a]._predEnd)?fmtBR(pd(m[a]._predEnd)):"—";var _lk=(a!=="MDM"&&m[a]&&m[a]._lockBad)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="⚠️ Conflito de precedência: a data desta área foi fixada manualmente e começa ANTES de a predecessora terminar (ela só libera em '+_pe+'), então o cronograma não está respeitando a ordem das áreas. Clique para reverter: a data volta a ser calculada automaticamente pela predecessora (mantendo a duração)." style="color:#BF360C;cursor:pointer">⚠️</span>':((a!=="MDM"&&m[a]&&m[a]._locked)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="🔒 Data definida manualmente: esta área foi fixada e não acompanha automaticamente a predecessora (que libera em '+_pe+'). Se a predecessora antecipar, esta data não se move sozinha. Clique para reverter ao cálculo automático pela predecessora (mantendo a duração)." style="color:#999;cursor:pointer">🔒</span>':"");return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+(m[a].resp?(' \u2014 Resp: '+m[a].resp):'')+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+(m[a].resp?' <span style="color:#b8b8b8;font-weight:400">\u00b7 '+m[a].resp+'</span>':'')+_lk+'</div>';}).join("")+'</div>'
+      +'<div style="padding-left:0;margin-top:1px">'+AREAS.filter(function(a){return !(_fAreas.length && _fAreas.indexOf(a)<0);}).map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";var _pe=(m[a]&&m[a]._predEnd)?fmtBR(pd(m[a]._predEnd)):"—";var _lk=(a!=="MDM"&&m[a]&&m[a]._lockBad)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="⚠️ Conflito de precedência: a data desta área foi fixada manualmente e começa ANTES de a predecessora terminar (ela só libera em '+_pe+'), então o cronograma não está respeitando a ordem das áreas. Clique para reverter: a data volta a ser calculada automaticamente pela predecessora (mantendo a duração)." style="color:#BF360C;cursor:pointer">⚠️</span>':((a!=="MDM"&&m[a]&&m[a]._locked)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="🔒 Data definida manualmente: esta área foi fixada e não acompanha automaticamente a predecessora (que libera em '+_pe+'). Se a predecessora antecipar, esta data não se move sozinha. Clique para reverter ao cálculo automático pela predecessora (mantendo a duração)." style="color:#999;cursor:pointer">🔒</span>':"");return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+(m[a].resp?(' \u2014 Resp: '+m[a].resp):'')+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+(m[a].resp?' <span style="color:#b8b8b8;font-weight:400">\u00b7 '+m[a].resp+'</span>':'')+_lk+'</div>';}).join("")+'</div>'
       +'</div><div class="g-subs">'+subs+'</div></div>';
   });
   return out;
@@ -1593,6 +1633,7 @@ function renderGantt(){
   const fAgs   = msValues("f-ag");
   const fDurs  = msValues("f-dur");
   const fAreasSel = msValues("f-area");
+  const _fDatas  = _filtroDatas(); // P01.2
   const hoje   = pd(CFG.hoje);
   const hojeL  = Math.max(0,Math.min(100,(hoje-MIN_D)/86400000/TOTAL*100));
 
@@ -1716,6 +1757,11 @@ function renderGantt(){
         var _durHit=GMS.some(function(m){return m.gk===_gkD && m.f===g.fase && fDurs.indexOf(_durBucket(_gmDurVal(m,fAreasSel)))>=0;});
         if(!_durHit) return false;
       }
+      if(_fDatas.ini || _fDatas.fim){ // P01.2 — grupo passa se algum GM casa o filtro de data
+        var _gkDt=gmKey(g.nome);
+        var _dtHit=GMS.some(function(m){return m.gk===_gkDt && m.f===g.fase && _gmDateOk(m,fAreasSel,_fDatas.ini,_fDatas.fim);});
+        if(!_dtHit) return false;
+      }
       return true;
     });
     tot+=faseMap[fk].length;
@@ -1757,7 +1803,7 @@ function renderGantt(){
 
     html+=`<div class="fase-hdr" onclick="toggleFase('${fk}')" id="hdr-${fk.replace(" ","")}">
       <div class="fase-lbl">
-        <span class="fase-arrow ${isCollapsed?"collapsed":""}">▼</span>
+        <span class="fase-arrow ${isCollapsed?"collapsed":""}">${isCollapsed?"+":"\u2212"}</span>
         <div class="fase-info">
           <span class="fase-nome">${fk}</span>
           <span class="fase-meta">${all.length} grupos · ${gmF} GMs · ${itF.toLocaleString('pt-BR')} itens · peso: ${metaF}%</span>
@@ -1852,7 +1898,7 @@ function renderGantt(){
             </div>
             <div class="g-stats">conclusão <b>${g.pct}%</b> &nbsp;|&nbsp; meta <b style="color:var(--v1)">${g.pctMeta.toFixed(2)}%</b>${_gms.length?` &nbsp;|&nbsp; <span style="opacity:.7">${_gms.length} GMs</span>`:""}${_agGrpHtml(_gms)}</div>
             <div style="padding-left:0;margin-top:1px">
-              ${AREAS.map(a=>`<div style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}${g[a].st==="done"?" ✅":""}</div>`).join("")}
+              ${AREAS.filter(a=>!(fAreasSel.length && fAreasSel.indexOf(a)<0)).map(a=>`<div style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:${ACFG[a].cor}">${ACFG[a].label}${g[a].st==="done"?" ✅":""}</div>`).join("")}
             </div>
           </div>
           <div class="g-subs">${subs}</div>
@@ -1919,6 +1965,7 @@ function toggleFase(fk){
 function limpar(){
   ["f-fase","f-area","f-st","f-resp","f-ag","f-dur"].forEach(function(id){ msClear(id); });
   document.getElementById("f-busca").value="";
+  ["f-ini","f-fim"].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=""; }); // P01.2
   renderGantt();
 }
 
@@ -2040,25 +2087,36 @@ function aplicar(){
 // ══════════════════════════════════════════════════════════════
 // BURNDOWN — versão melhorada
 // ══════════════════════════════════════════════════════════════
+// Visibilidade das linhas do burndown (clique na legenda alterna). Persiste entre renders.
+// Forecast e Linha de base começam DESATIVADOS por padrão.
+var BD_VIS = {plan:true, concl:true, prog:true, proj:true, forecast:false, base:false};
+// Período exibido: false = só 2026 (padrão, ocupa todo o espaço); true = 2026–2027 completo.
+var BD_FULL = false;
 function renderBurndown(){
   const canvas = document.getElementById("burndown-canvas");
   if(!canvas) return;
   const ctx = canvas.getContext("2d");
   const W = canvas.offsetWidth || 600;
-  const H = 230;
+  const H = 264;
   canvas.width = W * (window.devicePixelRatio||1);
   canvas.height = H * (window.devicePixelRatio||1);
   canvas.style.width = W+"px";
   canvas.style.height = H+"px";
   ctx.scale(window.devicePixelRatio||1, window.devicePixelRatio||1);
 
-  const PAD = {t:20, r:16, b:32, l:42};
+  const PAD = {t:20, r:16, b:58, l:42};
   const CW = W - PAD.l - PAD.r;
   const CH = H - PAD.t - PAD.b;
 
   const inicio = pd("2026-04-01");
   const fimMeta = pd("2026-12-31");
-  const totalDias = (fimMeta - inicio) / 86400000;
+  const totalDias = (fimMeta - inicio) / 86400000; // usado só para a matemática da meta (90% em dez/26)
+  // P02.1/P02.2 — eixo X. Padrão: só 2026 (até dez/26), ocupando todo o espaço.
+  // Com "Período completo", estende até 30/06/27 para caber linha de base e forecast.
+  BD_FULL = !!(document.getElementById("bd-full") && document.getElementById("bd-full").checked);
+  const fimChart = BD_FULL ? pd("2027-06-30") : fimMeta;
+  const spanDias = (fimChart - inicio) / 86400000;
+  function _xOf(d){ var t=(d - inicio)/86400000/spanDias; return PAD.l + Math.max(0,Math.min(1,t))*CW; }
   const hoje = pd(CFG.hoje);
 
   ctx.clearRect(0,0,W,H);
@@ -2090,28 +2148,48 @@ function renderBurndown(){
     }
   });
 
-  // Grade vertical — FIM de cada mês (alinhada aos marcos). Dezembro é rotulado
-  // só uma vez, pelo marco final "dez/26", para não duplicar.
-  const MESES_PT = ["abr","mai","jun","jul","ago","set","out","nov"];
-  MESES_PT.forEach((nm,i) => {
-    const dEnd = new Date(2026, (i+3)+1, 0).getTime(); // fim do mês: abr(3)…nov(10)
-    if(dEnd < inicio.getTime() || dEnd > inicio.getTime()+totalDias*86400000) return;
-    const t = (dEnd - inicio.getTime())/86400000 / totalDias;
-    const x = PAD.l + t*CW;
-    ctx.strokeStyle = "rgba(0,107,63,.08)";
-    ctx.lineWidth = 1; ctx.setLineDash([]);
-    ctx.beginPath(); ctx.moveTo(x, PAD.t); ctx.lineTo(x, PAD.t+CH); ctx.stroke();
-    ctx.fillStyle = "#888"; ctx.font = "8px Arial"; ctx.textAlign = "center";
-    ctx.fillText(nm, x, PAD.t+CH+11);
-  });
+  // Grade vertical — FIM de cada mês (alinhada aos marcos). Estende de abr/26 a jun/27.
+  // Dezembro é rotulado só uma vez, pelo marco final "dez/26", para não duplicar.
+  (function(){
+    var d=new Date(2026,3,30); // fim de abril/26
+    while(d.getTime() <= fimChart.getTime()){
+      var mi=d.getMonth(), yy=d.getFullYear();
+      var x=_xOf(d.getTime());
+      ctx.strokeStyle="rgba(0,107,63,.08)"; ctx.lineWidth=1; ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x,PAD.t); ctx.lineTo(x,PAD.t+CH); ctx.stroke();
+      // rótulo do mês (pula dez/26, que tem marco próprio)
+      if(!(mi===11 && yy===2026)){
+        var _nm=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"][mi];
+        ctx.fillStyle="#888"; ctx.font="8px Arial"; ctx.textAlign="center";
+        ctx.fillText(_nm+(yy===2027?"/27":""), x, PAD.t+CH+11);
+      }
+      d=new Date(yy, mi+2, 0); // fim do próximo mês
+    }
+  })();
 
-  // Linha META planejada (crescimento linear 0→90)
+  // Linha META planejada (crescimento linear 0→90% até dez/26)
+  var _metaX0=PAD.l, _metaX1=_xOf(fimMeta);
+  if(BD_VIS.plan){
   ctx.strokeStyle = "rgba(0,107,63,.25)";
   ctx.lineWidth = 1.5; ctx.setLineDash([6,3]);
   ctx.beginPath();
-  ctx.moveTo(PAD.l, PAD.t+CH);
-  ctx.lineTo(PAD.l+CW, PAD.t+CH - 0.9*CH);
+  ctx.moveTo(_metaX0, PAD.t+CH);
+  ctx.lineTo(_metaX1, PAD.t+CH - 0.9*CH);
   ctx.stroke(); ctx.setLineDash([]);
+  // P02.3 — números mensais sobre a linha "Planejado linear (90% até dez/26)"
+  (function(){
+    var d=new Date(2026,3,30);
+    while(d.getTime() <= fimMeta.getTime()){
+      var frac=(d.getTime()-inicio.getTime())/86400000/totalDias; // 0→1 até dez/26
+      if(frac>0 && frac<=1.0001){
+        var val=90*frac, x=_xOf(d.getTime()), y=PAD.t+CH-(val/100)*CH;
+        ctx.fillStyle="rgba(0,107,63,.55)"; ctx.font="7px Arial"; ctx.textAlign="center";
+        ctx.fillText(val.toFixed(0)+"%", x, y-4);
+      }
+      d=new Date(d.getFullYear(), d.getMonth()+2, 0);
+    }
+  })();
+  }
 
   // ── REALIZADO: Meta 1 (GM pronto) ou por ÁREA (queima de cada time) ──
   var _bdArea = (document.getElementById("bd-area")||{value:""}).value;
@@ -2142,12 +2220,11 @@ function renderBurndown(){
   });
   evC.sort(function(a,b){return a.data-b.data;});
 
-  const hojeT = Math.min(1,(hoje-inicio)/86400000/totalDias);
-  const hojeX = PAD.l + hojeT*CW;
+  const hojeX = _xOf(hoje);
   function _yOf(v){ return PAD.t + CH - Math.min(v/100,1)*CH; }
 
   let aC = 0; const concPts = [{x:PAD.l, y:PAD.t+CH}];
-  evC.forEach(function(e){ aC += e.pp; var t=(e.data-inicio)/86400000/totalDias; concPts.push({x:PAD.l+t*CW, y:_yOf(aC)}); });
+  evC.forEach(function(e){ aC += e.pp; concPts.push({x:_xOf(e.data), y:_yOf(aC)}); });
   concPts.push({x:hojeX, y:_yOf(concluido)});
   const hojeYConcl = _yOf(concluido);
 
@@ -2157,18 +2234,21 @@ function renderBurndown(){
 
   var fillGrad=ctx.createLinearGradient(0,PAD.t,0,PAD.t+CH);
   fillGrad.addColorStop(0,"rgba(95,191,147,.30)"); fillGrad.addColorStop(1,"rgba(95,191,147,.02)");
+  ctx.lineJoin="round"; ctx.lineCap="round";
+  if(BD_VIS.prog){
   ctx.fillStyle=fillGrad;
   ctx.beginPath(); ctx.moveTo(PAD.l, PAD.t+CH);
   progPts.forEach(function(pt){ctx.lineTo(pt.x,pt.y);}); ctx.lineTo(hojeX,PAD.t+CH); ctx.closePath(); ctx.fill();
-
-  ctx.lineJoin="round"; ctx.lineCap="round";
   ctx.strokeStyle="#5FBF93"; ctx.lineWidth=2.5; ctx.setLineDash([]);
   ctx.beginPath(); progPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
+  }
 
+  if(BD_VIS.concl){
   ctx.save(); ctx.shadowColor="rgba(0,107,63,.28)"; ctx.shadowBlur=5; ctx.shadowOffsetY=1.5;
   ctx.strokeStyle="#006B3F"; ctx.lineWidth=3; ctx.setLineDash([]);
   ctx.beginPath(); concPts.forEach(function(pt,i){i===0?ctx.moveTo(pt.x,pt.y):ctx.lineTo(pt.x,pt.y);}); ctx.stroke();
   ctx.restore();
+  }
 
   ctx.strokeStyle="rgba(191,54,12,.8)"; ctx.lineWidth=1.5; ctx.setLineDash([3,2]);
   ctx.beginPath(); ctx.moveTo(hojeX,PAD.t); ctx.lineTo(hojeX,PAD.t+CH); ctx.stroke(); ctx.setLineDash([]);
@@ -2176,8 +2256,7 @@ function renderBurndown(){
   ctx.fillText("Hoje", hojeX, PAD.t-4);
 
   const fimDez = pd("2026-12-31");
-  const fimDezT = Math.min(1,(fimDez-inicio)/86400000/totalDias);
-  const fimDezX = PAD.l + fimDezT*CW;
+  const fimDezX = _xOf(fimDez);
   const _diasPass = Math.max(1,(hoje-inicio)/86400000);
   const _ritmoConcl = concluido/_diasPass;
   // Teto pela área-gargalo: um GM só fica apto (Meta 1) quando TODAS as áreas concluem,
@@ -2196,6 +2275,7 @@ function renderBurndown(){
   if(_ritmoConcl>0){ ppDez = Math.min(100, concluido + _ritmoConcl*((fimDez-hoje)/86400000)); }
   if(_projArea!==null) ppDez = Math.min(ppDez, _projArea);
   const fimDezY = _yOf(ppDez);
+  if(BD_VIS.proj){
   ctx.strokeStyle="#FF8B22"; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
   ctx.beginPath(); ctx.moveTo(hojeX, hojeYConcl); ctx.lineTo(fimDezX, fimDezY); ctx.stroke(); ctx.setLineDash([]);
 
@@ -2206,17 +2286,18 @@ function renderBurndown(){
     ctx.fillStyle="#BF360C"; ctx.font="bold 8px Arial"; ctx.textAlign="right";
     ctx.fillText("Gap "+gapPp.toFixed(1)+"pp", fimDezX-4, (fimDezY+y90)/2+3);
   }
+  }
 
   function _bdDot(x,y,r,c){ctx.beginPath();ctx.arc(x,y,r+1.6,0,Math.PI*2);ctx.fillStyle="#fff";ctx.fill();ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
-  _bdDot(hojeX, hojeYConcl, 4, "#006B3F");
-  _bdDot(hojeX, hojeY, 4, "#5FBF93");
-  _bdDot(fimDezX, fimDezY, 4.5, "rgba(255,139,34,.95)");
-  ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
-  ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4);
-  ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
-  ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12);
-  ctx.fillStyle="#FF8B22"; ctx.font="bold 9px Arial"; ctx.textAlign="right";
-  ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5);
+  if(BD_VIS.concl){ _bdDot(hojeX, hojeYConcl, 4, "#006B3F");
+    ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
+    ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12); }
+  if(BD_VIS.prog){ _bdDot(hojeX, hojeY, 4, "#5FBF93");
+    ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
+    ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4); }
+  if(BD_VIS.proj){ _bdDot(fimDezX, fimDezY, 4.5, "rgba(255,139,34,.95)");
+    ctx.fillStyle="#FF8B22"; ctx.font="bold 9px Arial"; ctx.textAlign="right";
+    ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5); }
   ctx.fillStyle="#888"; ctx.font="8px Arial"; ctx.textAlign="center";
   ctx.fillText("dez/26", fimDezX, PAD.t+CH+11);
   ctx.strokeStyle="rgba(255,139,34,.3)"; ctx.lineWidth=1; ctx.setLineDash([3,3]);
@@ -2228,12 +2309,13 @@ function renderBurndown(){
     meses.forEach(function(mi){
       var dEnd=new Date(2026, mi+1, 0).getTime(); // último dia do mês
       if(dEnd < inicio.getTime() || dEnd > fimDez.getTime()) return;
-      var t=Math.min(1,(dEnd-inicio.getTime())/86400000/totalDias);
-      var x=PAD.l + t*CW, val, cor;
-      if(dEnd <= hoje.getTime()){
+      var x=_xOf(dEnd), val, cor, _isPast=(dEnd <= hoje.getTime());
+      if(_isPast){
+        if(!BD_VIS.concl) return;
         var acc=0; evC.forEach(function(e){ if(e.data.getTime()<=dEnd) acc+=e.pp; });
         val=acc; cor="#006B3F";
       } else {
+        if(!BD_VIS.proj) return;
         // Sobre a MESMA reta de projeção (ritmo constante hoje→dez): interpola
         // linearmente entre o concluído de hoje e ppDez (incremento mensal constante).
         var _fr=(dEnd-hoje.getTime())/Math.max(1,(fimDez.getTime()-hoje.getTime()));
@@ -2245,22 +2327,88 @@ function renderBurndown(){
       ctx.fillText(val.toFixed(0)+"%", x, y-6);
     });
   })();
+
+  // Rótulos de valor por mês sobre uma curva (ev ordenado por data). Igual ao planejado/projeção.
+  function _mLabels(ev, color, dy){
+    var d=new Date(2026,3,30);
+    while(d.getTime()<=fimChart.getTime()){
+      var acc=0; for(var i=0;i<ev.length;i++){ if(ev[i].d.getTime()<=d.getTime()) acc+=ev[i].pp; else break; }
+      if(acc>0.5){ var x=_xOf(d.getTime()), y=_yOf(acc); ctx.fillStyle=color; ctx.font="7px Arial"; ctx.textAlign="center"; ctx.fillText(acc.toFixed(0)+"%", x, y+dy); }
+      d=new Date(d.getFullYear(), d.getMonth()+2, 0);
+    }
+  }
+
+  // ── P02.1 FORECAST (previsto pelo cronograma do Gantt) ──
+  // Peso acumulado pela data prevista de conclusão. Sem filtro: fim do COMP (GM pronto).
+  // Com área filtrada: fim previsto DAQUELA área.
+  var _fcData={x90:null,dt90:null,fim:null};
+  (function(){
+    var ev=[];
+    GMS.forEach(function(m){ if(!(m.w>0)) return; var w=gmAreaWin(m); var d=_bdArea?(w[_bdArea]&&w[_bdArea].fim):(w.COMP&&w.COMP.fim); if(d) ev.push({d:pd(d), pp:m.w*100}); });
+    ev.sort(function(a,b){return a.d-b.d;});
+    var pts=[{x:PAD.l,y:PAD.t+CH}], acc=0;
+    ev.forEach(function(e){ acc+=e.pp; pts.push({x:_xOf(e.d),y:_yOf(acc)}); if(_fcData.x90===null && acc>=90){ _fcData.x90=_xOf(e.d); _fcData.dt90=e.d; } _fcData.fim=e.d; });
+    if(BD_VIS.forecast){
+      ctx.save(); ctx.strokeStyle="#4A148C"; ctx.lineWidth=1.8; ctx.setLineDash([2,2]); ctx.lineJoin="round"; ctx.lineCap="round";
+      ctx.beginPath(); pts.forEach(function(p,i){ i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }); ctx.stroke(); ctx.restore();
+      _mLabels(ev, "#4A148C", -4);
+      if(_fcData.x90!==null){ ctx.fillStyle="#4A148C"; ctx.font="bold 7px Arial"; ctx.textAlign="center"; ctx.fillText("90% "+fmtBR(_fcData.dt90).slice(0,5), _fcData.x90, _yOf(90)-12); }
+    }
+  })();
+
+  // ── P02.2 LINHA DE BASE (V9) ──
+  // Peso acumulado pela data de linha de base. Sem filtro: conclusão do GM (12/03/27).
+  // Com área filtrada: linha de base DAQUELA área.
+  (function(){
+    if(typeof BASELINE_CONCL==="undefined") return;
+    var ev=[];
+    GMS.forEach(function(m){ if(!(m.w>0)) return; var b=_bdArea?((typeof BASELINE_AREA!=="undefined"&&BASELINE_AREA[m.n])?BASELINE_AREA[m.n][_bdArea]:null):BASELINE_CONCL[m.n]; if(b) ev.push({d:pd(b), pp:m.w*100}); });
+    ev.sort(function(a,b){return a.d-b.d;});
+    var pts=[{x:PAD.l,y:PAD.t+CH}], acc=0;
+    ev.forEach(function(e){ acc+=e.pp; pts.push({x:_xOf(e.d),y:_yOf(acc)}); });
+    if(BD_VIS.base){
+      ctx.save(); ctx.strokeStyle="#8A8A8A"; ctx.lineWidth=1.7; ctx.setLineDash([]); ctx.lineJoin="round"; ctx.lineCap="round";
+      ctx.beginPath(); pts.forEach(function(p,i){ i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y); }); ctx.stroke(); ctx.restore();
+      _mLabels(ev, "#8A8A8A", 10);
+    }
+  })();
+
   var _semBIMon = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
   var _aLbl = (_bdArea&&ACFG[_bdArea])?ACFG[_bdArea].label+" ":"";
   const legs = [
-    {cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?"Refer\u00eancia 90% at\u00e9 dez/26":"Planejado linear (90% at\u00e9 dez/26)")},
-    {cor:"#006B3F",            dash:false, lbl:_aLbl+"conclu\u00eddo ("+concluido.toFixed(1)+"pp)"},
-    {cor:"#5FBF93",            dash:false, lbl:_aLbl+"progresso ("+progresso.toFixed(1)+"pp)"},
-    {cor:"#FF8B22",            dash:true,  lbl:"Proje\u00e7\u00e3o no ritmo \u2192 "+ppDez.toFixed(1)+"% em dez/26"},
+    {key:"plan",     cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?"Refer\u00eancia 90% at\u00e9 dez/26":"Planejado linear (90% at\u00e9 dez/26)")},
+    {key:"concl",    cor:"#006B3F",            dash:false, lbl:_aLbl+"conclu\u00eddo ("+concluido.toFixed(1)+"pp)"},
+    {key:"prog",     cor:"#5FBF93",            dash:false, lbl:_aLbl+"progresso ("+progresso.toFixed(1)+"pp)"},
+    {key:"proj",     cor:"#FF8B22",            dash:true,  lbl:"Proje\u00e7\u00e3o no ritmo \u2192 "+ppDez.toFixed(1)+"% em dez/26"},
+    {key:"forecast", cor:"#4A148C",            dash:true,  lbl:"Forecast "+_aLbl+(_fcData.dt90?"\u2192 90% "+fmtBR(_fcData.dt90):"(cronograma)")},
+    {key:"base",     cor:"#8A8A8A",            dash:false, lbl:"Linha de base "+(_bdArea?_aLbl:"\u2192 100% 12/03/27")},
   ];
-  let lx = PAD.l; const ly = PAD.t + CH + 24;
+  let lx = PAD.l; let ly = PAD.t + CH + 24;
+  var _legRects = [];
   legs.forEach(function(lg){
-    ctx.strokeStyle=lg.cor; ctx.lineWidth=lg.dash?1.5:2.5; ctx.setLineDash(lg.dash?[5,3]:[]);
+    ctx.font="8.5px Arial";
+    var wItem = 24 + ctx.measureText(lg.lbl).width + 16;
+    if(lx>PAD.l && lx + wItem > W - 4){ lx = PAD.l; ly += 13; } // quebra de linha
+    var _on = BD_VIS[lg.key]!==false;
+    ctx.strokeStyle=_on?lg.cor:"#cfcfcf"; ctx.lineWidth=lg.dash?1.5:2.5; ctx.setLineDash(lg.dash?[5,3]:[]);
     ctx.beginPath(); ctx.moveTo(lx,ly); ctx.lineTo(lx+20,ly); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle="#555"; ctx.font="8.5px Arial"; ctx.textAlign="left";
+    ctx.fillStyle=_on?"#555":"#bbb"; ctx.font="8.5px Arial"; ctx.textAlign="left";
     ctx.fillText(lg.lbl, lx+24, ly+3);
-    lx += ctx.measureText(lg.lbl).width + 40;
+    if(!_on){ ctx.strokeStyle="#bbb"; ctx.lineWidth=1; ctx.setLineDash([]); ctx.beginPath(); ctx.moveTo(lx+24,ly); ctx.lineTo(lx+24+ctx.measureText(lg.lbl).width,ly); ctx.stroke(); } // riscado quando oculto
+    _legRects.push({x:lx, y:ly-7, w:wItem, h:14, key:lg.key, cor:lg.cor, lbl:lg.lbl});
+    lx += wItem + 8;
   });
+  // Clique na legenda alterna a visibilidade da linha
+  canvas._bdLegRects = _legRects;
+  if(canvas._bdLegClick) canvas.removeEventListener("click", canvas._bdLegClick);
+  canvas._bdLegClick = function(e){
+    var rect=canvas.getBoundingClientRect();
+    var mx=(e.clientX-rect.left), my=(e.clientY-rect.top);
+    (canvas._bdLegRects||[]).forEach(function(r){
+      if(mx>=r.x && mx<=r.x+r.w && my>=r.y && my<=r.y+r.h){ BD_VIS[r.key]=!(BD_VIS[r.key]!==false); renderBurndown(); }
+    });
+  };
+  canvas.addEventListener("click", canvas._bdLegClick);
 
   var acum = progresso, _ppConclFinal = concluido;
 
@@ -2282,6 +2430,16 @@ function renderBurndown(){
     // Verificar proximidade dos marcos (em pixels canvas)
     const near = (px,py,r=20*DPR) => Math.hypot(mx-px*DPR,my-py*DPR)<r;
     const tt = document.getElementById("tt");
+
+    // Hover na legenda → mostra o número (código) da cor da linha, útil quando linhas se sobrepõem
+    var _csx=(e.clientX-rect.left), _csy=(e.clientY-rect.top), _lhit=null;
+    (canvas._bdLegRects||[]).forEach(function(r){ if(_csx>=r.x && _csx<=r.x+r.w && _csy>=r.y && _csy<=r.y+r.h) _lhit=r; });
+    if(_lhit){
+      tt.style.display="block";
+      tt.style.left=(e.clientX+12)+"px"; tt.style.top=(e.clientY-42)+"px";
+      tt.innerHTML='<h4>🎨 Cor da linha</h4><div style="font-size:11px;display:flex;align-items:center;gap:7px"><span style="width:14px;height:14px;border-radius:3px;display:inline-block;background:'+_lhit.cor+';border:1px solid #fff"></span><b style="color:#fff">'+_lhit.cor+'</b></div>';
+      return;
+    }
 
     if(near(hojeX,hojeY)){
       tt.style.display="block";
@@ -2490,7 +2648,7 @@ function renderVelocidade(){
         _restHtml = '<div style="color:#aaa;font-style:italic">+ '+restantes.length+' GMs com predecessor liberado</div>';
       } else {
         var _restRows = restantes.map(_gmRowVel).join("");
-        _restHtml = '<details style="margin-top:2px"><summary style="color:#1565C0;font-style:italic;cursor:pointer">+ '+restantes.length+' GMs com predecessor liberado (ver todos)</summary><div style="margin-top:3px;padding-left:2px;border-left:2px solid #E3EEF9">'+_restRows+'</div></details>';
+        _restHtml = '<details style="margin-top:2px"><summary style="color:#1565C0;font-style:italic;cursor:pointer">'+restantes.length+' GMs com predecessor liberado (ver todos)</summary><div style="margin-top:3px;padding-left:2px;border-left:2px solid #E3EEF9">'+_restRows+'</div></details>';
       }
     }
     var _aguardHtml = aguardando.length > 0 ? '<div style="color:#aaa;font-style:italic">'+aguardando.length+' GMs aguardam liberação do predecessor</div>' : "";
@@ -2508,7 +2666,9 @@ function renderVelocidade(){
         return win.MDM.fim ? pd(win.MDM.fim) : null; // ORC/BIM ← MDM
       };
       var _prev20 = aguardando.map(function(m){ return {m:m, d:_libPrev(m)}; })
-        .filter(function(o){ return o.d && o.d >= hoje && o.d <= _lim20; })
+        // P01.1 — se o MDM-raiz ainda não concluiu, o GM não está prestes a liberar
+        // NENHUMA sucessora (inclusive Compilador): evita o GM aparecer só no Compilador.
+        .filter(function(o){ return o.d && o.d >= hoje && o.d <= _lim20 && (a!=="COMP" || o.m.MDM.st==="done"); })
         .sort(function(x,y){ return x.d - y.d; });
       if(_prev20.length > 0){
         var _prevRows = _prev20.map(function(o){
@@ -2704,7 +2864,7 @@ var _criticoAberto=false;
 function togCritico(){
   _criticoAberto=!_criticoAberto;
   document.getElementById("critico-body").style.display=_criticoAberto?"":"none";
-  document.getElementById("critico-arrow").textContent=_criticoAberto?"▲":"▶";
+  document.getElementById("critico-arrow").textContent=_criticoAberto?"−":"+";
 }
 function renderCaminhoCritico(){
   var el=document.getElementById("caminho-critico"); if(!el) return;
@@ -2895,11 +3055,27 @@ function kbCard(m,area,col){
     ? '<div class="kc-prazo" style="font-size:8.5px;font-weight:600;color:'+_prazoCor+';margin-top:2px">\uD83D\uDCC5 prazo '+lbl+': '+fmtBR(pd(_fim))+'</div>'
     : "";
 
+  // P03.2 — na coluna Concluído, exibe a data de conclusão do GM
+  // (data real digitada em COMP, se houver; senão a data calculada pelo cronograma).
+  var _conclTxt="";
+  if(col==="done"){
+    var _cf=(m.COMP&&m.COMP.fim)?m.COMP.fim:(_win.COMP&&_win.COMP.fim);
+    if(_cf) _conclTxt='<div class="kc-prazo" style="font-size:8.5px;font-weight:700;color:#2E7D32;margin-top:2px">\u2705 conclu\u00eddo em '+fmtBR(pd(_cf))+'</div>';
+  }
+
   var btns="";
   if(col==="backlog") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button>';
   else if(col==="mdm"||col==="orc"||col==="bim"||col==="comp"){
     if(st==="plan") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'wip\')">▶ Iniciar</button>';
     else if(st==="wip") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'done\')">✓ Concluir</button>';
+  }
+  // P03.3 — cartão atrasado: botão para criar Plano de Ação (ou ver, se já existir)
+  if(_late){
+    var _temPlano = (typeof PLANO!=="undefined") && PLANO.some(function(p){ return p && p.area===area && (p.gm===m.n || (typeof p.txt==="string" && p.txt.indexOf("GM "+m.n+" ")===0)); });
+    if(_temPlano)
+      btns+='<button class="kc-btn" style="background:#2E7D32;color:#fff;border-color:#2E7D32" onclick="event.stopPropagation();kbVerPlano('+m.n+',\''+area+'\')" title="Ver o plano de a\u00e7\u00e3o deste GM">\uD83D\uDCCB Ver plano de a\u00e7\u00e3o</button>';
+    else
+      btns+='<button class="kc-btn" style="background:#BF360C;color:#fff;border-color:#BF360C" onclick="event.stopPropagation();kbPlanoAcao('+m.n+',\''+area+'\')" title="Criar um plano de a\u00e7\u00e3o para este GM atrasado (vai para a se\u00e7\u00e3o Plano de A\u00e7\u00e3o)">\u2795 Plano de a\u00e7\u00e3o</button>';
   }
   var nome=(m.nm||"").replace(/^MATERIAL: |^SERVI\u00c7O ESPECIALIZADO: /,"");
   return '<div class="kb-card" draggable="true" data-n="'+m.n+'" ondragstart="kbDragStart(event,'+m.n+',\''+area+'\',\''+col+'\')" onclick="abrirGmEdit('+m.n+')" style="border-left-color:'+cor+';background:'+_cardBg+'" title="Clique para editar o GM '+m.n+'">'
@@ -2908,6 +3084,7 @@ function kbCard(m,area,col){
     +'<span class="kc-st" style="color:'+stCor+'">'+stTxt+'</span>'
     +'<span style="flex:1"></span><span style="font-size:8px;color:#aaa">'+m.f+'</span></div>'
     +_prazoTxt
+    +_conclTxt
     +(resp?'<div class="kc-resp">\uD83D\uDC64 '+resp+'</div>':'')
     +(btns?'<div class="kc-btns">'+btns+'</div>':'')
     +'</div>';
@@ -2940,7 +3117,7 @@ function kbMetrics(){
   set("kpi-wip", wip);
 }
 function kbLimpar(){
-  ["kf-fase","kf-grupo","kf-area","kf-resp"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   var b=document.getElementById("kf-busca");if(b)b.value="";
   var l=document.getElementById("kf-late");if(l)l.checked=false;
   renderKanban();
@@ -2951,6 +3128,7 @@ function renderKanban(){
   kbPopularFiltros(); kbMetrics();
   var fFase=_kfVal("kf-fase"), fGrupo=_kfVal("kf-grupo"), fArea=_kfVal("kf-area"), fResp=_kfVal("kf-resp");
   var fBusca=(_kfVal("kf-busca")||"").toLowerCase().trim();
+  var _kfIni=_kfVal("kf-ini"), _kfFim=_kfVal("kf-fim"); // P01.2
   var fLate=(document.getElementById("kf-late")||{checked:false}).checked;
   function pass(m,area){
     if(fFase && m.f!==fFase) return false;
@@ -2958,6 +3136,7 @@ function renderKanban(){
     if(fArea && area!==fArea) return false;
     if(fResp && (m[area].resp||"")!==fResp) return false;
     if(fLate && !kbLate(m,area)) return false;
+    if((_kfIni||_kfFim) && !_gmDateOk(m,(fArea?[fArea]:[]),_kfIni,_kfFim)) return false; // P01.2
     if(fBusca && !(String(m.n).indexOf(fBusca)>=0 || (m.nm||"").toLowerCase().indexOf(fBusca)>=0 || (m.g||"").toLowerCase().indexOf(fBusca)>=0)) return false;
     return true;
   }
@@ -2969,6 +3148,11 @@ function renderKanban(){
   Object.keys(buckets).forEach(function(k){
     buckets[k].sort(function(a,b){ var fa=winFim(a.m,a.area), fb=winFim(b.m,b.area); return fa<fb?-1:fa>fb?1:(a.m.n-b.m.n); });
   });
+  // Coluna "Concluído": ordenar do mais recente para o mais antigo (data de conclusão do GM, COMP)
+  if(buckets["done"]){
+    function _conclDt(m){ return (m.COMP&&m.COMP.fim)?m.COMP.fim:winFim(m,"COMP"); }
+    buckets["done"].sort(function(a,b){ var da=_conclDt(a.m), db=_conclDt(b.m); return da<db?1:da>db?-1:(a.m.n-b.m.n); });
+  }
   function flat(items,col){ return items.map(function(it){return kbCard(it.m,it.area,col);}).join(""); }
   function grouped(items,col){
     var byFase={}, fOrder=[];
@@ -2998,6 +3182,42 @@ function kbPersist(m,area){
   var c={st:m[area].st,dur:m[area].dur||0,ini:(area==="MDM"?m.MDM.ini:(m[area].ini||null)),fim:(area==="MDM"?(m.MDM.fim||null):(m[area].fim||null)),resp:(m[area].resp||"")};
   if(area==="MDM") c.sel=!!m.MDM.sel;
   var g={}; g[m.n+"__"+area]=c; window.fbSalvarParcial({gmcells:g});
+}
+// P03.3 — cria um Plano de Ação a partir de um cartão atrasado do Kanban.
+// Leva para a seção "Plano de Ação": nome do GM, prazo previsto (data) e a descrição.
+function kbPlanoAcao(n,area){
+  var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
+  if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){kbPlanoAcao(n,area);})) return;
+  var nome=(m.nm||"").replace(/^MATERIAL: |^SERVI\u00c7O ESPECIALIZADO: /,"");
+  var desc=prompt("A\u00e7\u00e3o para GM "+n+" "+nome+" ("+ACFG[area].label+", atrasado):");
+  if(desc===null||!desc.trim()) return;
+  var win=gmAreaWin(m), prazo=(win[area]&&win[area].fim)?win[area].fim:"";
+  // Preencher também a DATA da ação (mesma informação do Plano de Ação). Sugere o prazo previsto, editável.
+  var dt=prompt("Data (prazo) da a\u00e7\u00e3o \u2014 formato AAAA-MM-DD:", prazo);
+  if(dt===null) return;
+  dt=(dt||"").trim();
+  var txt="GM "+n+" "+nome+" \u2014 "+desc.trim();
+  if(typeof PLANO==="undefined") return;
+  PLANO.push({txt:txt, area:area, done:false, dt:dt, gm:n});
+  if(window.renderPlano) renderPlano();
+  if(window.mdmLog) mdmLog("Plano de a\u00e7\u00e3o","Criou (cart\u00e3o atrasado)",'"'+txt+'" \u2014 \u00e1rea '+ACFG[area].label+', prazo '+(dt?fmtBR(pd(dt)):"\u2014"));
+  if(window.fbSalvar) window.fbSalvar();
+  if(window.renderKanban) renderKanban();
+  window.mostrarSyncStatus && window.mostrarSyncStatus("\u2705 A\u00e7\u00e3o criada no Plano de A\u00e7\u00e3o","#006B3F");
+}
+// Ver o plano de ação de um GM: abre a seção Plano de Ação, rola até ela e destaca os itens do GM.
+function kbVerPlano(n,area){
+  var sec=document.getElementById("sec-plano");
+  if(sec && sec.classList.contains("collapsed")){ sec.classList.remove("collapsed"); var arr=document.getElementById("arr-plano"); if(arr) arr.textContent="\u2212"; }
+  if(window.renderPlano) renderPlano();
+  var host=document.getElementById("plano-list");
+  if(host){
+    if(host.scrollIntoView) host.scrollIntoView({behavior:"smooth",block:"center"});
+    setTimeout(function(){
+      var items=host.querySelectorAll(".p-item");
+      items.forEach(function(el){ if(el.getAttribute("data-gm")===String(n)){ var _o=el.style.background; el.style.transition="background .3s"; el.style.background="#FFF3C4"; setTimeout(function(){el.style.background=_o;},1800); } });
+    },260);
+  }
 }
 function kbSet(n,area,st){
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
@@ -3050,7 +3270,7 @@ function trocarView(v){
 function togVisuais(){
   _visuaisAberto = !_visuaisAberto;
   document.getElementById("visuais-body").style.display = _visuaisAberto ? "" : "none";
-  document.getElementById("visuais-arrow").textContent = _visuaisAberto ? "▲" : "▶";
+  document.getElementById("visuais-arrow").textContent = _visuaisAberto ? "−" : "+";
   if(_visuaisAberto){
     if(window.renderBurndown) renderBurndown();
     if(window.renderHeatmap) renderHeatmap();
@@ -3205,8 +3425,19 @@ window.fbCellsPayload = function(){
   return {cells:cells, meta:meta, recursos:JSON.stringify(RECURSOS)};
 };
 
+// P03.1 — Regra: qualquer área (exceto MDM) com duração 0 fica automaticamente "concluído".
+// Roda retroativo a cada render (sobrescreve status) e cobre edições futuras.
+function _normDur0(){
+  if(typeof GMS==="undefined") return;
+  GMS.forEach(function(m){
+    ["ORC","BIM","COMP"].forEach(function(a){
+      if(m[a] && (m[a].dur||0)===0 && m[a].st!=="done") m[a].st="done";
+    });
+  });
+}
 function renderTudo(){
   _gmSchedOk=false; // recalcula o nivelamento por recursos a cada render
+  _normDur0();      // P03.1 — duração 0 (exceto MDM) ⇒ concluído (retroativo + futuro)
   // Recalcular % de conclusão de todos os grupos pelo status atual
   if(typeof calcPctGrupo === "function"){
     GRUPOS.forEach(function(g){ g.pct = calcPctGrupo(g); });

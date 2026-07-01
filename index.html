@@ -401,6 +401,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 .kc-btn:hover{background:var(--v1);color:#fff}
 .kc-btn.sec{flex:0 0 26px;border-color:#ccc;color:#999}
 .kc-btn.sec:hover{background:#999;color:#fff}
+.kb-card.kb-inativo:hover{opacity:.9 !important}
 .kb-metrics{display:flex;gap:8px;padding:10px 10px 0;flex-wrap:wrap}
 .kb-kpi{flex:1;min-width:132px;background:#fff;border:1px solid var(--bdr);border-radius:8px;padding:8px 10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
 .kk-top{font-size:9px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px;display:flex;align-items:center;gap:5px}
@@ -687,6 +688,12 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <input class="tl-input" type="date" id="f-ini" style="width:128px" onchange="renderGantt()" title="Mostra GMs que começam nesta data ou depois (acumula com o filtro de área)">
   <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera as áreas filtradas)">Fim ≤:</span>
   <input class="tl-input" type="date" id="f-fim" style="width:128px" onchange="renderGantt()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
+  <span class="tl-label" title="Filtrar por peso: só ativos (peso&gt;0), só inativos (peso 0) ou todos">Peso:</span>
+  <select id="f-peso" onchange="renderGantt()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:2px 4px;color:#444;background:#fff">
+    <option value="">Todos</option>
+    <option value="ativo">Só ativos (peso&gt;0)</option>
+    <option value="inativo">Só inativos (peso 0)</option>
+  </select>
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
   <span class="tl-cnt" id="f-cnt"></span>
   <div style="display:flex;gap:4px;margin-right:4px">
@@ -735,6 +742,12 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera a área filtrada)">Fim ≤:</span>
     <input class="tl-input" id="kf-fim" type="date" style="width:128px" onchange="renderKanban()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
     <label style="font-size:10px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="kf-late" onchange="renderKanban()"> Só atrasados</label>
+    <label class="tl-label" title="Filtrar por peso: só ativos (peso&gt;0), só inativos (peso 0) ou todos" style="display:inline-flex;align-items:center;gap:3px">Peso:
+      <select id="kf-peso" onchange="renderKanban()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:1px 3px;color:#444;background:#fff">
+        <option value="">Todos</option>
+        <option value="ativo">Só ativos (peso&gt;0)</option>
+        <option value="inativo">Só inativos (peso 0)</option>
+      </select></label>
     <button class="tl-btn sec" onclick="kbLimpar()">✕ Limpar</button>
     <span class="tl-cnt" id="kb-cnt"></span>
   </div>
@@ -1457,11 +1470,14 @@ function gmAreaWin(m){
 function gmRowsHtml(gms,fk,hojeL){
   var _fAreas=msValues("f-area"), out="";
   var _fAgs=msValues("f-ag"), _fDurs=msValues("f-dur");
+  var _fPeso=(document.getElementById("f-peso")||{value:""}).value; // "", "ativo", "inativo"
   var _fd=_filtroDatas();
   var _bq=(document.getElementById("f-busca")||{value:""}).value.trim();
   var _bqNum=(_bq!=="" && /^[0-9]+$/.test(_bq));
   gms.forEach(function(m){
     if(_bqNum && String(m.n).indexOf(_bq)<0) return;
+    if(_fPeso==="ativo" && !(m.w>0)) return;
+    if(_fPeso==="inativo" && (m.w>0)) return;
     if(_fAgs.length && _fAgs.indexOf(agOf(m))<0) return;
     if(_fDurs.length && _fDurs.indexOf(_durBucket(_gmDurVal(m,_fAreas)))<0) return;
     if(!_gmDateOk(m,_fAreas,_fd.ini,_fd.fim)) return; // P01.2
@@ -1633,6 +1649,7 @@ function renderGantt(){
   const fAgs   = msValues("f-ag");
   const fDurs  = msValues("f-dur");
   const fAreasSel = msValues("f-area");
+  const fPeso   = (document.getElementById("f-peso")||{value:""}).value; // "", "ativo", "inativo"
   const _fDatas  = _filtroDatas(); // P01.2
   const hoje   = pd(CFG.hoje);
   const hojeL  = Math.max(0,Math.min(100,(hoje-MIN_D)/86400000/TOTAL*100));
@@ -1756,6 +1773,11 @@ function renderGantt(){
         var _gkD=gmKey(g.nome);
         var _durHit=GMS.some(function(m){return m.gk===_gkD && m.f===g.fase && fDurs.indexOf(_durBucket(_gmDurVal(m,fAreasSel)))>=0;});
         if(!_durHit) return false;
+      }
+      if(fPeso){
+        var _gkP=gmKey(g.nome);
+        var _pesoHit=GMS.some(function(m){return m.gk===_gkP && m.f===g.fase && (fPeso==="ativo"?(m.w>0):!(m.w>0));});
+        if(!_pesoHit) return false;
       }
       if(_fDatas.ini || _fDatas.fim){ // P01.2 — grupo passa se algum GM casa o filtro de data
         var _gkDt=gmKey(g.nome);
@@ -1965,7 +1987,7 @@ function toggleFase(fk){
 function limpar(){
   ["f-fase","f-area","f-st","f-resp","f-ag","f-dur"].forEach(function(id){ msClear(id); });
   document.getElementById("f-busca").value="";
-  ["f-ini","f-fim"].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=""; }); // P01.2
+  ["f-ini","f-fim","f-peso"].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=""; }); // P01.2
   renderGantt();
 }
 
@@ -2450,9 +2472,8 @@ function renderBurndown(){
       tt.style.display="block";
       const _spaceR = window.innerWidth-(e.clientX+12);
       tt.style.left=(_spaceR>260?e.clientX+12:e.clientX-264)+"px";
-      tt.style.top=(e.clientY-16-_numHits.length*16)+"px";
-      tt.innerHTML='<h4>\uD83D\uDD22 '+(_numHits.length>1?"Números sobrepostos aqui":"Número")+'</h4>'
-        +_numHits.map(function(p){
+      tt.style.top=(e.clientY-8-_numHits.length*16)+"px";
+      tt.innerHTML=_numHits.map(function(p){
           return '<div style="font-size:11px;display:flex;align-items:center;gap:6px;margin:2px 0">'
             +'<span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:'+p.cor+';flex-shrink:0"></span>'
             +'<b style="color:#fff">'+p.txt+'</b><span style="color:#aaa;font-size:9.5px">'+p.src+'</span></div>';
@@ -2698,6 +2719,49 @@ function renderVelocidade(){
       }
     }
 
+    // ── GMs INATIVOS (peso 0) — não entram na velocidade (Meta 1), mas estão operacionalmente
+    //    liberados ou prestes a liberar. Listados à parte para AVALIAR ATUAÇÃO (concluir ou não). ──
+    var _inatLibHtml = "", _inatPrevHtml = "";
+    (function(){
+      var _predOk = function(m){
+        if(a==="MDM") return true;
+        if(a==="ORC"||a==="BIM") return m.MDM.st==="done";
+        if(a==="COMP") return m.MDM.st==="done" && m.ORC.st==="done" && m.BIM.st==="done";
+        return false;
+      };
+      var _rowInat = function(m, suf){
+        var _lbl = m.f+' · '+m.n+(m.nm?(' '+m.nm):'');
+        return '<div style="display:flex;justify-content:space-between"><span>'+_lbl+'</span><span style="color:#bbb">'+(suf||'peso 0')+'</span></div>';
+      };
+      var _inat = GMS.filter(function(m){ return !(m.w>0) && m[a].st!=="done"; });
+      // (1) Inativos JÁ liberados (predecessor concluído)
+      var _lib = _inat.filter(_predOk).sort(function(x,y){ return _fimGM(x)-_fimGM(y); });
+      if(_lib.length){
+        var _rows = _lib.map(function(m){ return _rowInat(m); }).join("");
+        _inatLibHtml = '<details style="margin-top:2px"><summary style="color:#8A8A8A;font-style:italic;cursor:pointer">\uD83D\uDCA4 '+_lib.length+' GMs inativos liberados \u2014 avaliar atua\u00e7\u00e3o (ver todos)</summary><div style="margin-top:3px;padding-left:2px;border-left:2px solid #e2e2e2">'+_rows+'</div></details>';
+      }
+      // (2) Inativos que a predecessora deve liberar em 20 dias (predecessor ainda não concluiu)
+      if(a !== "MDM"){
+        var _lim20i = new Date(hoje.getTime() + 20*86400000);
+        var _libPrevI = function(m){
+          var win = gmAreaWin(m);
+          if(a === "COMP"){
+            var ds = [win.MDM.fim, win.ORC.fim, win.BIM.fim].filter(Boolean).map(function(s){ return pd(s).getTime(); });
+            return ds.length ? new Date(Math.max.apply(null, ds)) : null;
+          }
+          return win.MDM.fim ? pd(win.MDM.fim) : null;
+        };
+        var _prevI = _inat.filter(function(m){ return !_predOk(m); })
+          .map(function(m){ return {m:m, d:_libPrevI(m)}; })
+          .filter(function(o){ return o.d && o.d>=hoje && o.d<=_lim20i && (a!=="COMP" || o.m.MDM.st==="done"); })
+          .sort(function(x,y){ return x.d - y.d; });
+        if(_prevI.length){
+          var _rowsP = _prevI.map(function(o){ return _rowInat(o.m, 'prev. '+fmtBR(o.d)); }).join("");
+          _inatPrevHtml = '<details style="margin-top:2px"><summary style="color:#8A8A8A;font-style:italic;cursor:pointer">\u231B '+_prevI.length+' GMs inativos que a predecessora deve liberar em 20 dias \u2014 avaliar atua\u00e7\u00e3o (ver todos)</summary><div style="margin-top:3px;padding-left:2px;border-left:2px solid #e6e6e6">'+_rowsP+'</div></details>';
+        }
+      }
+    })();
+
     html += `<div style="border:1px solid var(--bdr);border-radius:5px;padding:8px 10px;background:#fff;border-left:4px solid ${cor}">
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
         <span style="font-size:10px;font-weight:700;color:${cor};flex:1">${label}</span>
@@ -2724,7 +2788,9 @@ function renderVelocidade(){
       <div style="font-size:8px;color:#888;border-top:1px solid #eee;padding-top:4px">
         ${_proxRows}
         ${_restHtml}
+        ${_inatLibHtml}
         ${_prevHtml}
+        ${_inatPrevHtml}
         ${_aguardHtml}
       </div>
     </div>`;
@@ -3060,6 +3126,7 @@ function kbCols(m){
 }
 function kbCard(m,area,col){
   var cor=ACFG[area].cor, lbl=ACFG[area].label, resp=(m[area].resp||"");
+  var _inativo=!(m.w>0); // peso 0 = inativo (não compõe a Meta 1)
   var st=m[area].st, stTxt=(st==="done"?"✅ concluído":st==="wip"?"⏳ em andamento":"⚪ a iniciar");
   var stCor=(st==="done"?"#2E7D32":st==="wip"?"#FF8B22":"#999");
 
@@ -3097,8 +3164,8 @@ function kbCard(m,area,col){
       btns+='<button class="kc-btn" style="background:#BF360C;color:#fff;border-color:#BF360C" onclick="event.stopPropagation();kbPlanoAcao('+m.n+',\''+area+'\')" title="Criar um plano de a\u00e7\u00e3o para este GM atrasado (vai para a se\u00e7\u00e3o Plano de A\u00e7\u00e3o)">\u2795 Plano de a\u00e7\u00e3o</button>';
   }
   var nome=(m.nm||"").replace(/^MATERIAL: |^SERVI\u00c7O ESPECIALIZADO: /,"");
-  return '<div class="kb-card" draggable="true" data-n="'+m.n+'" ondragstart="kbDragStart(event,'+m.n+',\''+area+'\',\''+col+'\')" onclick="abrirGmEdit('+m.n+')" style="border-left-color:'+cor+';background:'+_cardBg+'" title="Clique para editar o GM '+m.n+'">'
-    +'<div class="kc-nm">'+m.n+' · '+nome+'</div>'
+  return '<div class="kb-card'+(_inativo?" kb-inativo":"")+'" draggable="true" data-n="'+m.n+'" ondragstart="kbDragStart(event,'+m.n+',\''+area+'\',\''+col+'\')" onclick="abrirGmEdit('+m.n+')" style="border-left-color:'+cor+';background:'+_cardBg+(_inativo?';opacity:.45':'')+'" title="'+(_inativo?'GM inativo (peso 0) — n\u00e3o comp\u00f5e a Meta 1. ':'')+'Clique para editar o GM '+m.n+'">'
+    +'<div class="kc-nm">'+m.n+' · '+nome+(_inativo?' <span style="font-size:7.5px;font-weight:700;color:#999;border:1px solid #ccc;border-radius:3px;padding:0 3px">peso 0</span>':'')+'</div>'
     +'<div class="kc-meta"><span class="kc-badge" style="background:'+cor+'">'+lbl+'</span>'
     +'<span class="kc-st" style="color:'+stCor+'">'+stTxt+'</span>'
     +'<span style="flex:1"></span><span style="font-size:8px;color:#aaa">'+m.f+'</span></div>'
@@ -3136,7 +3203,7 @@ function kbMetrics(){
   set("kpi-wip", wip);
 }
 function kbLimpar(){
-  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim","kf-peso"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   var b=document.getElementById("kf-busca");if(b)b.value="";
   var l=document.getElementById("kf-late");if(l)l.checked=false;
   renderKanban();
@@ -3149,12 +3216,15 @@ function renderKanban(){
   var fBusca=(_kfVal("kf-busca")||"").toLowerCase().trim();
   var _kfIni=_kfVal("kf-ini"), _kfFim=_kfVal("kf-fim"); // P01.2
   var fLate=(document.getElementById("kf-late")||{checked:false}).checked;
+  var fPeso=_kfVal("kf-peso"); // "", "ativo", "inativo"
   function pass(m,area){
     if(fFase && m.f!==fFase) return false;
     if(fGrupo && m.g!==fGrupo) return false;
     if(fArea && area!==fArea) return false;
     if(fResp && (m[area].resp||"")!==fResp) return false;
     if(fLate && !kbLate(m,area)) return false;
+    if(fPeso==="ativo" && !(m.w>0)) return false;
+    if(fPeso==="inativo" && (m.w>0)) return false;
     if((_kfIni||_kfFim) && !_gmDateOk(m,(fArea?[fArea]:[]),_kfIni,_kfFim)) return false; // P01.2
     if(fBusca && !(String(m.n).indexOf(fBusca)>=0 || (m.nm||"").toLowerCase().indexOf(fBusca)>=0 || (m.g||"").toLowerCase().indexOf(fBusca)>=0)) return false;
     return true;

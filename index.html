@@ -666,8 +666,8 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <div class="ms" id="ms-f-ag" data-all="Todos">
     <button type="button" class="ms-btn" onclick="msToggle('f-ag',event)"><span class="ms-lbl">Todos</span><span class="ms-car">▾</span></button>
     <div class="ms-pan" id="msp-f-ag" onclick="event.stopPropagation()">
-      <label><input type="checkbox" value="S" onchange="msPick('f-ag')"><span>Sim</span></label>
-      <label><input type="checkbox" value="N" onchange="msPick('f-ag')"><span>Não</span></label>
+      <label><input type="checkbox" value="S" onchange="msPick('f-ag')"><span>Com agrupador</span></label>
+      <label><input type="checkbox" value="N" onchange="msPick('f-ag')"><span>Sem agrupador</span></label>
       <label><input type="checkbox" value="0" onchange="msPick('f-ag')"><span>Não informado</span></label>
     </div>
   </div>
@@ -688,7 +688,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   <input class="tl-input" type="date" id="f-ini" style="width:128px" onchange="renderGantt()" title="Mostra GMs que começam nesta data ou depois (acumula com o filtro de área)">
   <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera as áreas filtradas)">Fim ≤:</span>
   <input class="tl-input" type="date" id="f-fim" style="width:128px" onchange="renderGantt()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
-  <span class="tl-label" title="Filtrar por status do GM: só ativos, só inativos (parecer INATIVAR) ou todos">Status:</span>
+  <span class="tl-label" title="Filtrar por disponibilidade do GM: só ativos, só inativos (parecer INATIVAR) ou todos">Disponibilidade:</span>
   <select id="f-peso" onchange="renderGantt()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:2px 4px;color:#444;background:#fff">
     <option value="">Todos</option>
     <option value="ativo">Só ativos</option>
@@ -735,6 +735,8 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <select class="tl-select" id="kf-area" style="min-height:26px" onchange="renderKanban()"><option value="">Todas</option><option value="MDM">MDM</option><option value="ORC">Orçamento</option><option value="BIM">BIM</option><option value="COMP">Compilador</option></select>
     <span class="tl-label">Resp.:</span>
     <select class="tl-select" id="kf-resp" style="min-height:26px" onchange="renderKanban()"><option value="">Todos</option></select>
+    <span class="tl-label">Agrupador:</span>
+    <select class="tl-select" id="kf-ag" style="min-height:26px" onchange="renderKanban()"><option value="">Todos</option><option value="S">Com agrupador</option><option value="N">Sem agrupador</option><option value="0">Não informado</option></select>
     <span class="tl-label">Buscar:</span>
     <input class="tl-input" id="kf-busca" type="text" placeholder="nº, GM ou grupo" oninput="renderKanban()">
     <span class="tl-label" title="Mostra GMs que começam nesta data ou depois (considera a área filtrada)">Início ≥:</span>
@@ -742,7 +744,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera a área filtrada)">Fim ≤:</span>
     <input class="tl-input" id="kf-fim" type="date" style="width:128px" onchange="renderKanban()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
     <label style="font-size:10px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="kf-late" onchange="renderKanban()"> Só atrasados</label>
-    <label class="tl-label" title="Filtrar por status do GM: só ativos, só inativos (parecer INATIVAR) ou todos" style="display:inline-flex;align-items:center;gap:3px">Status:
+    <label class="tl-label" title="Filtrar por disponibilidade do GM: só ativos, só inativos (parecer INATIVAR) ou todos" style="display:inline-flex;align-items:center;gap:3px">Disponibilidade:
       <select id="kf-peso" onchange="renderKanban()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:1px 3px;color:#444;background:#fff">
         <option value="">Todos</option>
         <option value="ativo">Só ativos</option>
@@ -883,6 +885,8 @@ function gmForNome(nome){return GM_BY_GRUPO[gmKey(nome)]||null;}
 function agOf(m){var v=(m&&m.ag!=null)?String(m.ag):"0";return (v==="S"||v==="N")?v:"0";}
 // Inativo = PARECER GM "INATIVAR" na planilha (flag m.inat). NÃO confundir com peso 0 (representatividade financeira).
 function gmInativo(m){ return !!(m && m.inat); }
+// GM cujo grupo está marcado "Simular sem BIM" no modal (g.semBIM) — usado na regra da Meta 2
+function gmSemBIM(m){ if(!m) return false; return GRUPOS.some(function(g){return gmKey(g.nome)===m.gk && g.fase===m.f && !!g.semBIM;}); }
 function agLabel(v){return v==="S"?"Com agrupador":(v==="N"?"Sem agrupador":"Agrup. n\u00e3o inf.");}
 function agCor(v){return v==="S"?"#1565C0":(v==="N"?"#999":"#bbb");}
 function ntOf(m){var v=(m&&m.nt!=null)?String(m.nt).toUpperCase():"";return (v==="SIM")?"SIM":((v==="N\u00c3O"||v==="NAO")?"N\u00c3O":"");}
@@ -1213,10 +1217,12 @@ function calcPctGrupo(g){
 function renderExec(){
   const k1=calcMeta1();
   // ── Meta 2 (AUTOMÁTICA): GM conta 2 meses após concluir TODAS as áreas ──
-  function _m2Fim(m){ var w=gmAreaWin(m); var mx=0; AREAS.forEach(function(a){ var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f; }); return mx?new Date(mx):null; }
+  // Exceção: GM com "Simular sem BIM" (grupo g.semBIM) conta sem depender do BIM — só MDM, ORC e COMP
+  function _m2Areas(m){ return gmSemBIM(m)?["MDM","ORC","COMP"]:AREAS; }
+  function _m2Fim(m){ var w=gmAreaWin(m); var mx=0; _m2Areas(m).forEach(function(a){ var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f; }); return mx?new Date(mx):null; }
   function _m2Matura(m){ var f=_m2Fim(m); if(!f) return null; return new Date(f.getFullYear(), f.getMonth()+2, f.getDate()); }
   var _hojeMs2=pd(CFG.hoje).getTime();
-  var _m2Done = GMS.filter(function(m){ return m.w>0 && AREAS.every(function(a){return m[a].st==="done";}); }); // todas as 4 áreas concluídas (não só COMP)
+  var _m2Done = GMS.filter(function(m){ return m.w>0 && _m2Areas(m).every(function(a){return m[a].st==="done";}); }); // todas as áreas exigidas concluídas (sem BIM p/ GMs semBIM)
   var _m2Atg=[], _m2Mat=[];
   _m2Done.forEach(function(m){ var d=_m2Matura(m); if(d && d.getTime()<=_hojeMs2) _m2Atg.push(m); else _m2Mat.push({m:m,d:d}); });
   _m2Atg.sort(function(a,b){ return (a.f<b.f?-1:a.f>b.f?1:(a.g<b.g?-1:a.g>b.g?1:a.n-b.n)); });
@@ -1247,7 +1253,7 @@ function renderExec(){
   var _rowOf=function(m){ return '<div style="display:flex;justify-content:space-between;gap:12px"><span>'+m.f+' · '+m.n+(m.nm?(" "+m.nm):"")+'</span><span style="color:#A8D5C5;white-space:nowrap">'+(m.w*100).toFixed(2)+'%</span></div>'; };
   var _emptyMsg='<div style="color:#aaa">Nenhum GM 100% concluído ainda</div>';
   var _allRows=_aptos.length ? _aptos.map(_rowOf).join("") : _emptyMsg;
-  var _aptosGrouped=function(aptos){
+  var _aptosGrouped=function(aptos,flagFn){
     if(!aptos.length) return _emptyMsg;
     var byF={}, fOrder=[];
     aptos.forEach(function(m){ if(!byF[m.f]){byF[m.f]={o:[],g:{}}; fOrder.push(m.f);} var fb=byF[m.f]; if(!fb.g[m.g]){fb.g[m.g]=[]; fb.o.push(m.g);} fb.g[m.g].push(m); });
@@ -1258,14 +1264,14 @@ function renderExec(){
       fb.o.forEach(function(gn){
         var arr=fb.g[gn], gpp=arr.reduce(function(s,m){return s+m.w*100;},0);
         H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#cfe9df;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span>'+_agGrpHtml(arr)+'</summary><div style="margin-left:14px">';
-        arr.forEach(function(m){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+m.n+(m.nm?(" "+m.nm):"")+'</span><span style="color:#A8D5C5;white-space:nowrap">'+(m.w*100).toFixed(2)+'%</span></div>'; });
+        arr.forEach(function(m){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+m.n+(m.nm?(" "+m.nm):"")+(flagFn?flagFn(m):"")+'</span><span style="color:#A8D5C5;white-space:nowrap">'+(m.w*100).toFixed(2)+'%</span></div>'; });
         H+='</div></details>';
       });
       H+='</details>';
     });
     return H;
   };
-  var _grpByDate=function(items){
+  var _grpByDate=function(items,flagFn){
     if(!items.length) return '<div style="color:#aaa">Nenhum GM em maturação</div>';
     var byF={}, fOrder=[];
     items.forEach(function(o){ var m=o.m; if(!byF[m.f]){byF[m.f]={o:[],g:{}}; fOrder.push(m.f);} var fb=byF[m.f]; if(!fb.g[m.g]){fb.g[m.g]=[]; fb.o.push(m.g);} fb.g[m.g].push(o); });
@@ -1277,7 +1283,7 @@ function renderExec(){
         var arr=fb.g[gn], gpp=arr.reduce(function(s,o){return s+o.m.w*100;},0);
         arr.sort(function(a,b){return (a.d?a.d.getTime():0)-(b.d?b.d.getTime():0);});
         H+='<details open style="margin-left:12px"><summary style="cursor:pointer;color:#e8cf93;padding:2px 0">'+gn+' <span style="color:#888;font-weight:400">\u2014 '+arr.length+' GMs \u00b7 '+gpp.toFixed(2)+'pp</span>'+_agGrpHtml(arr.map(function(o){return o.m;}))+'</summary><div style="margin-left:14px">';
-        arr.forEach(function(o){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+o.m.n+(o.m.nm?(" "+o.m.nm):"")+'</span><span style="color:#aaa;white-space:nowrap">conta em '+(o.d?fmtBR(o.d):"\u2014")+'</span></div>'; });
+        arr.forEach(function(o){ H+='<div style="display:flex;justify-content:space-between;gap:12px"><span>'+o.m.n+(o.m.nm?(" "+o.m.nm):"")+(flagFn?flagFn(o.m):"")+'</span><span style="color:#aaa;white-space:nowrap">conta em '+(o.d?fmtBR(o.d):"\u2014")+'</span></div>'; });
         H+='</div></details>';
       });
       H+='</details>';
@@ -1311,8 +1317,9 @@ function renderExec(){
   };
   var k2El=document.getElementById("k2-item");
   if(k2El){
-    var _m2Resumo='<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">Regra automática: <b>2 meses</b> após um GM concluir <b>todas as áreas</b> (MDM, Orçamento, BIM, Compilador), ele passa a contar para a Meta 2.<br><b style="color:#A8D5C5">✅ '+k2.toFixed(1)+'pp</b> já utilizados ('+_m2Atg.length+' GMs)<br><b style="color:#FFB719">⏳ '+(_k2Prev-k2).toFixed(1)+'pp</b> em maturação ('+_m2Mat.length+' GMs)</div>';
-    var _m2MatHtml = _m2Mat.length ? ('<div style="font-size:9px;font-weight:700;color:#FFB719;margin:12px 0 3px">Em maturação (concluídos, aguardando 2 meses):</div><div class="mc-list">'+_grpByDate(_m2Mat)+'</div>') : "";
+    var _m2Flag=function(m){ return gmSemBIM(m)?' <span title="Simular sem BIM: este GM conta para a Meta 2 sem depender da conclus\u00e3o do BIM (2 meses ap\u00f3s MDM, Or\u00e7amento e Compilador)" style="font-size:7.5px;font-weight:700;color:#B78BE0;border:1px solid #793F98;border-radius:3px;padding:0 3px;white-space:nowrap">sem BIM</span>':""; };
+    var _m2Resumo='<div style="font-size:9.5px;color:#aaa;margin-bottom:6px">Regra automática: <b>2 meses</b> após um GM concluir <b>todas as áreas</b> (MDM, Orçamento, BIM, Compilador), ele passa a contar para a Meta 2. GMs marcados <b style="color:#B78BE0">sem BIM</b> (Simular sem BIM no modal do GM) contam sem depender do BIM \u2014 2 meses após MDM, Orçamento e Compilador.<br><b style="color:#A8D5C5">✅ '+k2.toFixed(1)+'pp</b> já utilizados ('+_m2Atg.length+' GMs)<br><b style="color:#FFB719">⏳ '+(_k2Prev-k2).toFixed(1)+'pp</b> em maturação ('+_m2Mat.length+' GMs)</div>';
+    var _m2MatHtml = _m2Mat.length ? ('<div style="font-size:9px;font-weight:700;color:#FFB719;margin:12px 0 3px">Em maturação (concluídos, aguardando 2 meses):</div><div class="mc-list">'+_grpByDate(_m2Mat,_m2Flag)+'</div>') : "";
     var _m2Nota = '<div style="font-size:9px;color:#7a6a3a;background:#FFF8E6;border:1px solid #F0E2BE;border-radius:5px;padding:7px 9px;margin-bottom:8px">📌 A Meta 2 é calculada pela data em que cada GM concluiu <b>todas as áreas</b> mais 2 meses. Se algum GM aparecer na lista ou na data errada, ajuste a <b>data de conclusão</b> do GM para a data efetivamente realizada \u2014 a meta se recalcula automaticamente.</div>';
     k2El.style.cursor="pointer";
     k2El.title="Clique para ver a regra e a lista de GMs";
@@ -1320,7 +1327,7 @@ function renderExec(){
       document.getElementById("metasConclTit").textContent='Meta 2 — '+k2.toFixed(1)+'pp · GMs utilizados em orçamentos ('+_m2Atg.length+')';
       document.getElementById("metasConclBody").innerHTML=_m2Resumo+metaCurvaHtml({lo:5,hi:25,xmax:30,valor:k2,cor:"#FF8B22"})+_m2Nota
         +'<div style="font-size:9px;font-weight:700;color:#A8D5C5;margin:4px 0 3px">Já utilizados (atingiram a Meta 2):</div>'
-        +'<div class="mc-list">'+(_m2Atg.length?_aptosGrouped(_m2Atg):'<div style="color:#aaa">Nenhum GM atingiu a Meta 2 ainda</div>')+'</div>'
+        +'<div class="mc-list">'+(_m2Atg.length?_aptosGrouped(_m2Atg,_m2Flag):'<div style="color:#aaa">Nenhum GM atingiu a Meta 2 ainda</div>')+'</div>'
         +_m2MatHtml
         +'<div style="font-size:9px;color:#888;margin-top:10px">Meta: 25pp até dez/26 · Projeção com os já concluídos: '+_k2Prev.toFixed(1)+'pp</div>';
       document.getElementById("metasConclOv").style.display="flex";
@@ -1500,6 +1507,15 @@ function gmRowsHtml(gms,fk,hojeL){
   return out;
 }
 var _gmEditN=null;
+function _gmAtivoUpd(){
+  var cb=document.getElementById("gm-ativo"), tr=document.getElementById("gm-ativo-tr"), kn=document.getElementById("gm-ativo-kn"), tx=document.getElementById("gm-ativo-tx");
+  if(!cb||!tr||!kn||!tx) return;
+  var on=cb.checked;
+  tr.style.background=on?"#006B3F":"#cfcfcf";
+  kn.style.left=on?"18px":"2px";
+  tx.textContent=on?"Ativo":"Inativo";
+  tx.style.color=on?"#006B3F":"#999";
+}
 function gmCycle(n,a){
   if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){gmCycle(n,a);})) return;
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
@@ -1547,6 +1563,19 @@ function abrirGmEdit(n){
       +' <span style="font-size:10px;color:#888;margin-left:12px">Notável: <b style="color:'+ntCor(_nt)+'">'+(_nt==="SIM"?"Sim":(_nt==="NÃO"?"Não":"não informado"))+'</b></span>'
       +'</div>';
     document.getElementById("gmEditBody").insertAdjacentHTML("beforeend",_h);
+  })();
+  // toggle Disponibilidade (Ativo/Inativo) do GM — reflete a condição atual (flag inat)
+  (function(){
+    var _on=!gmInativo(m);
+    var h='<div class="gm-arow" style="margin-top:8px">'
+      +'<div class="gm-aname" style="color:#006B3F">Disponibilidade</div>'
+      +'<label style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none">'
+      +'<input type="checkbox" id="gm-ativo"'+(_on?" checked":"")+' onchange="_gmAtivoUpd()" style="position:absolute;opacity:0;width:0;height:0">'
+      +'<span id="gm-ativo-tr" style="width:34px;height:18px;border-radius:9px;position:relative;transition:all .15s;background:'+(_on?"#006B3F":"#cfcfcf")+'"><span id="gm-ativo-kn" style="position:absolute;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:all .15s;left:'+(_on?"18px":"2px")+'"></span></span>'
+      +'<span id="gm-ativo-tx" style="font-size:11px;font-weight:700;color:'+(_on?"#006B3F":"#999")+'">'+(_on?"Ativo":"Inativo")+'</span>'
+      +'<span style="font-size:10px;color:#888">\u2014 liga/desliga o GM (parecer INATIVAR)</span>'
+      +'</label></div>';
+    document.getElementById("gmEditBody").insertAdjacentHTML("beforeend",h);
   })();
   // checkbox "Simular sem BIM" — aplica ao grupo deste GM (unidade usada pelo burndown)
   (function(){
@@ -1626,10 +1655,14 @@ function salvarGmEdit(){
     else { if(_gmDateEd[a]){ m[a].ini=(ii?ii.value:null)||null; m[a].fim=(ff?ff.value:null)||null; } else if(_gmDurEd[a]){ m[a].ini=null; m[a].fim=null; } }
   });
   var _agEl=document.getElementById("gm-ag"); if(_agEl) m.ag=_agEl.value;
+  var _atEl=document.getElementById("gm-ativo"), _inatAntes=gmInativo(m);
+  if(_atEl) m.inat=!_atEl.checked;
   var gmcells={};
   AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||"")}; });
   gmcells[m.n+"__MDM"].ag=(m.ag!=null?m.ag:"0");
+  gmcells[m.n+"__MDM"].inat=!!m.inat;
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
+  if(window.mdmLog && _atEl && _inatAntes!==gmInativo(m)) mdmLog("GM "+m.f,"Disponibilidade GM "+m.n,(m.nm||"")+": "+(_inatAntes?"Inativo":"Ativo")+" \u2192 "+(gmInativo(m)?"Inativo":"Ativo"));
   var _sb=document.getElementById("gm-sembim");
   if(_sb){
     var _grps=GRUPOS.filter(function(g){return gmKey(g.nome)===m.gk && g.fase===m.f;});
@@ -3205,7 +3238,7 @@ function kbMetrics(){
   set("kpi-wip", wip);
 }
 function kbLimpar(){
-  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim","kf-peso"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim","kf-peso","kf-ag"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   var b=document.getElementById("kf-busca");if(b)b.value="";
   var l=document.getElementById("kf-late");if(l)l.checked=false;
   renderKanban();
@@ -3219,6 +3252,7 @@ function renderKanban(){
   var _kfIni=_kfVal("kf-ini"), _kfFim=_kfVal("kf-fim"); // P01.2
   var fLate=(document.getElementById("kf-late")||{checked:false}).checked;
   var fPeso=_kfVal("kf-peso"); // "", "ativo", "inativo"
+  var fAg=_kfVal("kf-ag"); // "", "S", "N", "0"
   function pass(m,area){
     if(fFase && m.f!==fFase) return false;
     if(fGrupo && m.g!==fGrupo) return false;
@@ -3227,6 +3261,7 @@ function renderKanban(){
     if(fLate && !kbLate(m,area)) return false;
     if(fPeso==="ativo" && gmInativo(m)) return false;
     if(fPeso==="inativo" && !gmInativo(m)) return false;
+    if(fAg && agOf(m)!==fAg) return false;
     if((_kfIni||_kfFim) && !_gmDateOk(m,(fArea?[fArea]:[]),_kfIni,_kfFim)) return false; // P01.2
     if(fBusca && !(String(m.n).indexOf(fBusca)>=0 || (m.nm||"").toLowerCase().indexOf(fBusca)>=0 || (m.g||"").toLowerCase().indexOf(fBusca)>=0)) return false;
     return true;
@@ -3495,6 +3530,7 @@ window.fbAplicarRemoto = function(d){
     if(c.resp!==undefined)m[a].resp=c.resp;
     if(c.sel!==undefined && a==="MDM")m.MDM.sel=c.sel;
     if(a==="MDM" && c.ag!==undefined)m.ag=c.ag;
+    if(a==="MDM" && c.inat!==undefined)m.inat=!!c.inat;
     if(c.ini!==undefined){ if(a==="MDM")m.MDM.ini=c.ini; else m[a].ini=c.ini; }
     if(c.fim!==undefined){ if(a==="MDM")m.MDM.fim=c.fim; else m[a].fim=c.fim; }
   }); }); }

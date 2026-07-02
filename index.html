@@ -3026,9 +3026,14 @@ function renderCaminhoCritico(){
   });
   var byTeam={}; stats.forEach(function(s){byTeam[s.team]=s;});
   var durGlobal=(function(){var c=0,k=0;stats.forEach(function(s){c+=s.carga;k+=s.n;});return k?c/k:1;})();
-  // gargalo = time nivelado com maior espera acumulada na fila (desempata por carga/recurso)
+  // gargalo = time cujo +1 recurso mais ANTECIPA o fim do projeto (simulação);
+  // empate ou nenhum ganho → maior espera acumulada na fila (critério anterior)
   var lev=stats.filter(function(s){return s.team!=="MDM";});
-  var garg=lev.slice().sort(function(a,b){return (b.waitTot-a.waitTot)||(b.proc-a.proc);})[0];
+  var baseEnd=_simProjEnd(null,0);
+  var _ganho={};
+  lev.forEach(function(s){ _ganho[s.team]=baseEnd-_simProjEnd(s.team,s.R+1); });
+  var garg=lev.slice().sort(function(a,b){return (_ganho[b.team]-_ganho[a.team])||(b.waitTot-a.waitTot)||(b.proc-a.proc);})[0];
+  var gargTemGanho=!!(garg && _ganho[garg.team]>=86400000);
   var compMake=byTeam.COMP.make;
   // ── Simulação: fim do projeto (último Compilador) ao adicionar recursos a um time ──
   function _simProjEnd(overrideTeam,R){
@@ -3050,7 +3055,6 @@ function renderCaminhoCritico(){
     var mx=-Infinity; GMS.forEach(function(m){ if(m.w>0){var c=fim.COMP[m.n]; if(c>mx)mx=c;} });
     return mx;
   }
-  var baseEnd=_simProjEnd(null,0);
   var sim1=garg?_simProjEnd(garg.team,garg.R+1):baseEnd;
   var sim2=garg?_simProjEnd(garg.team,garg.R+2):baseEnd;
   function _d(ms){return Math.round((baseEnd-ms)/86400000);}
@@ -3061,7 +3065,10 @@ function renderCaminhoCritico(){
   var head='<div style="font-size:11px;color:#333;margin-bottom:8px;line-height:1.5">'
     +'O projeto (\u00faltimo Compilador) termina em <b style="color:'+(_alem(compMake)>0?"#BF360C":"#006B3F")+'">'+_br(compMake)+'</b>'
     +(_alem(compMake)>0?(' <span style="color:#BF360C;font-weight:700">('+_alem(compMake)+'d al\u00e9m de dez/26)</span>'):'')
-    +'. O gargalo n\u00e3o \u00e9 a etapa mais longa, e sim o <b style="color:'+gCor+'">time '+gLbl+'</b>: sem capacidade para acompanhar a libera\u00e7\u00e3o dos GMs, eles se acumulam na fila esperando um recurso livre.</div>';
+    +(gargTemGanho
+      ?('. O gargalo n\u00e3o \u00e9 a etapa mais longa, e sim o <b style="color:'+gCor+'">time '+gLbl+'</b>: \u00e9 o time cujo refor\u00e7o de recurso mais antecipa o fim do projeto \u2014 sem capacidade para acompanhar a libera\u00e7\u00e3o dos GMs, eles se acumulam na fila esperando um recurso livre.')
+      :('. Adicionar recursos aos times <b>n\u00e3o antecipa o fim do projeto</b>: a restri\u00e7\u00e3o \u00e9 a cadeia de predecessoras (ritmo do MDM e datas j\u00e1 definidas), n\u00e3o a capacidade dos times.'))
+    +'</div>';
   // tabela por time
   var rows=stats.map(function(s){
     var isG=garg&&s.team===garg.team;
@@ -3094,11 +3101,17 @@ function renderCaminhoCritico(){
   }
   var simHtml='';
   if(garg){
+    var _gLinha=lev.map(function(s){
+      var g=Math.round(_ganho[s.team]/86400000);
+      var c=ACFG[s.team]?ACFG[s.team].cor:"#555";
+      return '<b style="color:'+c+'">'+(ACFG[s.team]?ACFG[s.team].label:s.team)+'</b> \u2212'+(g>0?g:0)+'d';
+    }).join(' \u00b7 ');
     simHtml='<div style="font-size:10.5px;color:#333;line-height:1.6">'
       +'<span style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px">Simula\u00e7\u00e3o \u2014 fim do projeto adicionando recursos ao '+gLbl+'</span><br>'
       +'Atual (R=<b>'+garg.R+'</b>): <b>'+_br(_isoOf(baseEnd))+'</b>'
       +' \u00b7 +1 (R='+(garg.R+1)+'): <b style="color:#006B3F">'+_br(_isoOf(sim1))+'</b> <span style="color:#006B3F">(\u2212'+_d(sim1)+'d)</span>'
       +' \u00b7 +2 (R='+(garg.R+2)+'): <b style="color:#006B3F">'+_br(_isoOf(sim2))+'</b> <span style="color:#006B3F">(\u2212'+_d(sim2)+'d)</span>'
+      +'<br><span style="font-size:9px;color:#888">Ganho com +1 recurso, por time: '+_gLinha+'</span>'
       +'</div>';
   }
   // ── Atraso de MDM: grupos fora do SLA (19d por grupo) ──

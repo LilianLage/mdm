@@ -1195,7 +1195,9 @@ function _bdSemBimChip(){
   dot.style.boxShadow   = on ? '0 0 0 2px rgba(121,63,152,.18)' : 'none';
 }
 function calcPctGrupo(g){
-  if(g.COMP.st==="done") return 100;
+  // 100% (concluído p/ Meta 1) exige TODAS as áreas done — inclusive placeholders de
+  // "sem atuação" (status done com 0 dias). COMP done sozinho NÃO conclui o GM.
+  if(g.MDM.st==="done"&&g.ORC.st==="done"&&g.BIM.st==="done"&&g.COMP.st==="done") return 100;
   if(g.ORC.st==="wip"||g.BIM.st==="wip"||g.ORC.st==="done"||g.BIM.st==="done") return 75;
   if(g.MDM.st==="done") return 50;
   if(g.MDM.st==="wip") return 25;

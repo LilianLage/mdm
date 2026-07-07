@@ -3677,7 +3677,7 @@ function calcResumoJIP(){
     delete e.wip;
     return e;
   });
-  var r1=function(v){return Math.round(v*10)/10;};
+  var r1=function(v){return Math.round(v*100)/100;};
   var serie={}; serie[CFG.hoje.slice(0,7)]={m1:r1(m1),m1c:r1(m1c),m2:r1(m2)};
   return {ts:new Date().toISOString(),hoje:CFG.hoje,meta1:r1(m1),meta1Concl:r1(m1c),meta2:r1(m2),serie:serie,grupos:grupos,gms:gms};
 }

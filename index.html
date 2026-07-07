@@ -450,6 +450,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     'window._fbListen=function(){try{onSnapshot(REF,function(snap){if(!snap.exists())return;if(snap.metadata&&snap.metadata.hasPendingWrites)return;window.fbAplicarRemoto(snap.data());if(window.renderTudo)window.renderTudo();});}catch(e){}};',
     'window.fbCarregar=async function(){try{var snap=await getDoc(REF);if(snap.exists()){var d=snap.data();if(d.cells||d.meta||d.gmcells){window.fbAplicarRemoto(d);}else if(d.grupos){var v=JSON.parse(d.grupos);if(Array.isArray(v)&&v.length)window.GRUPOS.splice(0,window.GRUPOS.length,...v);window._GIDS=null;if(d.plano){var p2=JSON.parse(d.plano);if(Array.isArray(p2))window.PLANO.splice(0,window.PLANO.length,...p2);}if(d.takeaways){var t3=JSON.parse(d.takeaways);if(Array.isArray(t3))window.TAKEAWAYS.splice(0,window.TAKEAWAYS.length,...t3);}if(d.cfg){var c4=JSON.parse(d.cfg);if(c4&&c4.kpi2!==undefined)window.CFG.kpi2=c4.kpi2;}await window.fbSalvar();}}else{await window.fbSalvar();}window._fbListen();window.mostrarSyncStatus("🔄 Sincronizado ao vivo","#006B3F");return true;}catch(e){return false;}};',
     'window._fbLog=async function(e){try{if(!e)return;await addDoc(collection(db,"audit_log"),e);}catch(err){}};',
+    'window._fbPublicarResumo=async function(p){try{if(!p)return;await setDoc(doc(db,"resumo","jip"),p,{merge:true});console.log("[resumo JIP] publicado",p.ts);}catch(e){console.error("[resumo JIP] falha ao publicar:",e);window.mostrarSyncStatus("⚠️ Resumo JIP: "+e.message,"#BF360C");}};',
     'window._fbCarregarLog=async function(){try{var q=query(collection(db,"audit_log"),orderBy("ts","desc"));var s=await getDocs(q);var out=[];s.forEach(function(d){out.push(d.data());});return out;}catch(err){return [];}};',
     'window.fbPronto=true;if(window._fbOnPronto)window._fbOnPronto();'
   ].join('');
@@ -3626,6 +3627,80 @@ if(window.fbPronto){
   // Fallback: se Firebase demorar mais de 3s, renderiza com dados locais
   setTimeout(() => { if(!window.fbPronto) renderTudo(); }, 3000);
 }
+
+// ═══════════ CONTRATO DE RESUMO → DASHBOARD JIP ═══════════
+// Publica em resumo/jip (deste projeto Firebase) um retrato compacto do MDM:
+// Meta 1/Meta 2 (série mensal acumulada por merge) + cronograma por fase,
+// grupo e GM. O board JIP assina esse doc e alimenta OKRs e roadmap do
+// produto MDM automaticamente, sem duplo preenchimento.
+function calcResumoJIP(){
+  if(typeof GMS==="undefined") return null;
+  if(typeof recalcGmSched==="function" && !_gmSchedOk) recalcGmSched();
+  var hojeMs=pd(CFG.hoje).getTime();
+  var AR=["MDM","ORC","BIM","COMP"];
+  // Meta 1 — progresso ponderado e % concluído (GMs 100% nas 4 áreas)
+  var m1=calcMeta1();
+  var m1c=GMS.reduce(function(s,m){return s+(calcPctGrupo(m)===100?m.w*100:0);},0);
+  // Meta 2 — mesma regra automática do painel executivo (2 meses de maturação; exceção "sem BIM")
+  function m2Areas(m){ return gmSemBIM(m)?["MDM","ORC","COMP"]:AR; }
+  var m2=0;
+  GMS.forEach(function(m){
+    if(!(m.w>0)) return;
+    if(!m2Areas(m).every(function(a){return m[a].st==="done";})) return;
+    var w=gmAreaWin(m),mx=0;
+    m2Areas(m).forEach(function(a){var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f;});
+    if(!mx) return;
+    var d0=new Date(mx), d=new Date(d0.getFullYear(),d0.getMonth()+2,d0.getDate());
+    if(d.getTime()<=hojeMs) m2+=m.w*100;
+  });
+  // GMs ativos: janela agregada (fim = maior fim entre as 4 áreas) + status
+  var gms=[];
+  GMS.forEach(function(m){
+    if(m.inat) return;
+    var w=gmAreaWin(m),mx=0;
+    AR.forEach(function(a){var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f;});
+    var pct=calcPctGrupo(m);
+    gms.push({n:m.n,nm:m.nm||"",g:m.g,gk:m.gk,f:m.f,fim:mx?_isoOf(mx):null,st:(pct===100?"done":(pct>0?"wip":"plan"))});
+  });
+  // Grupos (por fase): agregação dos GMs ativos
+  var gmap={},gord=[];
+  gms.forEach(function(x){
+    var k=x.f+"|"+x.gk;
+    if(!gmap[k]){gmap[k]={g:x.g,gk:x.gk,f:x.f,tot:0,done:0,wip:0,fim:null};gord.push(k);}
+    var e=gmap[k]; e.tot++;
+    if(x.st==="done")e.done++; else if(x.st==="wip")e.wip++;
+    if(x.fim&&(!e.fim||x.fim>e.fim))e.fim=x.fim;
+  });
+  var grupos=gord.map(function(k){
+    var e=gmap[k];
+    e.st=(e.done===e.tot?"done":((e.wip>0||e.done>0)?"wip":"plan"));
+    delete e.wip;
+    return e;
+  });
+  var r1=function(v){return Math.round(v*10)/10;};
+  var serie={}; serie[CFG.hoje.slice(0,7)]={m1:r1(m1),m1c:r1(m1c),m2:r1(m2)};
+  return {ts:new Date().toISOString(),hoje:CFG.hoje,meta1:r1(m1),meta1Concl:r1(m1c),meta2:r1(m2),serie:serie,grupos:grupos,gms:gms};
+}
+var _resumoJipTimer=null;
+function agendarResumoJIP(){
+  if(_resumoJipTimer)clearTimeout(_resumoJipTimer);
+  _resumoJipTimer=setTimeout(function(){
+    try{ var p=calcResumoJIP(); if(p&&window._fbPublicarResumo) window._fbPublicarResumo(p); }
+    catch(e){ console.error("[resumo JIP] falha ao calcular:",e); }
+  },1500);
+}
+// Publica após cada salvamento (envolve fbSalvarParcial/fbSalvar) e no load
+(function(){
+  var t=setInterval(function(){
+    if(!window.fbPronto||!window.fbSalvarParcial||!window.fbSalvar)return;
+    clearInterval(t);
+    var _sp=window.fbSalvarParcial;
+    window.fbSalvarParcial=function(p){var r=_sp(p);Promise.resolve(r).then(agendarResumoJIP);return r;};
+    var _sv=window.fbSalvar;
+    window.fbSalvar=function(){var r=_sv();Promise.resolve(r).then(agendarResumoJIP);return r;};
+    setTimeout(agendarResumoJIP,3000); // retrato inicial após o load
+  },400);
+})();
 </script>
 <!-- ══════════ HISTÓRICO DE EDIÇÕES (identidade + log + painel) ══════════ -->
 <script>

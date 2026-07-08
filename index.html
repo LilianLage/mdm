@@ -383,6 +383,16 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 .kb-tabs{display:flex;gap:0;margin-top:10px;border-bottom:2px solid var(--bdr)}
 .kb-tab{font-size:11px;font-weight:600;color:#888;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;padding:7px 16px;cursor:pointer;display:flex;align-items:center;gap:6px}
 .kb-tab.on{color:var(--v1);font-weight:700;border-bottom-color:var(--v1)}
+/* ── Aba Tabela (visão estilo Excel/CSV) ── */
+.gtb{border-collapse:separate;border-spacing:0;font-size:9px;white-space:nowrap;min-width:100%}
+.gtb th{position:sticky;top:0;background:#F3F7F4;z-index:3;border-bottom:1px solid var(--bdr);border-right:1px solid #e4ece6;padding:4px 6px;text-align:left;font-size:8.5px;color:#2f3f34;vertical-align:top}
+.gtb td{border-bottom:1px solid #f0f0f0;border-right:1px solid #f6f6f6;padding:3px 6px;color:#444}
+.gtb tbody tr:nth-child(even) td{background:#FAFCFA}
+.gtb tbody tr:hover td{background:#EFF7F1}
+.gtb td.num,.gtb th.num{text-align:right}
+.gtb tfoot td{position:sticky;bottom:0;background:#EAF3EC;font-weight:700;color:var(--v1);border-top:2px solid var(--v1);z-index:3;padding:4px 6px}
+.gtb .tf-in{width:92px;max-width:130px;font-size:8.5px;border:1px solid #ddd;border-radius:4px;padding:1px 3px;color:#444;background:#fff;display:block;margin-top:3px;font-weight:400}
+.gtb select.tf-in{width:auto}
 .kb-board{display:flex;gap:8px;padding:10px;overflow-x:auto;background:#F4F8F4;border:1px solid var(--bdr);align-items:flex-start}
 .kb-col{flex:0 0 205px;min-width:205px;background:#fff;border:1px solid var(--bdr);border-radius:8px;display:flex;flex-direction:column;max-height:78vh}
 .kb-col-hd{padding:7px 9px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:#fff;border-radius:7px 7px 0 0;display:flex;justify-content:space-between;align-items:center}
@@ -507,11 +517,11 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
       <div class="kpi-label">Meta 1 — Aptos p/ Operação</div>
       <div class="kpi-val" id="k1-v" style="display:flex;align-items:baseline;gap:16px;cursor:help">
         <span style="display:inline-flex;flex-direction:column;line-height:1.05">
-          <span id="k1-prog">—</span>
+          <span id="k1-prog" style="color:#52B788">—</span>
           <span style="font-size:9px;font-weight:600;color:#888;letter-spacing:.3px">progresso</span>
         </span>
         <span style="display:inline-flex;flex-direction:column;line-height:1.05">
-          <span id="k1-concl" style="color:#52B788">—</span>
+          <span id="k1-concl" style="color:var(--v1)">—</span>
           <span style="font-size:9px;font-weight:600;color:#888;letter-spacing:.3px">concluído</span>
         </span>
       </div>
@@ -621,6 +631,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
 <div class="kb-tabs">
   <button class="kb-tab on" id="tab-gantt" onclick="trocarView('gantt')">📊 Gantt</button>
   <button class="kb-tab" id="tab-kanban" onclick="trocarView('kanban')">🗂️ Kanban — gestão diária</button>
+  <button class="kb-tab" id="tab-tabela" onclick="trocarView('tabela')">📋 Tabela</button>
 </div>
 <div id="view-gantt">
 <!-- GANTT TOOLBAR -->
@@ -695,6 +706,7 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <option value="ativo">Só ativos</option>
     <option value="inativo">Só inativos</option>
   </select>
+  <label title="Mostrar só GMs com alguma área concluída cujo fim previsto está no FUTURO e sem data real registrada — abra o GM e salve (o painel pedirá a data real) ou corrija a data de fim" style="font-size:9px;font-weight:700;color:#BF360C;display:inline-flex;align-items:center;gap:3px;cursor:pointer;white-space:nowrap;user-select:none"><input type="checkbox" id="f-futuro" onchange="renderGantt()" style="margin:0">⚠️ Concluído c/ data futura</label>
   <button class="tl-btn sec" onclick="limpar()">✕ Limpar</button>
   <span class="tl-cnt" id="f-cnt"></span>
   <div style="display:flex;gap:4px;margin-right:4px">
@@ -756,6 +768,15 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
   </div>
   <div style="font-size:9px;color:#888;padding:0 12px 2px">Cada time puxa seus cartões · arraste entre colunas ou use os botões · clique no cartão para editar o GM. Orçamento e BIM atuam em paralelo (o mesmo GM aparece nas duas colunas, com o selo da área).</div>
   <div class="kb-board" id="kanban-board"></div>
+</div>
+
+<div id="view-tabela" style="display:none">
+  <div style="display:flex;align-items:center;gap:8px;margin:8px 0 6px;flex-wrap:wrap">
+    <span style="font-size:9.5px;font-weight:700;color:var(--v1)">📋 Tabela de GMs — mesma visão da exportação CSV · filtre pelos títulos e as somatórias do rodapé seguem o filtro</span>
+    <span class="tl-cnt" id="tab-cnt"></span>
+    <button class="tl-btn sec" onclick="tabLimparFiltros()" style="margin-left:auto">✕ Limpar filtros</button>
+  </div>
+  <div id="tabela-wrap" style="overflow:auto;max-height:72vh;border:1px solid var(--bdr);border-radius:8px;background:#fff"></div>
 </div>
 
 <footer>
@@ -1063,6 +1084,21 @@ function calcRitmo(){
   const ritmoNec=diasRestantes>0?falta/diasRestantes:Infinity;
   return{ritmoAtual,ritmoNec,meta1Atual,diasRestantes:Math.round(diasRestantes),falta};
 }
+// Forecast da Meta 1 (mesma lógica da linha Forecast do burndown): acumula o peso de
+// cada GM na sua data prevista de conclusão — MAIOR fim entre TODAS as áreas,
+// priorizando a data real (fimR) quando a área já concluiu — e retorna a data em que
+// o acumulado atinge 90pp, a data final e o total previsto.
+function calcForecast90(){
+  if(typeof GMS==="undefined") return null;
+  var ev=[];
+  GMS.forEach(function(m){ if(!(m.w>0)) return; var w=gmAreaWin(m); var t=0;
+    AREAS.forEach(function(a){ var f=(m[a]&&m[a].st==="done"&&m[a].fimR)?m[a].fimR:(w[a]&&w[a].fim); var ms=f?pd(f).getTime():0; if(ms>t)t=ms; });
+    if(t) ev.push({t:t, pp:m.w*100}); });
+  ev.sort(function(a,b){return a.t-b.t;});
+  var acc=0, d90=null, fim=null;
+  ev.forEach(function(e){ acc+=e.pp; if(d90===null && acc>=90) d90=new Date(e.t); fim=new Date(e.t); });
+  return {d90:d90, fim:fim, total:acc};
+}
 
 function calcDivs(){
   const hoje=pd(CFG.hoje);
@@ -1211,7 +1247,8 @@ function renderExec(){
   // ── Meta 2 (AUTOMÁTICA): GM conta 2 meses após concluir TODAS as áreas ──
   // Exceção: GM com "Simular sem BIM" (grupo g.semBIM) conta sem depender do BIM — só MDM, ORC e COMP
   function _m2Areas(m){ return gmSemBIM(m)?["MDM","ORC","COMP"]:AREAS; }
-  function _m2Fim(m){ var w=gmAreaWin(m); var mx=0; _m2Areas(m).forEach(function(a){ var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f; }); return mx?new Date(mx):null; }
+  // Data de conclusão por área: prioriza a data REAL (fimR, registrada ao marcar done antes do previsto); senão usa o cronograma.
+  function _m2Fim(m){ var w=gmAreaWin(m); var mx=0; _m2Areas(m).forEach(function(a){ var f=(m[a]&&m[a].st==="done"&&m[a].fimR)?Date.parse(m[a].fimR):((w[a]&&w[a].fim)?Date.parse(w[a].fim):0); if(f>mx)mx=f; }); return mx?new Date(mx):null; }
   function _m2Matura(m){ var f=_m2Fim(m); if(!f) return null; return new Date(f.getFullYear(), f.getMonth()+2, f.getDate()); }
   var _hojeMs2=pd(CFG.hoje).getTime();
   var _m2Done = GMS.filter(function(m){ return m.w>0 && _m2Areas(m).every(function(a){return m[a].st==="done";}); }); // todas as áreas exigidas concluídas (sem BIM p/ GMs semBIM)
@@ -1326,14 +1363,19 @@ function renderExec(){
     };
   }
   const k1b=document.getElementById("k1-b");
-  const ritmo=calcRitmo();
-  const ratio=ritmo.ritmoNec/Math.max(ritmo.ritmoAtual,0.0001);
-  const k1OkRitmo=ratio<=1.3;
+  // Análise pelo FORECAST (cronograma), não mais pelo ritmo: compara a data em que o
+  // cronograma atual atinge 90pp com a meta (31/12/26).
+  const _fc90=calcForecast90();
+  const _metaDt=pd("2026-12-31");
+  const _fcOk=!!(_fc90 && _fc90.d90 && _fc90.d90.getTime()<=_metaDt.getTime());
+  const _fcDif=(_fc90&&_fc90.d90)?Math.round((_fc90.d90.getTime()-_metaDt.getTime())/86400000):null;
   k1b.style.width=Math.min(100,k1/90*100)+"%";
-  k1b.style.background=k1OkRitmo?"var(--v1)":"var(--la)";
-  k1b.title=k1OkRitmo
-    ?`✅ Ritmo adequado — ${ritmo.ritmoAtual.toFixed(2)}pp/dia realizado vs ${ritmo.ritmoNec.toFixed(2)}pp/dia necessário. Meta 1 no caminho certo.`
-    :`⚠️ Ritmo insuficiente — realizando ${ritmo.ritmoAtual.toFixed(2)}pp/dia, mas precisaria de ${ritmo.ritmoNec.toFixed(2)}pp/dia para atingir 90% até dez/26. Faltam ${ritmo.falta.toFixed(1)}pp em ${ritmo.diasRestantes} dias.`;
+  k1b.style.background=_fcOk?"var(--v1)":"var(--la)";
+  k1b.title=(_fc90&&_fc90.d90)
+    ?(_fcOk
+      ?"\u2705 Forecast no prazo \u2014 pelo cronograma atual, 90% em "+fmtBR(_fc90.d90)+" ("+Math.abs(_fcDif)+" dia(s) antes da meta de dez/26)."
+      :"\u26A0\uFE0F Forecast al\u00e9m da meta \u2014 pelo cronograma atual, 90% s\u00f3 em "+fmtBR(_fc90.d90)+" ("+_fcDif+" dia(s) ap\u00f3s dez/26). Reveja prazos ou escopo.")
+    :"\u26A0\uFE0F Forecast \u2014 o cronograma atual n\u00e3o chega a 90pp (total previsto: "+(_fc90?_fc90.total.toFixed(1):"0")+"pp).";
   document.getElementById("k2-v").textContent=k2.toFixed(1)+"%";
   document.getElementById("k2-b").style.width=Math.min(100,k2/25*100)+"%";
   document.getElementById("rod").textContent="Data: "+CFG.rod;
@@ -1475,7 +1517,9 @@ function gmRowsHtml(gms,fk,hojeL){
   var _fd=_filtroDatas();
   var _bq=(document.getElementById("f-busca")||{value:""}).value.trim();
   var _bqNum=(_bq!=="" && /^[0-9]+$/.test(_bq));
+  var _fFut=(document.getElementById("f-futuro")||{checked:false}).checked;
   gms.forEach(function(m){
+    if(_fFut && !gmDoneFuturo(m)) return;
     if(_bqNum && String(m.n).indexOf(_bq)<0) return;
     if(_fPeso==="ativo" && gmInativo(m)) return;
     if(_fPeso==="inativo" && !gmInativo(m)) return;
@@ -1493,7 +1537,7 @@ function gmRowsHtml(gms,fk,hojeL){
     out+='<div class="g-row gm-row'+(inativo?" gm-inativo":"")+'"><div class="g-lbl gm-lbl" onclick="abrirGmEdit('+m.n+')" title="Detalhe do GM '+m.n+' (datas/dura\u00e7\u00e3o)">'
       +'<div class="g-lbl-top"><span class="gm-bullet">\u2514</span><span class="g-nome" title="'+nm+'">'+nm+'</span></div>'
       +'<div class="g-stats">peso <b style="color:var(--v1)">'+(m.w*100).toFixed(3)+'%</b> &nbsp;\u00b7&nbsp; '+(m.it||0)+' itens'+(inativo?' &nbsp;\u00b7&nbsp; <span style="color:#999">INATIVO</span>':'')+'</div>'+'<div class="g-stats" style="padding-left:11px"><span style="color:'+ntCor(ntOf(m))+'">'+ntLabel(ntOf(m))+'</span> &nbsp;\u00b7&nbsp; <span style="color:'+agCor(agOf(m))+'">'+agLabel(agOf(m))+'</span></div>'
-      +'<div style="padding-left:0;margin-top:1px">'+AREAS.filter(function(a){return !(_fAreas.length && _fAreas.indexOf(a)<0);}).map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";var _pe=(m[a]&&m[a]._predEnd)?fmtBR(pd(m[a]._predEnd)):"—";var _lk=(a!=="MDM"&&m[a]&&m[a]._lockBad)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="⚠️ Conflito de precedência: a data desta área foi fixada manualmente e começa ANTES de a predecessora terminar (ela só libera em '+_pe+'), então o cronograma não está respeitando a ordem das áreas. Clique para reverter: a data volta a ser calculada automaticamente pela predecessora (mantendo a duração)." style="color:#BF360C;cursor:pointer">⚠️</span>':((a!=="MDM"&&m[a]&&m[a]._locked)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="🔒 Data definida manualmente: esta área foi fixada e não acompanha automaticamente a predecessora (que libera em '+_pe+'). Se a predecessora antecipar, esta data não se move sozinha. Clique para reverter ao cálculo automático pela predecessora (mantendo a duração)." style="color:#999;cursor:pointer">🔒</span>':"");return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+(m[a].resp?(' \u2014 Resp: '+m[a].resp):'')+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+(m[a].resp?' <span style="color:#b8b8b8;font-weight:400">\u00b7 '+m[a].resp+'</span>':'')+_lk+'</div>';}).join("")+'</div>'
+      +'<div style="padding-left:0;margin-top:1px">'+AREAS.filter(function(a){return !(_fAreas.length && _fAreas.indexOf(a)<0);}).map(function(a){var ic=m[a].st==="done"?"\u2705":m[a].st==="wip"?"\u23F3":"\u26AA";var _pe=(m[a]&&m[a]._predEnd)?fmtBR(pd(m[a]._predEnd)):"—";var _ftr=(m[a].st==="done"&&!m[a].fimR&&win[a]&&win[a].fim&&pd(win[a].fim)>pd(CFG.hoje))?' <span title="Concluído com fim previsto no FUTURO ('+fmtBR(pd(win[a].fim))+') e sem data real registrada — distorce Meta 2 e forecast. Clique no GM, salve e informe a data real, ou corrija a data de fim." style="font-size:7.5px;font-weight:700;color:#BF360C;border:1px solid #BF360C;border-radius:3px;padding:0 3px;white-space:nowrap">📅 futuro</span>':"";var _lk=(a!=="MDM"&&m[a]&&m[a]._lockBad)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="⚠️ Conflito de precedência: a data desta área foi fixada manualmente e começa ANTES de a predecessora terminar (ela só libera em '+_pe+'), então o cronograma não está respeitando a ordem das áreas. Clique para reverter: a data volta a ser calculada automaticamente pela predecessora (mantendo a duração)." style="color:#BF360C;cursor:pointer">⚠️</span>':((a!=="MDM"&&m[a]&&m[a]._locked)?' <span onclick="event.stopPropagation();destravarGmArea('+m.n+',&#39;'+a+'&#39;)" title="🔒 Data definida manualmente: esta área foi fixada e não acompanha automaticamente a predecessora (que libera em '+_pe+'). Se a predecessora antecipar, esta data não se move sozinha. Clique para reverter ao cálculo automático pela predecessora (mantendo a duração)." style="color:#999;cursor:pointer">🔒</span>':"");return '<div onclick="event.stopPropagation();abrirGmEdit('+m.n+')" title="'+ACFG[a].label+' \u2014 '+(m[a].st==="done"?"conclu\u00eddo":m[a].st==="wip"?"em andamento":"planejado")+(m[a].resp?(' \u2014 Resp: '+m[a].resp):'')+' (clique p/ editar)" style="height:20px;display:flex;align-items:center;gap:3px;padding-left:2px;font-size:9px;font-weight:700;color:'+ACFG[a].cor+';cursor:pointer">'+ic+' '+ACFG[a].label+(m[a].resp?' <span style="color:#b8b8b8;font-weight:400">\u00b7 '+m[a].resp+'</span>':'')+_lk+_ftr+'</div>';}).join("")+'</div>'
       +'</div><div class="g-subs">'+subs+'</div></div>';
   });
   return out;
@@ -1508,11 +1552,33 @@ function _gmAtivoUpd(){
   tx.textContent=on?"Ativo":"Inativo";
   tx.style.color=on?"#006B3F":"#999";
 }
+// ── Data REAL de conclusão (fimR) ──────────────────────────────────────────
+// Problema: marcar "done" antes do fim previsto deixa o GM concluído com data
+// futura, distorcendo a Meta 2 (maturação de 2 meses) e o forecast. Solução:
+// ao marcar done com fim previsto no futuro, pedir a data real (padrão: hoje)
+// e gravar em fimR — a Meta 2 e o forecast passam a usar essa data.
+function gmFimReal(m,a){
+  if(!m || !m[a] || m[a].st!=="done") return;
+  var w=gmAreaWin(m), f=w[a]&&w[a].fim;
+  if(!f || pd(f)<=pd(CFG.hoje)) return; // fim previsto não está no futuro: nada a corrigir
+  var r=prompt("GM "+m.n+(m.nm?" "+m.nm:"")+" \u2014 "+ACFG[a].label+" marcado como conclu\u00eddo, mas o fim previsto \u00e9 "+fmtBR(pd(f))+" (futuro).\nInforme a data REAL de conclus\u00e3o (AAAA-MM-DD). Cancelar ou vazio = hoje:", CFG.hoje);
+  r=(r===null?"":String(r)).trim();
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(r)) r=CFG.hoje;
+  m[a].fimR=r;
+  if(window.mdmLog) mdmLog("GM "+m.f,"Data real de conclus\u00e3o "+ACFG[a].label+" GM "+m.n,(m.nm||"")+": "+fmtBR(pd(r))+" (fim previsto era "+fmtBR(pd(f))+")");
+}
+// GM com alguma área concluída ("done") cujo fim previsto está no FUTURO e sem data
+// real (fimR) registrada — caso que distorce Meta 2 e forecast. Usado no badge e no filtro.
+function gmDoneFuturo(m){
+  var w=gmAreaWin(m), hj=pd(CFG.hoje);
+  return AREAS.some(function(a){ return m[a] && m[a].st==="done" && !m[a].fimR && w[a] && w[a].fim && pd(w[a].fim)>hj; });
+}
 function gmCycle(n,a){
   if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){gmCycle(n,a);})) return;
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
   var order=["plan","wip","done"], cur=m[a].st||"plan", nx=order[(order.indexOf(cur)+1)%3], antes=cur;
   m[a].st=nx;
+  if(nx==="done") gmFimReal(m,a); else m[a].fimR=null;
   var c={st:m[a].st,dur:m[a].dur||0,iniR:m[a].iniR||null,fimR:m[a].fimR||null}; if(a==="MDM")c.ini=m.MDM.ini;
   var gmcells={}; gmcells[m.n+"__"+a]=c;
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
@@ -1638,6 +1704,7 @@ function salvarGmEdit(){
   if(_gmEditN===null) return;
   var m=GMS.find(function(x){return x.n===_gmEditN;}); if(!m){fecharGmEdit();return;}
   var antes=AREAS.map(function(a){return ACFG[a].label+"="+m[a].st;}).join(", ");
+  var _stAntes={}; AREAS.forEach(function(a){ _stAntes[a]=m[a].st; });
   AREAS.forEach(function(a){
     var st=document.getElementById("gm-"+a+"-st"); if(st)m[a].st=st.value;
     var du=document.getElementById("gm-"+a+"-dur"); if(du){var v=parseInt(du.value,10);m[a].dur=(isNaN(v)||v<0)?0:v;}
@@ -1649,8 +1716,11 @@ function salvarGmEdit(){
   var _agEl=document.getElementById("gm-ag"); if(_agEl) m.ag=_agEl.value;
   var _atEl=document.getElementById("gm-ativo"), _inatAntes=gmInativo(m);
   if(_atEl) m.inat=!_atEl.checked;
+  _gmInvalida(); // recalcular janelas com as novas datas antes de checar conclusão antecipada
+  // done sem fimR (novo OU legado): gmFimReal só pergunta se o fim previsto está no futuro
+  AREAS.forEach(function(a){ if(m[a].st==="done"&&!m[a].fimR) gmFimReal(m,a); else if(m[a].st!=="done"&&_stAntes[a]==="done") m[a].fimR=null; });
   var gmcells={};
-  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||"")}; });
+  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||""), iniR:(m[a].iniR||null), fimR:(m[a].fimR||null)}; });
   gmcells[m.n+"__MDM"].ag=(m.ag!=null?m.ag:"0");
   gmcells[m.n+"__MDM"].inat=!!m.inat;
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
@@ -2015,6 +2085,7 @@ function limpar(){
   ["f-fase","f-area","f-st","f-resp","f-ag","f-dur"].forEach(function(id){ msClear(id); });
   document.getElementById("f-busca").value="";
   ["f-ini","f-fim","f-peso"].forEach(function(id){ var e=document.getElementById(id); if(e)e.value=""; }); // P01.2
+  var _ff=document.getElementById("f-futuro"); if(_ff)_ff.checked=false;
   renderGantt();
 }
 
@@ -2137,8 +2208,8 @@ function aplicar(){
 // BURNDOWN — versão melhorada
 // ══════════════════════════════════════════════════════════════
 // Visibilidade das linhas do burndown (clique na legenda alterna). Persiste entre renders.
-// Forecast e Linha de base começam DESATIVADOS por padrão.
-var BD_VIS = {plan:true, concl:true, prog:true, proj:true, forecast:false, base:false};
+// Padrão: Forecast ATIVADO · Projeção no ritmo e Linha de base DESATIVADAS.
+var BD_VIS = {plan:true, concl:true, prog:true, proj:false, forecast:true, base:false};
 // Período exibido: false = só 2026 (padrão, ocupa todo o espaço); true = 2026–2027 completo.
 var BD_FULL = false;
 function renderBurndown(){
@@ -2256,7 +2327,7 @@ function renderBurndown(){
     if(_bdArea){
       var st=m[_bdArea].st;
       if(st==="done"){
-        var dA = pd(gmAreaWin(m)[_bdArea].fim || CFG.hoje);
+        var dA = pd(m[_bdArea].fimR || gmAreaWin(m)[_bdArea].fim || CFG.hoje);
         if(dA > hoje) dA = hoje;
         concluido += ppFull; progresso += ppFull;
         evC.push({data:dA, pp:ppFull});
@@ -2264,7 +2335,10 @@ function renderBurndown(){
     } else {
       var p = calcPctGrupo(m);
       if(p===100){
-        var dC = pd(gmAreaWin(m).COMP.fim || CFG.hoje);
+        // Data de conclusão (Meta 1): MAIOR fim entre TODAS as áreas, priorizando a data real (fimR)
+        var _w2=gmAreaWin(m), _tc=0;
+        AREAS.forEach(function(a){ var f=(m[a].st==="done"&&m[a].fimR)?m[a].fimR:(_w2[a]&&_w2[a].fim); var ms=f?pd(f).getTime():0; if(ms>_tc)_tc=ms; });
+        var dC = _tc?new Date(_tc):hoje;
         if(dC > hoje) dC = hoje;
         concluido += ppFull; progresso += ppFull;
         evC.push({data:dC, pp:ppFull});
@@ -2346,10 +2420,7 @@ function renderBurndown(){
     ctx.fillStyle="#006B3F"; ctx.font="bold 8px Arial"; ctx.textAlign="left";
     ctx.fillText(concluido.toFixed(1)+"pp concl.", hojeX+6, hojeYConcl+12);
     _numPts.push({x:hojeX+6, y:hojeYConcl+12, txt:concluido.toFixed(1)+"pp concl.", cor:"#006B3F", src:"Conclu\u00eddo"}); }
-  if(BD_VIS.prog){ _bdDot(hojeX, hojeY, 4, "#5FBF93");
-    ctx.fillStyle="#5FBF93"; ctx.font="bold 9px Arial"; ctx.textAlign="left";
-    ctx.fillText(progresso.toFixed(1)+"pp", hojeX+6, hojeY-4);
-    _numPts.push({x:hojeX+6, y:hojeY-4, txt:progresso.toFixed(1)+"pp", cor:"#5FBF93", src:"Progresso"}); }
+  if(BD_VIS.prog){ _bdDot(hojeX, hojeY, 4, "#5FBF93"); } // sem rótulo numérico do progresso (pedido: desativar o número)
   if(BD_VIS.proj){ _bdDot(fimDezX, fimDezY, 4.5, "rgba(255,139,34,.95)");
     ctx.fillStyle="#FF8B22"; ctx.font="bold 9px Arial"; ctx.textAlign="right";
     ctx.fillText(ppDez.toFixed(1)+"%", fimDezX-6, fimDezY-5);
@@ -2397,12 +2468,18 @@ function renderBurndown(){
   }
 
   // ── P02.1 FORECAST (previsto pelo cronograma do Gantt) ──
-  // Peso acumulado pela data prevista de conclusão. Sem filtro: fim do COMP (GM pronto).
-  // Com área filtrada: fim previsto DAQUELA área.
+  // Peso acumulado pela data prevista de conclusão. Sem filtro (Meta 1): GM pronto =
+  // TODAS as áreas concluídas → usa a MAIOR data de fim entre MDM/ORC/BIM/COMP.
+  // Com área filtrada: fim previsto DAQUELA área. Se a área já concluiu com data
+  // real registrada (fimR), a data real prevalece sobre o cronograma.
   var _fcData={x90:null,dt90:null,fim:null};
   (function(){
     var ev=[];
-    GMS.forEach(function(m){ if(!(m.w>0)) return; var w=gmAreaWin(m); var d=_bdArea?(w[_bdArea]&&w[_bdArea].fim):(w.COMP&&w.COMP.fim); if(d) ev.push({d:pd(d), pp:m.w*100}); });
+    function _fcFimA(m,w,a){ var f=(m[a]&&m[a].st==="done"&&m[a].fimR)?m[a].fimR:(w[a]&&w[a].fim); return f?pd(f).getTime():0; }
+    GMS.forEach(function(m){ if(!(m.w>0)) return; var w=gmAreaWin(m); var t=0;
+      if(_bdArea){ t=_fcFimA(m,w,_bdArea); }
+      else { AREAS.forEach(function(a){ var f=_fcFimA(m,w,a); if(f>t)t=f; }); }
+      if(t) ev.push({d:new Date(t), pp:m.w*100}); });
     ev.sort(function(a,b){return a.d-b.d;});
     var pts=[{x:PAD.l,y:PAD.t+CH}], acc=0;
     ev.forEach(function(e){ acc+=e.pp; pts.push({x:_xOf(e.d),y:_yOf(acc)}); if(_fcData.x90===null && acc>=90){ _fcData.x90=_xOf(e.d); _fcData.dt90=e.d; } _fcData.fim=e.d; });
@@ -3325,7 +3402,7 @@ function renderKanban(){
 }
 function kbPersist(m,area){
   if(!window.fbSalvarParcial) return;
-  var c={st:m[area].st,dur:m[area].dur||0,ini:(area==="MDM"?m.MDM.ini:(m[area].ini||null)),fim:(area==="MDM"?(m.MDM.fim||null):(m[area].fim||null)),resp:(m[area].resp||"")};
+  var c={st:m[area].st,dur:m[area].dur||0,ini:(area==="MDM"?m.MDM.ini:(m[area].ini||null)),fim:(area==="MDM"?(m.MDM.fim||null):(m[area].fim||null)),resp:(m[area].resp||""),iniR:(m[area].iniR||null),fimR:(m[area].fimR||null)};
   if(area==="MDM") c.sel=!!m.MDM.sel;
   var g={}; g[m.n+"__"+area]=c; window.fbSalvarParcial({gmcells:g});
 }
@@ -3369,6 +3446,7 @@ function kbSet(n,area,st){
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
   if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){kbSet(n,area,st);})) return;
   var antes=m[area].st; m[area].st=st;
+  if(st==="done") gmFimReal(m,area); else if(antes==="done") m[area].fimR=null;
   kbPersist(m,area);
   if(window.mdmLog) mdmLog("Kanban","Status "+ACFG[area].label+" GM "+n,(m.nm||"")+": "+antes+" \u2192 "+st);
   _gmInvalida();
@@ -3408,9 +3486,12 @@ function trocarView(v){
   _view=v; window._view=v;
   document.getElementById("view-gantt").style.display=(v==="gantt")?"":"none";
   document.getElementById("view-kanban").style.display=(v==="kanban")?"":"none";
-  var tg=document.getElementById("tab-gantt"), tk=document.getElementById("tab-kanban");
+  var vt=document.getElementById("view-tabela"); if(vt) vt.style.display=(v==="tabela")?"":"none";
+  var tg=document.getElementById("tab-gantt"), tk=document.getElementById("tab-kanban"), tb=document.getElementById("tab-tabela");
   if(tg) tg.className="kb-tab"+(v==="gantt"?" on":"");
   if(tk) tk.className="kb-tab"+(v==="kanban"?" on":"");
+  if(tb) tb.className="kb-tab"+(v==="tabela"?" on":"");
+  if(v==="tabela" && typeof renderTabela==="function") renderTabela();
   if(v==="kanban") renderKanban();
 }
 function togVisuais(){
@@ -3444,28 +3525,104 @@ function exportarPDF(){
   if(window.renderGantt) renderGantt();
 }
 
-function exportarCSV(){
-  document.getElementById("exp-btn").classList.remove("open");
+// Dados tabulares dos GMs — mesma estrutura da exportação CSV. Usado pelo CSV e pela aba Tabela.
+function tabelaDados(){
   if(typeof recalcGmSched==="function") recalcGmSched();
   var stl={plan:"Planejado",wip:"Andamento",done:"Concluido"};
   var head=["Fase","Grupo","No GM","Nome GM","Peso %","Itens","Avanco %","Concluido","Ativo","Notavel","Agrupador",
     "MDM Status","MDM Inicio","MDM Fim","MDM Dur (d)","MDM Resp","ORC Status","ORC Inicio","ORC Fim","ORC Dur (d)","ORC Resp",
     "BIM Status","BIM Inicio","BIM Fim","BIM Dur (d)","BIM Resp","COMP Status","COMP Inicio","COMP Fim","COMP Dur (d)","COMP Resp"];
   var fnum=function(f){return parseInt((String(f).match(/\d+/)||[0])[0],10);};
-  var linhas=[head];
+  var rows=[];
   GMS.slice().sort(function(a,b){return (fnum(a.f)-fnum(b.f))||String(a.gk).localeCompare(String(b.gk))||(a.n-b.n);}).forEach(function(m){
     var w=gmAreaWin(m), p=calcPctGrupo(m);
-    linhas.push([m.f, m.g, m.n, m.nm||"", (m.w*100).toFixed(3), m.it||0, p, (p===100?"Sim":"Nao"), (m.w>0?"Sim":"Nao"), (ntOf(m)==="SIM"?"Sim":(ntOf(m)==="NÃO"?"Nao":"Nao informado")), (agOf(m)==="S"?"Sim":(agOf(m)==="N"?"Nao":"Nao informado")),
+    rows.push([m.f, m.g, m.n, m.nm||"", (m.w*100).toFixed(3), m.it||0, p, (p===100?"Sim":"Nao"), (m.w>0?"Sim":"Nao"), (ntOf(m)==="SIM"?"Sim":(ntOf(m)==="NÃO"?"Nao":"Nao informado")), (agOf(m)==="S"?"Sim":(agOf(m)==="N"?"Nao":"Nao informado")),
       stl[m.MDM.st]||m.MDM.st, w.MDM.ini, w.MDM.fim, (m.MDM.dur||0), (m.MDM.resp||""),
       stl[m.ORC.st]||m.ORC.st, w.ORC.ini, w.ORC.fim, (m.ORC.dur||0), (m.ORC.resp||""),
       stl[m.BIM.st]||m.BIM.st, w.BIM.ini, w.BIM.fim, (m.BIM.dur||0), (m.BIM.resp||""),
       stl[m.COMP.st]||m.COMP.st, w.COMP.ini, w.COMP.fim, (m.COMP.dur||0), (m.COMP.resp||"")]);
   });
+  return {head:head, rows:rows};
+}
+function exportarCSV(){
+  document.getElementById("exp-btn").classList.remove("open");
+  var d=tabelaDados();
+  var linhas=[d.head].concat(d.rows);
   var csv=linhas.map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(";");}).join("\n");
   var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
   var url=URL.createObjectURL(blob), a=document.createElement("a");
   a.href=url; a.download="MDM_GMs_"+new Date().toISOString().slice(0,10)+".csv";
   a.click(); URL.revokeObjectURL(url);
+}
+// ══ ABA TABELA — visão estilo Excel/CSV com filtro por coluna e somatórias ══
+// Colunas numéricas: 4 Peso% (Σ) · 5 Itens (Σ) · 6 Avanço% (média) · 14/19/24/29 Dur (Σ).
+// Coluna 7 (Concluido): conta os "Sim". As somatórias consideram SÓ as linhas filtradas.
+var _TAB_DATA=null; // cache {head,rows} do render atual
+var _TAB_NUM={2:1,4:1,5:1,6:1,14:1,19:1,24:1,29:1}; // colunas alinhadas à direita
+function _tabEsc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+function renderTabela(){
+  var wrap=document.getElementById("tabela-wrap"); if(!wrap) return;
+  // preservar filtros digitados antes de reconstruir
+  var prev={}; wrap.querySelectorAll(".tf-in").forEach(function(el){ if(el.value) prev[el.getAttribute("data-c")]=el.value; });
+  _TAB_DATA=tabelaDados();
+  var head=_TAB_DATA.head, rows=_TAB_DATA.rows;
+  // valores distintos por coluna: até 25 vira <select> (igualdade), senão campo de texto (busca parcial)
+  var thH="";
+  head.forEach(function(h,c){
+    var dist={}, nd=0, many=false;
+    for(var i=0;i<rows.length;i++){ var v=String(rows[i][c]); if(!(v in dist)){ dist[v]=1; nd++; if(nd>25){ many=true; break; } } }
+    var ctl;
+    if(!many){
+      var vals=Object.keys(dist).sort();
+      ctl='<select class="tf-in" data-c="'+c+'" onchange="tabFiltra()"><option value="">Todos</option>'+vals.map(function(v){return '<option value="'+_tabEsc(v)+'">'+_tabEsc(v===""?"(vazio)":v)+'</option>';}).join("")+'</select>';
+    } else {
+      ctl='<input class="tf-in" data-c="'+c+'" oninput="tabFiltra()" placeholder="filtrar\u2026">';
+    }
+    thH+='<th'+(_TAB_NUM[c]?' class="num"':'')+'>'+_tabEsc(h)+ctl+'</th>';
+  });
+  wrap.innerHTML='<table class="gtb"><thead><tr>'+thH+'</tr></thead><tbody id="tab-body"></tbody><tfoot><tr id="tab-foot"></tr></tfoot></table>';
+  // reaplicar filtros preservados
+  Object.keys(prev).forEach(function(c){ var el=wrap.querySelector('.tf-in[data-c="'+c+'"]'); if(el) el.value=prev[c]; });
+  tabFiltra();
+}
+function tabFiltra(){
+  var wrap=document.getElementById("tabela-wrap"); if(!wrap||!_TAB_DATA) return;
+  var head=_TAB_DATA.head, rows=_TAB_DATA.rows;
+  var fs=[]; wrap.querySelectorAll(".tf-in").forEach(function(el){
+    var v=(el.value||"").trim(); if(v==="") return;
+    fs.push({c:parseInt(el.getAttribute("data-c"),10), v:v.toLowerCase(), exact:el.tagName==="SELECT"});
+  });
+  var vis=rows.filter(function(r){
+    for(var i=0;i<fs.length;i++){ var f=fs[i], cell=String(r[f.c]).toLowerCase();
+      if(f.exact){ if(cell!==f.v) return false; } else { if(cell.indexOf(f.v)<0) return false; } }
+    return true;
+  });
+  // corpo
+  var body=vis.map(function(r){
+    return '<tr>'+r.map(function(v,c){return '<td'+(_TAB_NUM[c]?' class="num"':'')+'>'+_tabEsc(v)+'</td>';}).join("")+'</tr>';
+  }).join("");
+  document.getElementById("tab-body").innerHTML=body||'<tr><td colspan="'+head.length+'" style="color:#aaa;text-align:center;padding:14px">Nenhuma linha corresponde aos filtros</td></tr>';
+  // somatórias (só das linhas filtradas)
+  var sPeso=0,sIt=0,sAv=0,nConcl=0,sD={14:0,19:0,24:0,29:0};
+  vis.forEach(function(r){ sPeso+=parseFloat(r[4])||0; sIt+=parseFloat(r[5])||0; sAv+=parseFloat(r[6])||0;
+    if(r[7]==="Sim")nConcl++; [14,19,24,29].forEach(function(c){ sD[c]+=parseFloat(r[c])||0; }); });
+  var foot=head.map(function(h,c){
+    var t="";
+    if(c===0) t="\u03A3 \u00b7 "+vis.length+" linha"+(vis.length===1?"":"s");
+    else if(c===4) t=sPeso.toFixed(3)+"%";
+    else if(c===5) t=String(sIt);
+    else if(c===6) t=vis.length?((sAv/vis.length).toFixed(1)+"% m\u00e9d."):"";
+    else if(c===7) t=nConcl+" Sim";
+    else if(sD[c]!==undefined) t=sD[c]+"d";
+    return '<td'+(_TAB_NUM[c]?' class="num"':'')+' title="'+(c===6?"M\u00e9dia das linhas filtradas":"Somat\u00f3ria das linhas filtradas")+'">'+t+'</td>';
+  }).join("");
+  document.getElementById("tab-foot").innerHTML=foot;
+  var cnt=document.getElementById("tab-cnt"); if(cnt) cnt.textContent=vis.length+" de "+rows.length+" GMs";
+}
+function tabLimparFiltros(){
+  var wrap=document.getElementById("tabela-wrap"); if(!wrap) return;
+  wrap.querySelectorAll(".tf-in").forEach(function(el){ el.value=""; });
+  tabFiltra();
 }
 
 function exportarJSON(){
@@ -3547,6 +3704,7 @@ window.fbAplicarRemoto = function(d){
   if(d.gmcells&&typeof GMS!=="undefined"){ GMS.forEach(function(m){ AS.forEach(function(a){
     var c=d.gmcells[m.n+"__"+a]; if(!c) return;
     if(c.st!=null)m[a].st=c.st; if(c.dur!=null)m[a].dur=c.dur;
+    if(c.iniR!==undefined)m[a].iniR=c.iniR; if(c.fimR!==undefined)m[a].fimR=c.fimR;
     if(c.resp!==undefined)m[a].resp=c.resp;
     if(c.sel!==undefined && a==="MDM")m.MDM.sel=c.sel;
     if(a==="MDM" && c.ag!==undefined)m.ag=c.ag;
@@ -3606,6 +3764,7 @@ function renderTudo(){
   renderVelocidade();
   renderCaminhoCritico();
   if(_view==="kanban") renderKanban();
+  if(_view==="tabela" && typeof renderTabela==="function") renderTabela();
 }
 window.renderTudo = renderTudo;
 (function(){var _rt;window.addEventListener("resize",function(){clearTimeout(_rt);_rt=setTimeout(function(){if(_visuaisAberto&&window.renderBurndown)renderBurndown();},180);});})();

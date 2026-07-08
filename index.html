@@ -1615,13 +1615,7 @@ function abrirGmEdit(n){
       +' <label>Dur (d)</label><input type="number" min="0" id="gm-'+a+'-dur" value="'+(ar.dur||0)+'" style="width:52px">'
       +' <label>Resp.</label><input type="text" id="gm-'+a+'-resp" value="'+((ar.resp||"").replace(/"/g,"&quot;"))+'" placeholder="Responsável" style="width:128px">'
       +((a!=="MDM" && (ar.ini||ar.fim)) ? ' <button type="button" onclick="if(destravarGmArea('+m.n+',&#39;'+a+'&#39;))abrirGmEdit('+m.n+')" title="Voltar ao cálculo automático pela predecessora" style="margin-left:6px;font-size:10px;padding:2px 7px;border:1px solid #1565C0;background:#EAF2FB;color:#1565C0;border-radius:4px;cursor:pointer">🔓 Destravar</button>' : '')
-      +(function(){
-        var _rs=gmRevStatus(m,a);
-        var _btn=' <button type="button" onclick="gmRevConfirmar('+m.n+',&#39;'+a+'&#39;)" title="Confirmo que revisei as datas/dura\u00e7\u00e3o desta \u00e1rea e est\u00e3o corretas (sem alterar valores)" style="font-size:10px;padding:2px 7px;border:1px solid #2E7D32;background:#EEF7EF;color:#2E7D32;border-radius:4px;cursor:pointer">\u2713 Confirmar revis\u00e3o</button>';
-        if(_rs==="ok") return ' <span style="margin-left:6px;font-size:9.5px;color:#2E7D32;font-weight:700" title="Datas/dura\u00e7\u00e3o revisadas por '+(ar.rev.por||"")+' e sem mudan\u00e7as desde ent\u00e3o">\u2714 revisado por '+String(ar.rev.por||"").split("@")[0]+' em '+fmtBR(pd(ar.rev.em))+'</span>';
-        if(_rs==="stale") return ' <span style="margin-left:6px;font-size:9.5px;color:#B26A00;font-weight:700" title="Revisado por '+((ar.rev&&ar.rev.por)||"")+' em '+((ar.rev&&ar.rev.em)?fmtBR(pd(ar.rev.em)):"\u2014")+', mas os valores mudaram depois \u2014 precisa de nova confirma\u00e7\u00e3o">\u26A0 revis\u00e3o desatualizada</span>'+_btn;
-        return ' <span style="margin-left:6px;font-size:9.5px;color:#999">\u25CB n\u00e3o revisado</span>'+_btn;
-      })()
+      +'<span id="gm-rev-'+a+'">'+_gmRevSegHtml(m,a)+'</span>'
       +'</div>';
   }).join("");
   document.getElementById("gmEditBody").innerHTML=body+'<div style="font-size:10px;color:#888;margin-top:8px">A <b>dura\u00e7\u00e3o</b> gera as datas (MDM dispara; ORC/BIM seguem; COMP fecha por \u00faltimo). Voc\u00ea pode editar a <b>data</b> direto \u2014 a dura\u00e7\u00e3o recalcula. O status define real \u00d7 planejado (conclu\u00eddo \u2192 reais; em andamento \u2192 in\u00edcio real; plan \u2192 planejadas). Salvar move a meta e atualiza o grupo.</div>';
@@ -1657,8 +1651,8 @@ function abrirGmEdit(n){
       +'<span><b>Simular sem BIM</b> — marca o grupo deste GM para o cenário <i>Simular sem BIM</i> do burndown (reduz o prazo final pela duração do BIM).</span></label>';
     document.getElementById("gmEditBody").insertAdjacentHTML("beforeend",h);
   })();
-  _gmDateEd={}; _gmDurEd={};
-  AREAS.forEach(function(a){ ["ini","fim","dur"].forEach(function(k){ var el=document.getElementById("gm-"+a+"-"+k); if(el) el.addEventListener("change", function(){ if(k==="dur")_gmDurEd[a]=true; else _gmDateEd[a]=true; gmLink(a, k==="dur"?"dur":k); }); }); });
+  _gmDateEd={}; _gmDurEd={}; _gmRevPend={};
+  AREAS.forEach(function(a){ ["ini","fim","dur"].forEach(function(k){ var el=document.getElementById("gm-"+a+"-"+k); if(el) el.addEventListener("change", function(){ if(k==="dur")_gmDurEd[a]=true; else _gmDateEd[a]=true; gmLink(a, k==="dur"?"dur":k); _gmRevPend[a]=false; _gmRevLive(m.n,a); }); }); });
   document.getElementById("gmEditOv").style.display="flex";
 }
 function fecharGmEdit(){var o=document.getElementById("gmEditOv");if(o)o.style.display="none";_gmEditN=null;}
@@ -1671,15 +1665,37 @@ function gmRevStatus(m,a){
   var w=gmAreaWin(m)[a]||{};
   return ((w.ini||null)===(r.v.ini||null) && (w.fim||null)===(r.v.fim||null) && (m[a].dur||0)===(r.v.dur||0)) ? "ok" : "stale";
 }
+// HTML do segmento de revisão de uma área no modal (estados: em dia / desatualizada / não revisada).
+function _gmRevBtnHtml(n,a){ return ' <button type="button" onclick="gmRevConfirmar('+n+',&#39;'+a+'&#39;)" title="Confirmo que revisei as datas/dura\u00e7\u00e3o desta \u00e1rea e est\u00e3o corretas" style="font-size:10px;padding:2px 7px;border:1px solid #2E7D32;background:#EEF7EF;color:#2E7D32;border-radius:4px;cursor:pointer">\u2713 Confirmar revis\u00e3o</button>'; }
+function _gmRevSegHtml(m,a){
+  var ar=m[a], _rs=gmRevStatus(m,a);
+  if(_rs==="ok") return ' <span style="margin-left:6px;font-size:9.5px;color:#2E7D32;font-weight:700" title="Datas/dura\u00e7\u00e3o revisadas por '+(ar.rev.por||"")+' e sem mudan\u00e7as desde ent\u00e3o">\u2714 revisado por '+String(ar.rev.por||"").split("@")[0]+' em '+fmtBR(pd(ar.rev.em))+'</span>';
+  if(_rs==="stale") return ' <span style="margin-left:6px;font-size:9.5px;color:#B26A00;font-weight:700" title="Revisado por '+((ar.rev&&ar.rev.por)||"")+' em '+((ar.rev&&ar.rev.em)?fmtBR(pd(ar.rev.em)):"\u2014")+', mas os valores mudaram depois \u2014 precisa de nova confirma\u00e7\u00e3o">\u26A0 revis\u00e3o desatualizada</span>'+_gmRevBtnHtml(m.n,a);
+  return ' <span style="margin-left:6px;font-size:9.5px;color:#999">\u25CB n\u00e3o revisado</span>'+_gmRevBtnHtml(m.n,a);
+}
+// Ao alterar data/duração no modal, a revisão anterior deixa de valer na hora: reabilita o Confirmar.
+function _gmRevLive(n,a){
+  var el=document.getElementById("gm-rev-"+a); if(!el) return;
+  el.innerHTML=' <span style="margin-left:6px;font-size:9.5px;color:#B26A00;font-weight:700" title="Voc\u00ea alterou data/dura\u00e7\u00e3o desta \u00e1rea nesta edi\u00e7\u00e3o \u2014 a revis\u00e3o anterior deixa de valer. Confirme novamente se os novos valores estiverem revisados.">\u26A0 alterado nesta edi\u00e7\u00e3o</span>'+_gmRevBtnHtml(n,a);
+}
 // Revisão por área (time): confirma que as datas/duração foram revisadas SEM alterar valores.
 function gmRevConfirmar(n,a){
   var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
   if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){gmRevConfirmar(n,a);})) return;
   var _u=(window.mdmGetUser&&window.mdmGetUser())||""; if(!_u) return;
+  // Modal aberto com alteração NÃO salva nesta área: adia o carimbo para o Salvar
+  // (o snapshot precisa ser dos valores novos, recalculados). Feedback imediato no modal.
+  if(_gmEditN===n && typeof _gmDateEd!=="undefined" && (_gmDateEd[a]||_gmDurEd[a])){
+    _gmRevPend[a]=true;
+    var elp=document.getElementById("gm-rev-"+a);
+    if(elp) elp.innerHTML=' <span style="margin-left:6px;font-size:9.5px;color:#2E7D32;font-weight:700" title="Confirma\u00e7\u00e3o registrada \u2014 o carimbo (com os novos valores) ser\u00e1 gravado quando voc\u00ea salvar. Se cancelar, nada \u00e9 gravado.">\u2714 revis\u00e3o confirmada \u2014 grava ao salvar</span>';
+    return;
+  }
   m[a].rev={por:_u,em:new Date().toISOString().slice(0,10),v:gmRevSnap(m,a)};
   if(typeof kbPersist==="function") kbPersist(m,a);
   if(window.mdmLog) mdmLog("Revis\u00e3o","Confirmou "+ACFG[a].label+" GM "+n,(m.nm||"")+" \u2014 datas/dura\u00e7\u00e3o revisadas sem altera\u00e7\u00e3o");
-  if(_gmEditN===n) abrirGmEdit(n);
+  var el=document.getElementById("gm-rev-"+a);
+  if(_gmEditN===n && el) el.innerHTML=_gmRevSegHtml(m,a); // atualiza só o segmento, preservando edições não salvas das outras áreas
   if(window._view==="kanban" && window.renderKanban) renderKanban();
 }
 function fecharMetasConcl(){var o=document.getElementById("metasConclOv");if(o)o.style.display="none";}
@@ -1752,12 +1768,14 @@ function salvarGmEdit(){
   _gmInvalida(); // recalcular janelas com as novas datas antes de checar conclusão antecipada
   // done sem fimR (novo OU legado): gmFimReal só pergunta se o fim previsto está no futuro
   AREAS.forEach(function(a){ if(m[a].st==="done"&&!m[a].fimR) gmFimReal(m,a); else if(m[a].st!=="done"&&_stAntes[a]==="done") m[a].fimR=null; });
-  // Revisão por área (time): edição MANUAL de data/duração pela interface carimba quem revisou
-  // e grava o SNAPSHOT dos valores revisados (se mudarem depois, a revisão fica "desatualizada").
-  // Cargas em massa não passam por aqui — só edição individual conta como revisão.
+  // Revisão por área (time): o carimbo só acontece com CONFIRMAÇÃO explícita.
+  // Se a pessoa alterou data/duração e clicou "Confirmar revisão" no modal, o carimbo
+  // é gravado aqui, com o snapshot dos valores NOVOS já recalculados.
+  // Editar sem confirmar NÃO conta como revisão (a alteração invalida a revisão anterior via snapshot).
   (function(){
     var _u=(window.mdmGetUser&&window.mdmGetUser())||""; if(!_u) return;
-    AREAS.forEach(function(a){ if(_gmDateEd[a]||_gmDurEd[a]) m[a].rev={por:_u,em:new Date().toISOString().slice(0,10),v:gmRevSnap(m,a)}; });
+    AREAS.forEach(function(a){ if(_gmRevPend[a]){ m[a].rev={por:_u,em:new Date().toISOString().slice(0,10),v:gmRevSnap(m,a)}; if(window.mdmLog) mdmLog("Revis\u00e3o","Confirmou "+ACFG[a].label+" GM "+m.n,(m.nm||"")+" \u2014 revisou junto com a edi\u00e7\u00e3o"); } });
+    _gmRevPend={};
   })();
   var gmcells={};
   AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||""), iniR:(m[a].iniR||null), fimR:(m[a].fimR||null), rev:(m[a].rev||null)}; });

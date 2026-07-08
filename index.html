@@ -757,6 +757,12 @@ footer{background:var(--v1);padding:3px 16px;display:flex;justify-content:space-
     <span class="tl-label" title="Mostra GMs que terminam nesta data ou antes (considera a área filtrada)">Fim ≤:</span>
     <input class="tl-input" id="kf-fim" type="date" style="width:128px" onchange="renderKanban()" title="Mostra GMs que terminam nesta data ou antes (acumula com o filtro de área)">
     <label style="font-size:10px;color:#555;display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" id="kf-late" onchange="renderKanban()"> Só atrasados</label>
+    <label class="tl-label" title="Filtrar pela revisão das datas/duração do GM (as 4 áreas): com alguma pendência (não revisada ou desatualizada) ou 4/4 em dia" style="display:inline-flex;align-items:center;gap:3px">Revisão:
+      <select id="kf-rev" onchange="renderKanban()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:1px 3px;color:#444;background:#fff">
+        <option value="">Todas</option>
+        <option value="nao">○ Com pendência</option>
+        <option value="sim">✔ 4/4 em dia</option>
+      </select></label>
     <label class="tl-label" title="Filtrar por disponibilidade do GM: só ativos, só inativos (parecer INATIVAR) ou todos" style="display:inline-flex;align-items:center;gap:3px">Disponibilidade:
       <select id="kf-peso" onchange="renderKanban()" style="font-size:9px;border:1px solid #ddd;border-radius:4px;padding:1px 3px;color:#444;background:#fff">
         <option value="">Todos</option>
@@ -1609,6 +1615,13 @@ function abrirGmEdit(n){
       +' <label>Dur (d)</label><input type="number" min="0" id="gm-'+a+'-dur" value="'+(ar.dur||0)+'" style="width:52px">'
       +' <label>Resp.</label><input type="text" id="gm-'+a+'-resp" value="'+((ar.resp||"").replace(/"/g,"&quot;"))+'" placeholder="Responsável" style="width:128px">'
       +((a!=="MDM" && (ar.ini||ar.fim)) ? ' <button type="button" onclick="if(destravarGmArea('+m.n+',&#39;'+a+'&#39;))abrirGmEdit('+m.n+')" title="Voltar ao cálculo automático pela predecessora" style="margin-left:6px;font-size:10px;padding:2px 7px;border:1px solid #1565C0;background:#EAF2FB;color:#1565C0;border-radius:4px;cursor:pointer">🔓 Destravar</button>' : '')
+      +(function(){
+        var _rs=gmRevStatus(m,a);
+        var _btn=' <button type="button" onclick="gmRevConfirmar('+m.n+',&#39;'+a+'&#39;)" title="Confirmo que revisei as datas/dura\u00e7\u00e3o desta \u00e1rea e est\u00e3o corretas (sem alterar valores)" style="font-size:10px;padding:2px 7px;border:1px solid #2E7D32;background:#EEF7EF;color:#2E7D32;border-radius:4px;cursor:pointer">\u2713 Confirmar revis\u00e3o</button>';
+        if(_rs==="ok") return ' <span style="margin-left:6px;font-size:9.5px;color:#2E7D32;font-weight:700" title="Datas/dura\u00e7\u00e3o revisadas por '+(ar.rev.por||"")+' e sem mudan\u00e7as desde ent\u00e3o">\u2714 revisado por '+String(ar.rev.por||"").split("@")[0]+' em '+fmtBR(pd(ar.rev.em))+'</span>';
+        if(_rs==="stale") return ' <span style="margin-left:6px;font-size:9.5px;color:#B26A00;font-weight:700" title="Revisado por '+((ar.rev&&ar.rev.por)||"")+' em '+((ar.rev&&ar.rev.em)?fmtBR(pd(ar.rev.em)):"\u2014")+', mas os valores mudaram depois \u2014 precisa de nova confirma\u00e7\u00e3o">\u26A0 revis\u00e3o desatualizada</span>'+_btn;
+        return ' <span style="margin-left:6px;font-size:9.5px;color:#999">\u25CB n\u00e3o revisado</span>'+_btn;
+      })()
       +'</div>';
   }).join("");
   document.getElementById("gmEditBody").innerHTML=body+'<div style="font-size:10px;color:#888;margin-top:8px">A <b>dura\u00e7\u00e3o</b> gera as datas (MDM dispara; ORC/BIM seguem; COMP fecha por \u00faltimo). Voc\u00ea pode editar a <b>data</b> direto \u2014 a dura\u00e7\u00e3o recalcula. O status define real \u00d7 planejado (conclu\u00eddo \u2192 reais; em andamento \u2192 in\u00edcio real; plan \u2192 planejadas). Salvar move a meta e atualiza o grupo.</div>';
@@ -1649,6 +1662,26 @@ function abrirGmEdit(n){
   document.getElementById("gmEditOv").style.display="flex";
 }
 function fecharGmEdit(){var o=document.getElementById("gmEditOv");if(o)o.style.display="none";_gmEditN=null;}
+// Revisão por área: snapshot dos valores revisados (início/fim efetivos + duração).
+function gmRevSnap(m,a){ var w=gmAreaWin(m)[a]||{}; return {ini:(w.ini||null),fim:(w.fim||null),dur:(m[a].dur||0)}; }
+// Status da revisão: "none" (nunca revisada) | "stale" (revisada, mas os valores mudaram depois) | "ok" (em dia).
+function gmRevStatus(m,a){
+  var r=m[a]&&m[a].rev; if(!r) return "none";
+  if(!r.v) return "stale"; // carimbo antigo sem snapshot: exige nova confirmação
+  var w=gmAreaWin(m)[a]||{};
+  return ((w.ini||null)===(r.v.ini||null) && (w.fim||null)===(r.v.fim||null) && (m[a].dur||0)===(r.v.dur||0)) ? "ok" : "stale";
+}
+// Revisão por área (time): confirma que as datas/duração foram revisadas SEM alterar valores.
+function gmRevConfirmar(n,a){
+  var m=GMS.find(function(x){return x.n===n;}); if(!m) return;
+  if(window.mdmEnsureUser && !window.mdmEnsureUser(function(){gmRevConfirmar(n,a);})) return;
+  var _u=(window.mdmGetUser&&window.mdmGetUser())||""; if(!_u) return;
+  m[a].rev={por:_u,em:new Date().toISOString().slice(0,10),v:gmRevSnap(m,a)};
+  if(typeof kbPersist==="function") kbPersist(m,a);
+  if(window.mdmLog) mdmLog("Revis\u00e3o","Confirmou "+ACFG[a].label+" GM "+n,(m.nm||"")+" \u2014 datas/dura\u00e7\u00e3o revisadas sem altera\u00e7\u00e3o");
+  if(_gmEditN===n) abrirGmEdit(n);
+  if(window._view==="kanban" && window.renderKanban) renderKanban();
+}
 function fecharMetasConcl(){var o=document.getElementById("metasConclOv");if(o)o.style.display="none";}
 function abrirGmList(nome,fase){
   var GA=buildGmAssignments();
@@ -1719,8 +1752,15 @@ function salvarGmEdit(){
   _gmInvalida(); // recalcular janelas com as novas datas antes de checar conclusão antecipada
   // done sem fimR (novo OU legado): gmFimReal só pergunta se o fim previsto está no futuro
   AREAS.forEach(function(a){ if(m[a].st==="done"&&!m[a].fimR) gmFimReal(m,a); else if(m[a].st!=="done"&&_stAntes[a]==="done") m[a].fimR=null; });
+  // Revisão por área (time): edição MANUAL de data/duração pela interface carimba quem revisou
+  // e grava o SNAPSHOT dos valores revisados (se mudarem depois, a revisão fica "desatualizada").
+  // Cargas em massa não passam por aqui — só edição individual conta como revisão.
+  (function(){
+    var _u=(window.mdmGetUser&&window.mdmGetUser())||""; if(!_u) return;
+    AREAS.forEach(function(a){ if(_gmDateEd[a]||_gmDurEd[a]) m[a].rev={por:_u,em:new Date().toISOString().slice(0,10),v:gmRevSnap(m,a)}; });
+  })();
   var gmcells={};
-  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||""), iniR:(m[a].iniR||null), fimR:(m[a].fimR||null)}; });
+  AREAS.forEach(function(a){ gmcells[m.n+"__"+a]={st:m[a].st, dur:m[a].dur||0, ini:(a==="MDM"?m.MDM.ini:(m[a].ini||null)), fim:(a==="MDM"?(m.MDM.fim||null):(m[a].fim||null)), resp:(m[a].resp||""), iniR:(m[a].iniR||null), fimR:(m[a].fimR||null), rev:(m[a].rev||null)}; });
   gmcells[m.n+"__MDM"].ag=(m.ag!=null?m.ag:"0");
   gmcells[m.n+"__MDM"].inat=!!m.inat;
   if(window.fbSalvarParcial) window.fbSalvarParcial({gmcells:gmcells});
@@ -3236,6 +3276,7 @@ function popularRespFiltro(){
 var _view="gantt";
 var KB_COLS=[
   {k:"backlog", t:"Backlog",      c:"#607D8B"},
+  {k:"sel",     t:"Selecionadas", c:"#0277BD"},
   {k:"mdm",     t:"MDM",          c:"#006B3F"},
   {k:"orc",     t:"Orçamento",    c:"#FF8B22"},
   {k:"bim",     t:"BIM",          c:"#793F98"},
@@ -3254,6 +3295,7 @@ function kbCols(m){
     if(cols.length) return cols;
   }
   if(md==="wip") return [["mdm","MDM"]];
+  if(m.MDM.sel) return [["sel","MDM"]];
   return [["backlog", "MDM"]];
 }
 function kbCard(m,area,col){
@@ -3282,7 +3324,10 @@ function kbCard(m,area,col){
   }
 
   var btns="";
-  if(col==="backlog") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button>';
+  if(col==="backlog") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSel('+m.n+',true)" title="Mover para a coluna Selecionadas (pr\u00f3ximas a iniciar)">☑ Selecionar</button>'
+    +'<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button>';
+  else if(col==="sel") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\'MDM\',\'wip\')">▶ Iniciar MDM</button>'
+    +'<button class="kc-btn" onclick="event.stopPropagation();kbSel('+m.n+',false)" title="Devolver ao backlog">↩ Backlog</button>';
   else if(col==="mdm"||col==="orc"||col==="bim"||col==="comp"){
     if(st==="plan") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'wip\')">▶ Iniciar</button>';
     else if(st==="wip") btns='<button class="kc-btn" onclick="event.stopPropagation();kbSet('+m.n+',\''+area+'\',\'done\')">✓ Concluir</button>';
@@ -3300,6 +3345,13 @@ function kbCard(m,area,col){
     +'<div class="kc-nm">'+m.n+' · '+nome+(_inativo?' <span style="font-size:7.5px;font-weight:700;color:#999;border:1px solid #ccc;border-radius:3px;padding:0 3px">inativo</span>':'')+'</div>'
     +'<div class="kc-meta"><span class="kc-badge" style="background:'+cor+'">'+lbl+'</span>'
     +'<span class="kc-st" style="color:'+stCor+'">'+stTxt+'</span>'
+    +(function(){
+      var _ok=0,_tip=AREAS.map(function(_a){ var s=gmRevStatus(m,_a); if(s==="ok")_ok++; var r=m[_a].rev;
+        return ACFG[_a].label+": "+(s==="ok"?("revisado por "+(r.por||"")+" em "+fmtBR(pd(r.em))):(s==="stale"?"revis\u00e3o desatualizada (valores mudaram depois)":"n\u00e3o revisado")); }).join(" \u00b7 ");
+      return (_ok===4)
+        ? '<span title="Revis\u00e3o das datas/dura\u00e7\u00e3o em dia nas 4 \u00e1reas \u2014 '+_tip+'" style="font-size:8px;color:#2E7D32;font-weight:700">\u2714 4/4</span>'
+        : '<span title="Revis\u00e3o das datas/dura\u00e7\u00e3o: '+_ok+' de 4 \u00e1reas em dia \u2014 '+_tip+'" style="font-size:8px;color:'+(_ok?'#B26A00':'#bbb')+';font-weight:700">\u25CB '+_ok+'/4</span>';
+    })()
     +'<span style="flex:1"></span><span style="font-size:8px;color:#aaa">'+m.f+'</span></div>'
     +_prazoTxt
     +_conclTxt
@@ -3335,7 +3387,7 @@ function kbMetrics(){
   set("kpi-wip", wip);
 }
 function kbLimpar(){
-  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim","kf-peso","kf-ag"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
+  ["kf-fase","kf-grupo","kf-area","kf-resp","kf-ini","kf-fim","kf-peso","kf-ag","kf-rev"].forEach(function(id){var e=document.getElementById(id);if(e)e.value="";});
   var b=document.getElementById("kf-busca");if(b)b.value="";
   var l=document.getElementById("kf-late");if(l)l.checked=false;
   renderKanban();
@@ -3349,6 +3401,7 @@ function renderKanban(){
   var _kfIni=_kfVal("kf-ini"), _kfFim=_kfVal("kf-fim"); // P01.2
   var fLate=(document.getElementById("kf-late")||{checked:false}).checked;
   var fPeso=_kfVal("kf-peso"); // "", "ativo", "inativo"
+  var fRev=_kfVal("kf-rev"); // "", "nao", "sim"
   var fAg=_kfVal("kf-ag"); // "", "S", "N", "0"
   function pass(m,area){
     if(fFase && m.f!==fFase) return false;
@@ -3358,6 +3411,9 @@ function renderKanban(){
     if(fLate && !kbLate(m,area)) return false;
     if(fPeso==="ativo" && gmInativo(m)) return false;
     if(fPeso==="inativo" && !gmInativo(m)) return false;
+    if(fRev){ var _rok=0; AREAS.forEach(function(_a){ if(gmRevStatus(m,_a)==="ok") _rok++; });
+      if(fRev==="nao" && _rok===4) return false;
+      if(fRev==="sim" && _rok<4) return false; }
     if(fAg && agOf(m)!==fAg) return false;
     if((_kfIni||_kfFim) && !_gmDateOk(m,(fArea?[fArea]:[]),_kfIni,_kfFim)) return false; // P01.2
     if(fBusca && !(String(m.n).indexOf(fBusca)>=0 || (m.nm||"").toLowerCase().indexOf(fBusca)>=0 || (m.g||"").toLowerCase().indexOf(fBusca)>=0)) return false;
@@ -3402,7 +3458,7 @@ function renderKanban(){
 }
 function kbPersist(m,area){
   if(!window.fbSalvarParcial) return;
-  var c={st:m[area].st,dur:m[area].dur||0,ini:(area==="MDM"?m.MDM.ini:(m[area].ini||null)),fim:(area==="MDM"?(m.MDM.fim||null):(m[area].fim||null)),resp:(m[area].resp||""),iniR:(m[area].iniR||null),fimR:(m[area].fimR||null)};
+  var c={st:m[area].st,dur:m[area].dur||0,ini:(area==="MDM"?m.MDM.ini:(m[area].ini||null)),fim:(area==="MDM"?(m.MDM.fim||null):(m[area].fim||null)),resp:(m[area].resp||""),iniR:(m[area].iniR||null),fimR:(m[area].fimR||null),rev:(m[area].rev||null)};
   if(area==="MDM") c.sel=!!m.MDM.sel;
   var g={}; g[m.n+"__"+area]=c; window.fbSalvarParcial({gmcells:g});
 }
@@ -3706,6 +3762,7 @@ window.fbAplicarRemoto = function(d){
     if(c.st!=null)m[a].st=c.st; if(c.dur!=null)m[a].dur=c.dur;
     if(c.iniR!==undefined)m[a].iniR=c.iniR; if(c.fimR!==undefined)m[a].fimR=c.fimR;
     if(c.resp!==undefined)m[a].resp=c.resp;
+    if(c.rev!==undefined)m[a].rev=c.rev;
     if(c.sel!==undefined && a==="MDM")m.MDM.sel=c.sel;
     if(a==="MDM" && c.ag!==undefined)m.ag=c.ag;
     if(a==="MDM" && c.inat!==undefined)m.inat=!!c.inat;

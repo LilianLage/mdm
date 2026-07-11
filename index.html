@@ -2373,7 +2373,7 @@ function renderBurndown(){
     ctx.beginPath(); ctx.moveTo(_metaX1, PAD.t+CH-0.9*CH); ctx.lineTo(_xOf(fimMeta), PAD.t+CH-0.9*CH); ctx.stroke();
   }
   ctx.setLineDash([]);
-  // P02.3 — números mensais sobre a linha "Planejado linear" / meta ajustada da área
+  // P02.3 — números mensais sobre a linha "Planejado linear" / "Planejado Linear <Área>"
   (function(){
     var d=new Date(2026,3,30);
     while(d.getTime() <= _metaFimLinha.getTime()){
@@ -2382,7 +2382,7 @@ function renderBurndown(){
         var val=90*frac, x=_xOf(d.getTime()), y=PAD.t+CH-(val/100)*CH;
         ctx.fillStyle="rgba(0,107,63,.55)"; ctx.font="7px Arial"; ctx.textAlign="center";
         ctx.fillText(val.toFixed(0)+"%", x, y-4);
-        _numPts.push({x:x, y:y-4, txt:val.toFixed(0)+"%", cor:"#006B3F", src:_bdArea?"Meta ajustada (predecessoras)":"Planejado linear"});
+        _numPts.push({x:x, y:y-4, txt:val.toFixed(0)+"%", cor:"#006B3F", src:_bdArea?("Planejado Linear "+(ACFG[_bdArea]?ACFG[_bdArea].label:_bdArea)):"Planejado linear"});
       }
       d=new Date(d.getFullYear(), d.getMonth()+2, 0);
     }
@@ -2391,7 +2391,7 @@ function renderBurndown(){
   if(_metaBufferDias>0){
     ctx.fillStyle="#006B3F"; ctx.font="bold 7px Arial"; ctx.textAlign="center";
     ctx.fillText("90% até "+fmtBR(_metaFimLinha).slice(0,5), _metaX1, PAD.t+CH-0.9*CH-6);
-    _numPts.push({x:_metaX1, y:PAD.t+CH-0.9*CH-6, txt:"90% até "+fmtBR(_metaFimLinha), cor:"#006B3F", src:"Meta ajustada — prazo de "+(ACFG[_bdArea]?ACFG[_bdArea].label:_bdArea)+" (–"+Math.round(_metaBufferDias)+"d de predecessoras)"});
+    _numPts.push({x:_metaX1, y:PAD.t+CH-0.9*CH-6, txt:"90% até "+fmtBR(_metaFimLinha), cor:"#006B3F", src:"Planejado Linear "+(ACFG[_bdArea]?ACFG[_bdArea].label:_bdArea)+" — prazo (–"+Math.round(_metaBufferDias)+"d de predecessoras)"});
   }
   }
 
@@ -2591,7 +2591,7 @@ function renderBurndown(){
   var _semBIMon = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
   var _aLbl = (_bdArea&&ACFG[_bdArea])?ACFG[_bdArea].label+" ":"";
   const legs = [
-    {key:"plan",     cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?("Meta ajustada "+_aLbl+"\u2192 90% at\u00e9 "+fmtBR(_metaFimLinha)+(_metaBufferDias>0?" (\u2013"+Math.round(_metaBufferDias)+"d p/ predecessoras)":"")):"Planejado linear (90% at\u00e9 dez/26)")},
+    {key:"plan",     cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?("Planejado Linear "+(ACFG[_bdArea]?ACFG[_bdArea].label:_bdArea)+" \u2192 90% at\u00e9 "+fmtBR(_metaFimLinha)+(_metaBufferDias>0?" (\u2013"+Math.round(_metaBufferDias)+"d p/ predecessoras)":"")):"Planejado linear (90% at\u00e9 dez/26)")},
     {key:"concl",    cor:"#006B3F",            dash:false, lbl:_aLbl+"conclu\u00eddo ("+concluido.toFixed(1)+"pp)"},
     {key:"prog",     cor:"#5FBF93",            dash:false, lbl:_aLbl+"progresso ("+progresso.toFixed(1)+"pp)"},
     {key:"proj",     cor:"#FF8B22",            dash:true,  lbl:"Proje\u00e7\u00e3o no ritmo \u2192 "+ppDez.toFixed(1)+"% em dez/26"},

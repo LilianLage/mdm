@@ -2320,33 +2320,82 @@ function renderBurndown(){
     }
   })();
 
-  // Linha META planejada (crescimento linear 0→90% até dez/26)
-  var _metaX0=PAD.l, _metaX1=_xOf(fimMeta);
+  // Linha META planejada (crescimento linear 0→90%).
+  // Sem filtro: reta até dez/26 (Meta 1 geral).
+  // Com área filtrada: reta ANTECIPADA — desconta o tempo médio REAL (fila +
+  // duração) que as etapas seguintes levam na cadeia de predecessoras
+  // (MDM→ORC/BIM→COMP), usando as janelas já niveladas por recurso em
+  // gmAreaWin/recalcGmSched (não a duração nominal da tarefa, que subestima
+  // muito o gargalo de fila de ORC/BIM/COMP). Mostra até quando ESSA área
+  // precisa fechar 90% sem atrasar a meta geral de dez/26.
+  var _bdArea = (document.getElementById("bd-area")||{value:""}).value;
+  function _gapMedArea(a){
+    // Gap médio (em dias) entre o fim da(s) predecessora(s) e o fim REAL
+    // (já nivelado por recurso) da área "a", para cada GM ativo.
+    var soma=0, n=0;
+    GMS.forEach(function(m){
+      if(!(m.w>0)) return;
+      var w=gmAreaWin(m);
+      if(!(w[a] && w[a].fim)) return;
+      var fimA=pd(w[a].fim).getTime();
+      var pred;
+      if(a==="COMP") pred=Math.max(w.MDM.fim?pd(w.MDM.fim).getTime():0, w.ORC.fim?pd(w.ORC.fim).getTime():0, w.BIM.fim?pd(w.BIM.fim).getTime():0);
+      else pred = w.MDM.fim ? pd(w.MDM.fim).getTime() : null;
+      if(pred==null) return;
+      var gap=(fimA-pred)/86400000;
+      if(gap>=0){ soma+=gap; n++; }
+    });
+    return n ? soma/n : 0;
+  }
+  var _metaFimLinha = fimMeta, _metaTotalDias = totalDias, _metaBufferDias = 0;
+  if(_bdArea){
+    var _gORC=_gapMedArea("ORC"), _gBIM=_gapMedArea("BIM"), _gCOMP=_gapMedArea("COMP");
+    if(_bdArea==="MDM") _metaBufferDias = Math.max(_gORC,_gBIM) + _gCOMP;
+    else if(_bdArea==="ORC" || _bdArea==="BIM") _metaBufferDias = _gCOMP;
+    // COMP: sem buffer — é a última etapa da cadeia, a meta dela é a própria dez/26.
+    if(_metaBufferDias>0){
+      _metaFimLinha = new Date(fimMeta.getTime() - _metaBufferDias*86400000);
+      _metaTotalDias = Math.max(1,(_metaFimLinha.getTime()-inicio.getTime())/86400000);
+    }
+  }
+  var _metaX0=PAD.l, _metaX1=_xOf(_metaFimLinha);
   if(BD_VIS.plan){
   ctx.strokeStyle = "rgba(0,107,63,.25)";
   ctx.lineWidth = 1.5; ctx.setLineDash([6,3]);
   ctx.beginPath();
   ctx.moveTo(_metaX0, PAD.t+CH);
   ctx.lineTo(_metaX1, PAD.t+CH - 0.9*CH);
-  ctx.stroke(); ctx.setLineDash([]);
-  // P02.3 — números mensais sobre a linha "Planejado linear (90% até dez/26)"
+  ctx.stroke();
+  // Se a meta ajustada termina antes de dez/26, prolonga uma reta pontilhada mais fraca
+  // em 90% até dez/26 — mostra que, depois de atingir, a área precisa SUSTENTAR 90%.
+  if(_metaBufferDias>0){
+    ctx.strokeStyle="rgba(0,107,63,.18)"; ctx.lineWidth=1.2; ctx.setLineDash([2,3]);
+    ctx.beginPath(); ctx.moveTo(_metaX1, PAD.t+CH-0.9*CH); ctx.lineTo(_xOf(fimMeta), PAD.t+CH-0.9*CH); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  // P02.3 — números mensais sobre a linha "Planejado linear" / meta ajustada da área
   (function(){
     var d=new Date(2026,3,30);
-    while(d.getTime() <= fimMeta.getTime()){
-      var frac=(d.getTime()-inicio.getTime())/86400000/totalDias; // 0→1 até dez/26
+    while(d.getTime() <= _metaFimLinha.getTime()){
+      var frac=(d.getTime()-inicio.getTime())/86400000/_metaTotalDias; // 0→1 até o prazo desta linha
       if(frac>0 && frac<=1.0001){
         var val=90*frac, x=_xOf(d.getTime()), y=PAD.t+CH-(val/100)*CH;
         ctx.fillStyle="rgba(0,107,63,.55)"; ctx.font="7px Arial"; ctx.textAlign="center";
         ctx.fillText(val.toFixed(0)+"%", x, y-4);
-        _numPts.push({x:x, y:y-4, txt:val.toFixed(0)+"%", cor:"#006B3F", src:"Planejado linear"});
+        _numPts.push({x:x, y:y-4, txt:val.toFixed(0)+"%", cor:"#006B3F", src:_bdArea?"Meta ajustada (predecessoras)":"Planejado linear"});
       }
       d=new Date(d.getFullYear(), d.getMonth()+2, 0);
     }
   })();
+  // Rótulo do prazo ajustado (quando antecipado em relação a dez/26)
+  if(_metaBufferDias>0){
+    ctx.fillStyle="#006B3F"; ctx.font="bold 7px Arial"; ctx.textAlign="center";
+    ctx.fillText("90% até "+fmtBR(_metaFimLinha).slice(0,5), _metaX1, PAD.t+CH-0.9*CH-6);
+    _numPts.push({x:_metaX1, y:PAD.t+CH-0.9*CH-6, txt:"90% até "+fmtBR(_metaFimLinha), cor:"#006B3F", src:"Meta ajustada — prazo de "+(ACFG[_bdArea]?ACFG[_bdArea].label:_bdArea)+" (–"+Math.round(_metaBufferDias)+"d de predecessoras)"});
+  }
   }
 
   // ── REALIZADO: Meta 1 (GM pronto) ou por ÁREA (queima de cada time) ──
-  var _bdArea = (document.getElementById("bd-area")||{value:""}).value;
   var _tEl=document.getElementById("bd-title"); if(_tEl) _tEl.textContent=(_bdArea&&ACFG[_bdArea])?ACFG[_bdArea].label:"Meta 1";
   function _areaFrac(m,a){ var w=gmAreaWin(m), ai=w[a]&&w[a].ini, af=w[a]&&w[a].fim; if(!ai||!af) return 0.5; var t=hoje.getTime(), i=Date.parse(ai), f=Date.parse(af); if(f<=i) return 0.5; return Math.max(0,Math.min(1,(t-i)/(f-i))); }
   const evC = [];
@@ -2542,7 +2591,7 @@ function renderBurndown(){
   var _semBIMon = document.getElementById('bd-sembim') && document.getElementById('bd-sembim').checked;
   var _aLbl = (_bdArea&&ACFG[_bdArea])?ACFG[_bdArea].label+" ":"";
   const legs = [
-    {key:"plan",     cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?"Refer\u00eancia 90% at\u00e9 dez/26":"Planejado linear (90% at\u00e9 dez/26)")},
+    {key:"plan",     cor:"rgba(0,107,63,.25)", dash:true,  lbl:(_bdArea?("Meta ajustada "+_aLbl+"\u2192 90% at\u00e9 "+fmtBR(_metaFimLinha)+(_metaBufferDias>0?" (\u2013"+Math.round(_metaBufferDias)+"d p/ predecessoras)":"")):"Planejado linear (90% at\u00e9 dez/26)")},
     {key:"concl",    cor:"#006B3F",            dash:false, lbl:_aLbl+"conclu\u00eddo ("+concluido.toFixed(1)+"pp)"},
     {key:"prog",     cor:"#5FBF93",            dash:false, lbl:_aLbl+"progresso ("+progresso.toFixed(1)+"pp)"},
     {key:"proj",     cor:"#FF8B22",            dash:true,  lbl:"Proje\u00e7\u00e3o no ritmo \u2192 "+ppDez.toFixed(1)+"% em dez/26"},

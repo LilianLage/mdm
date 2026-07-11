@@ -3174,14 +3174,25 @@ function renderCaminhoCritico(){
   });
   var byTeam={}; stats.forEach(function(s){byTeam[s.team]=s;});
   var durGlobal=(function(){var c=0,k=0;stats.forEach(function(s){c+=s.carga;k+=s.n;});return k?c/k:1;})();
-  // gargalo = time cujo +1 recurso mais ANTECIPA o fim do projeto (simulação);
-  // empate ou nenhum ganho → maior espera acumulada na fila (critério anterior)
+  // gargalo = time estruturalmente mais sobrecarregado: maior "proc." (carga ÷
+  // recursos = dias de processamento contínuo necessários pra dar conta de TODOS
+  // os GMs daquele time). Empate → maior espera acumulada na fila.
+  // (Critério anterior usava só o ganho de +1 recurso no ÚLTIMO GM a terminar o
+  // projeto — mas como o Compilador é sempre a etapa final da cadeia, qualquer
+  // atraso "passa" por ele por último, então esse critério tendia a apontar o
+  // Compilador mesmo quando ele só está esperando um time anterior (normalmente
+  // o BIM) liberar. "proc." mede a sobrecarga real do time inteiro, não só do
+  // GM que por acaso termina por último.)
   var lev=stats.filter(function(s){return s.team!=="MDM";});
   var baseEnd=_simProjEnd(null,0);
   var _ganho={};
   lev.forEach(function(s){ _ganho[s.team]=baseEnd-_simProjEnd(s.team,s.R+1); });
-  var garg=lev.slice().sort(function(a,b){return (_ganho[b.team]-_ganho[a.team])||(b.waitTot-a.waitTot)||(b.proc-a.proc);})[0];
-  var gargTemGanho=!!(garg && _ganho[garg.team]>=86400000);
+  var garg=lev.slice().sort(function(a,b){return ((b.proc||0)-(a.proc||0))||(b.waitTot-a.waitTot)||(_ganho[b.team]-_ganho[a.team]);})[0];
+  // "Tem ganho" exige um efeito minimamente relevante (não só ruído de 1 dia):
+  // pelo menos 5 dias, ou 3% do atraso total sobre dez/26 — o que for maior.
+  var _atrasoTotalMs = Math.max(0, baseEnd - pd("2026-12-31").getTime());
+  var _gargMinGanhoMs = Math.max(5*86400000, _atrasoTotalMs*0.03);
+  var gargTemGanho=!!(garg && _ganho[garg.team]>=_gargMinGanhoMs);
   var compMake=byTeam.COMP.make;
   // ── Simulação: fim do projeto (último Compilador) ao adicionar recursos a um time ──
   function _simProjEnd(overrideTeam,R){

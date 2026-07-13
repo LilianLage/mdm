@@ -3923,7 +3923,7 @@ function calcResumoJIP(){
     if(!(m.w>0)) return;
     if(!m2Areas(m).every(function(a){return m[a].st==="done";})) return;
     var w=gmAreaWin(m),mx=0;
-    m2Areas(m).forEach(function(a){var f=(w[a]&&w[a].fim)?Date.parse(w[a].fim):0; if(f>mx)mx=f;});
+    m2Areas(m).forEach(function(a){var f=(m[a]&&m[a].st==="done"&&m[a].fimR)?Date.parse(m[a].fimR):((w[a]&&w[a].fim)?Date.parse(w[a].fim):0); if(f>mx)mx=f;});
     if(!mx) return;
     var d0=new Date(mx), d=new Date(d0.getFullYear(),d0.getMonth()+2,d0.getDate());
     if(d.getTime()<=hojeMs) m2+=m.w*100;
@@ -3953,8 +3953,23 @@ function calcResumoJIP(){
     return e;
   });
   var r1=function(v){return Math.round(v*100)/100;};
+  // Forecast mensal da Meta 1 (mesma lógica da linha Forecast do burndown):
+  // peso acumulado na data prevista de conclusão de cada GM — maior fim entre
+  // as 4 áreas, priorizando a data real (fimR) — fechado ao fim de cada mês de 2026.
+  var fc1={};
+  (function(){
+    var ev=[];
+    GMS.forEach(function(m){ if(!(m.w>0)) return; var w=gmAreaWin(m); var t=0;
+      AR.forEach(function(a){ var f=(m[a]&&m[a].st==="done"&&m[a].fimR)?m[a].fimR:(w[a]&&w[a].fim); var ms=f?pd(f).getTime():0; if(ms>t)t=ms; });
+      if(t) ev.push({t:t, pp:m.w*100}); });
+    for(var mi=0;mi<12;mi++){
+      var lim=new Date(2026,mi+1,1).getTime();
+      var acc=0; ev.forEach(function(e){ if(e.t<lim) acc+=e.pp; });
+      fc1["2026-"+("0"+(mi+1)).slice(-2)]=r1(acc);
+    }
+  })();
   var serie={}; serie[CFG.hoje.slice(0,7)]={m1:r1(m1),m1c:r1(m1c),m2:r1(m2)};
-  return {ts:new Date().toISOString(),hoje:CFG.hoje,meta1:r1(m1),meta1Concl:r1(m1c),meta2:r1(m2),serie:serie,grupos:grupos,gms:gms};
+  return {ts:new Date().toISOString(),hoje:CFG.hoje,meta1:r1(m1),meta1Concl:r1(m1c),meta2:r1(m2),serie:serie,fc1:fc1,grupos:grupos,gms:gms};
 }
 var _resumoJipTimer=null;
 function agendarResumoJIP(){
